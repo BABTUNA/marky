@@ -1,0 +1,23 @@
+# Local Business Ad Research Agent - Dependencies
+
+# HTTP & API
+requests>=2.31.0
+tenacity>=8.2.0
+
+# Database & Caching
+sqlalchemy>=2.0.0
+
+# Text Processing
+langdetect>=1.0.9
+
+# Environment & Config
+python-dotenv>=1.0.0
+
+# CLI
+click>=8.1.0
+rich>=13.0.0
+
+# Optional: Embeddings (uncomment if using)
+# openai>=1.0.0
+# numpy>=1.24.0
+# scikit-learn>=1.3.0

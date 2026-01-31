@@ -1,0 +1,431 @@
+{
+  "search": {
+    "business_type": "plumber",
+    "location": "Providence, RI",
+    "radius_miles": 10.0
+  },
+  "generated_at": "2026-01-31T13:04:35.079106",
+  "competitors_found": 5,
+  "competitors": [
+    {
+      "name": "Roto-Rooter Plumbing & Water Cleanup",
+      "address": "1195 Broad St, Providence, RI 02905, United States",
+      "website": "https://www.rotorooter.com/providence/?utm_source=Google&utm_medium=organic&utm_campaign=gmb&utm_content=website",
+      "rating": 4.8,
+      "review_count": 3051,
+      "services": [
+        "Inspection",
+        "Tankless",
+        "Repair",
+        "Gas Line",
+        "Emergency Plumbing",
+        "Maintenance",
+        "Sump Pump",
+        "Water Softener",
+        "Backflow",
+        "Hydro Jetting",
+        "Leak Detection",
+        "Installation",
+        "Water Heater",
+        "Drain Cleaning",
+        "Toilet Repair",
+        "Garbage Disposal",
+        "Emergency",
+        "Kitchen Plumbing",
+        "Sewer Line",
+        "Estimate",
+        "Faucet",
+        "Trenchless",
+        "Service"
+      ],
+      "trust_signals": [
+        "On Time",
+        "Same-Day Service",
+        "295 Reviews",
+        "Certified",
+        "Licensed & Insured",
+        "Free Estimate",
+        "Emergency Service",
+        "Fully Licensed",
+        "No Hidden Fees",
+        "Since 1935",
+        "24/7"
+      ],
+      "unique_selling_points": []
+    },
+    {
+      "name": "G.W.Wagner Plumbing,LLC",
+      "address": "144 Freeborn Ave, East Providence, RI 02914, United States",
+      "website": "http://www.wagnerplumbingservices.com/",
+      "rating": 4.4,
+      "review_count": 190,
+      "services": [
+        "Maintenance",
+        "Water Heater",
+        "Installation",
+        "Drain Cleaning",
+        "Emergency",
+        "Repair",
+        "Faucet",
+        "Service"
+      ],
+      "trust_signals": [
+        "Since 1999",
+        "Locally Owned",
+        "247",
+        "25 Years Of Experience"
+      ],
+      "unique_selling_points": [
+        "#### experienced professionals"
+      ]
+    },
+    {
+      "name": "Sureflow Rooter Service And Drain Cleaning",
+      "address": "107 W Clifford St, Providence, RI 02907, United States",
+      "website": "https://www.sureflowrooter.com/",
+      "rating": 4.9,
+      "review_count": 80,
+      "services": [
+        "Maintenance",
+        "Hydro Jetting",
+        "Inspection",
+        "Installation",
+        "Drain Cleaning",
+        "Emergency",
+        "Repair",
+        "Sewer Line",
+        "Garbage Disposal",
+        "Estimate",
+        "Service"
+      ],
+      "trust_signals": [
+        "247",
+        "No Hidden Charges",
+        "On Time",
+        "Warranty",
+        "Emergency Service",
+        "Free Estimate",
+        "Fully Licensed",
+        "Bonded",
+        "Family-Owned"
+      ],
+      "unique_selling_points": []
+    },
+    {
+      "name": "Phillips Plumbing & Mechanical",
+      "address": "313 Warwick Ave, Cranston, RI 02905, United States",
+      "website": "http://www.phillipsplumbingri.com/",
+      "rating": 4.5,
+      "review_count": 112,
+      "services": [
+        "Maintenance",
+        "Installation",
+        "Water Heater",
+        "Emergency",
+        "Repair",
+        "Sewer Line",
+        "Estimate",
+        "Service"
+      ],
+      "trust_signals": [
+        "Family Owned",
+        "On Time",
+        "Since 1985",
+        "Emergency Service",
+        "24/7"
+      ],
+      "unique_selling_points": []
+    },
+    {
+      "name": "F.G. Lees & Son, Inc.",
+      "address": "161 Admiral St, Providence, RI 02908, United States",
+      "website": "https://www.fglees.com/",
+      "rating": 4.4,
+      "review_count": 57,
+      "services": [
+        "Service",
+        "Installation",
+        "Emergency",
+        "Repair",
+        "Gas Line",
+        "Sewer Line",
+        "Backflow",
+        "Estimate",
+        "Faucet",
+        "Water Heater"
+      ],
+      "trust_signals": [
+        "On Time",
+        "Certified",
+        "Emergency Service",
+        "Free Estimate"
+      ],
+      "unique_selling_points": []
+    }
+  ],
+  "market_analysis": {
+    "common_services": [
+      "Inspection",
+      "Repair",
+      "Gas Line",
+      "Maintenance",
+      "Backflow",
+      "Hydro Jetting",
+      "Installation",
+      "Water Heater",
+      "Drain Cleaning",
+      "Garbage Disposal",
+      "Emergency",
+      "Sewer Line",
+      "Estimate",
+      "Faucet",
+      "Service"
+    ],
+    "common_trust_signals": [
+      "On Time",
+      "Certified",
+      "Free Estimate",
+      "Emergency Service",
+      "Fully Licensed",
+      "24/7",
+      "247"
+    ],
+    "service_gaps": [],
+    "common_complaints": []
+  },
+  "insights": [
+    {
+      "type": "trust_differentiator",
+      "title": "Trust Opportunity: Background Checked",
+      "description": "Most competitors don't emphasize 'Background Checked' - this builds customer confidence.",
+      "suggested_copy": [
+        "Background Checked - peace of mind included.",
+        "We're proud to be background checked."
+      ],
+      "priority": 2
+    },
+    {
+      "type": "trust_differentiator",
+      "title": "Trust Opportunity: Same Day Service",
+      "description": "Most competitors don't emphasize 'Same Day Service' - this builds customer confidence.",
+      "suggested_copy": [
+        "Same Day Service - peace of mind included.",
+        "We're proud to be same day service."
+      ],
+      "priority": 2
+    },
+    {
+      "type": "trust_differentiator",
+      "title": "Trust Opportunity: Upfront Pricing",
+      "description": "Most competitors don't emphasize 'Upfront Pricing' - this builds customer confidence.",
+      "suggested_copy": [
+        "Upfront Pricing - peace of mind included.",
+        "We're proud to be upfront pricing."
+      ],
+      "priority": 2
+    },
+    {
+      "type": "messaging_angle",
+      "title": "Few competitors mention: 24/7 Service",
+      "description": "Messaging gap identified in competitor analysis.",
+      "suggested_copy": [],
+      "priority": 3
+    },
+    {
+      "type": "messaging_angle",
+      "title": "Few competitors mention: Same-Day Service",
+      "description": "Messaging gap identified in competitor analysis.",
+      "suggested_copy": [],
+      "priority": 3
+    },
+    {
+      "type": "messaging_angle",
+      "title": "Few competitors mention: Licensed And Insured",
+      "description": "Messaging gap identified in competitor analysis.",
+      "suggested_copy": [],
+      "priority": 3
+    }
+  ],
+  "differentiators": [
+    {
+      "angle": "Emergency Angle",
+      "hook": "Burst pipe at 2 AM? We're there in 60 minutes or less.",
+      "supporting_points": [
+        "Fast response time",
+        "Available 24/7",
+        "No extra fees for emergencies"
+      ],
+      "best_for": "Google Ads (search intent)"
+    },
+    {
+      "angle": "Trust Angle",
+      "hook": "The plumber your neighbors trust. 100+ 5-star reviews.",
+      "supporting_points": [
+        "Licensed and insured",
+        "Background-checked",
+        "Thousands of happy customers"
+      ],
+      "best_for": "Facebook/Instagram (social proof)"
+    },
+    {
+      "angle": "Pricing Angle",
+      "hook": "No hidden fees. The price we quote is the price you pay.",
+      "supporting_points": [
+        "Free estimates",
+        "No hidden fees",
+        "Price match guarantee"
+      ],
+      "best_for": "Google Ads, Website"
+    },
+    {
+      "angle": "Quality Angle",
+      "hook": "Fixed right the first time, guaranteed.",
+      "supporting_points": [
+        "Trained professionals",
+        "Premium materials",
+        "Satisfaction guaranteed"
+      ],
+      "best_for": "Instagram, Website portfolio"
+    },
+    {
+      "angle": "Speed Angle",
+      "hook": "Same-day service. Because leaks don't wait.",
+      "supporting_points": [
+        "Same-day availability",
+        "On-time guarantee",
+        "Efficient service"
+      ],
+      "best_for": "Google Ads, Google Business Profile"
+    },
+    {
+      "angle": "Trust Opportunity: Background Checked",
+      "hook": "Background Checked - peace of mind included.",
+      "supporting_points": [
+        "Signal 'Background Checked' rarely mentioned by competitors"
+      ],
+      "best_for": "Facebook/Instagram Ads"
+    },
+    {
+      "angle": "Trust Opportunity: Same Day Service",
+      "hook": "Same Day Service - peace of mind included.",
+      "supporting_points": [
+        "Signal 'Same Day Service' rarely mentioned by competitors"
+      ],
+      "best_for": "Facebook/Instagram Ads"
+    },
+    {
+      "angle": "Trust Opportunity: Upfront Pricing",
+      "hook": "Upfront Pricing - peace of mind included.",
+      "supporting_points": [
+        "Signal 'Upfront Pricing' rarely mentioned by competitors"
+      ],
+      "best_for": "Facebook/Instagram Ads"
+    }
+  ],
+  "quick_use": {
+    "headlines": [
+      "The plumber your neighbors trust. 100+ 5-star reviews.",
+      "Plumbing Problems? Solved.",
+      "Same-day service. Because leaks don't wait.",
+      "Burst pipe at 2 AM? We're there in 60 minutes or less.",
+      "No hidden fees. The price we quote is the price you pay.",
+      "Fast. Reliable. Affordable.",
+      "Your Local Plumbing Experts",
+      "Fixed right the first time, guaranteed."
+    ],
+    "taglines": [
+      "Serving Providence, RI with pride",
+      "Quality you can trust, service you deserve",
+      "Your satisfaction, guaranteed",
+      "Locally owned, community trusted",
+      "Excellence in every job",
+      "Where quality meets reliability",
+      "Professional service, personal touch",
+      "Done right. Done on time."
+    ],
+    "trust_signals": [
+      "Licensed & Insured",
+      "Satisfaction Guaranteed",
+      "Same-Day Service Available",
+      "Background-Checked Technicians",
+      "Upfront Pricing",
+      "Locally Owned & Operated",
+      "On Time",
+      "Certified",
+      "Free Estimate",
+      "Emergency Service"
+    ]
+  },
+  "timing": {
+    "start_time": "2026-01-31T13:02:50.562538",
+    "end_time": "2026-01-31T13:04:35.079106",
+    "total_duration_seconds": 104.516568,
+    "steps": [
+      {
+        "step": "1. Competitor Discovery",
+        "duration_seconds": 1.4191644191741943
+      },
+      {
+        "step": "2. Website Scraping",
+        "duration_seconds": 98.98626112937927
+      },
+      {
+        "step": "3. Content Extraction",
+        "duration_seconds": 0.052373647689819336
+      },
+      {
+        "step": "4. Market Analysis",
+        "duration_seconds": 0.0
+      },
+      {
+        "step": "5. Ad Differentiation Generation",
+        "duration_seconds": 0.006857156753540039
+      },
+      {
+        "step": "6. AI Success/Failure Analysis",
+        "duration_seconds": 4.051911354064941
+      }
+    ]
+  },
+  "top_rated_competitors": [
+    {
+      "name": "Sureflow Rooter Service And Drain Cleaning",
+      "rating": 4.9,
+      "review_count": 80
+    },
+    {
+      "name": "Roto-Rooter Plumbing & Water Cleanup",
+      "rating": 4.8,
+      "review_count": 3051
+    },
+    {
+      "name": "Phillips Plumbing & Mechanical",
+      "rating": 4.5,
+      "review_count": 112
+    }
+  ],
+  "worst_rated_competitors": [
+    {
+      "name": "Phillips Plumbing & Mechanical",
+      "rating": 4.5,
+      "review_count": 112
+    },
+    {
+      "name": "G.W.Wagner Plumbing,LLC",
+      "rating": 4.4,
+      "review_count": 190
+    },
+    {
+      "name": "F.G. Lees & Son, Inc.",
+      "rating": 4.4,
+      "review_count": 57
+    }
+  ],
+  "success_failure_analysis": {
+    "source": "claude",
+    "raw_analysis": "{\n  \"success_factors\": [\n    \"Consistently high customer ratings (4.8-4.9 stars)\",\n    \"Large volume of reviews (80-3051)\",\n    \"Offering a comprehensive range of services (maintenance, installation, emergency, etc.)\",\n    \"Establishing trust signals (on-time, no hidden charges, same-day service)\",\n    \"Highlighting industry experience (since 1985, 1999)\"\n  ],\n  \"failure_patterns\": [\n    \"Lower customer ratings (4.4-4.5 stars)\",\n    \"Fewer reviews (57-190)\",\n    \"Lacking in certain service offerings (e.g., not offering emergency services)\",\n    \"Weaker trust signals (e.g., only mentioning \"on-time\" or \"certified\")\",\n    \"Lacking in local/industry experience\"\n  ],\n  \"key_differentiators\": [\n    \"Top competitors have significantly higher customer ratings and review volumes, indicating better customer satisfaction and trust\",\n    \"Top competitors offer a more comprehensive range of services, making them more appealing to a wider customer base\",\n    \"Top competitors effectively communicate trust signals that build confidence in their services\"\n  ],\n  \"recommendations\": [\n    \"Focus on consistently delivering high-quality services to earn positive customer reviews and ratings\",\n    \"Expand service offerings to provide a one-stop-shop for customers' plumbing needs\",\n    \"Prominently display trust signals (e.g., on-time service, no hidden charges, certifications) to build customer confidence\",\n    \"Emphasize industry experience and local expertise to stand out from competitors\",\n    \"Consider offering promotions or discounts to attract new customers and build a strong customer base\"\n  ],\n  \"ad_angles_from_analysis\": [\n    \"Trusted by thousands of satisfied customers - 4.8+ star ratings and 3,000+ reviews\",\n    \"Your one-stop-shop for all your plumbing needs, from emergency repairs to maintenance and installation\",\n    \"Experienced, local plumbers you can count on - family-owned since 1985 with no hidden charges\"\n  }\n}",
+    "success_factors": [],
+    "failure_patterns": [],
+    "recommendations": []
+  }
+}
