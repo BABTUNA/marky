@@ -1,0 +1,346 @@
+{
+  "keywords": [
+    "plumber",
+    "emergency plumber",
+    "plumbing services"
+  ],
+  "location": "United States",
+  "keyword_data": [
+    {
+      "keyword": "plumber",
+      "search_volume": 673000,
+      "competition": "LOW",
+      "competition_index": 33,
+      "cpc": 29.9,
+      "low_bid": 13.7,
+      "high_bid": 70.82,
+      "monthly_searches": [
+        {
+          "year": 2025,
+          "month": 12,
+          "search_volume": 673000
+        },
+        {
+          "year": 2025,
+          "month": 11,
+          "search_volume": 450000
+        },
+        {
+          "year": 2025,
+          "month": 10,
+          "search_volume": 550000
+        },
+        {
+          "year": 2025,
+          "month": 9,
+          "search_volume": 550000
+        },
+        {
+          "year": 2025,
+          "month": 8,
+          "search_volume": 450000
+        },
+        {
+          "year": 2025,
+          "month": 7,
+          "search_volume": 550000
+        },
+        {
+          "year": 2025,
+          "month": 6,
+          "search_volume": 550000
+        },
+        {
+          "year": 2025,
+          "month": 5,
+          "search_volume": 823000
+        },
+        {
+          "year": 2025,
+          "month": 4,
+          "search_volume": 673000
+        },
+        {
+          "year": 2025,
+          "month": 3,
+          "search_volume": 1000000
+        },
+        {
+          "year": 2025,
+          "month": 2,
+          "search_volume": 1000000
+        },
+        {
+          "year": 2025,
+          "month": 1,
+          "search_volume": 823000
+        }
+      ]
+    },
+    {
+      "keyword": "emergency plumber",
+      "search_volume": 74000,
+      "competition": "LOW",
+      "competition_index": 31,
+      "cpc": 65.57,
+      "low_bid": 19.67,
+      "high_bid": 93.09,
+      "monthly_searches": [
+        {
+          "year": 2025,
+          "month": 12,
+          "search_volume": 49500
+        },
+        {
+          "year": 2025,
+          "month": 11,
+          "search_volume": 49500
+        },
+        {
+          "year": 2025,
+          "month": 10,
+          "search_volume": 74000
+        },
+        {
+          "year": 2025,
+          "month": 9,
+          "search_volume": 49500
+        },
+        {
+          "year": 2025,
+          "month": 8,
+          "search_volume": 49500
+        },
+        {
+          "year": 2025,
+          "month": 7,
+          "search_volume": 49500
+        },
+        {
+          "year": 2025,
+          "month": 6,
+          "search_volume": 74000
+        },
+        {
+          "year": 2025,
+          "month": 5,
+          "search_volume": 90500
+        },
+        {
+          "year": 2025,
+          "month": 4,
+          "search_volume": 90500
+        },
+        {
+          "year": 2025,
+          "month": 3,
+          "search_volume": 74000
+        },
+        {
+          "year": 2025,
+          "month": 2,
+          "search_volume": 74000
+        },
+        {
+          "year": 2025,
+          "month": 1,
+          "search_volume": 74000
+        }
+      ]
+    },
+    {
+      "keyword": "plumbing services",
+      "search_volume": 74000,
+      "competition": "LOW",
+      "competition_index": 7,
+      "cpc": 34.13,
+      "low_bid": 13.88,
+      "high_bid": 71.32,
+      "monthly_searches": [
+        {
+          "year": 2025,
+          "month": 12,
+          "search_volume": 110000
+        },
+        {
+          "year": 2025,
+          "month": 11,
+          "search_volume": 60500
+        },
+        {
+          "year": 2025,
+          "month": 10,
+          "search_volume": 60500
+        },
+        {
+          "year": 2025,
+          "month": 9,
+          "search_volume": 74000
+        },
+        {
+          "year": 2025,
+          "month": 8,
+          "search_volume": 49500
+        },
+        {
+          "year": 2025,
+          "month": 7,
+          "search_volume": 60500
+        },
+        {
+          "year": 2025,
+          "month": 6,
+          "search_volume": 74000
+        },
+        {
+          "year": 2025,
+          "month": 5,
+          "search_volume": 74000
+        },
+        {
+          "year": 2025,
+          "month": 4,
+          "search_volume": 74000
+        },
+        {
+          "year": 2025,
+          "month": 3,
+          "search_volume": 74000
+        },
+        {
+          "year": 2025,
+          "month": 2,
+          "search_volume": 60500
+        },
+        {
+          "year": 2025,
+          "month": 1,
+          "search_volume": 60500
+        }
+      ]
+    }
+  ],
+  "trend_data": [],
+  "seasonal_insights": [
+    {
+      "keyword": "plumber",
+      "peak_season": "Winter (Jan, Feb, Mar, May)",
+      "peak_months": [
+        1,
+        2,
+        3,
+        5
+      ],
+      "low_season": "Summer (Jun, Jul, Aug, Sep, Oct, Nov)",
+      "low_months": [
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "seasonality_score": 55.0,
+      "recommendation": "Increase ad spend in Winter (Jan, Feb, Mar, May). Consider reducing budget in Summer (Jun, Jul, Aug, Sep, Oct, Nov)."
+    },
+    {
+      "keyword": "emergency plumber",
+      "peak_season": "Spring (Apr, May)",
+      "peak_months": [
+        4,
+        5
+      ],
+      "low_season": "Summer (Jul, Aug, Sep, Nov, Dec)",
+      "low_months": [
+        7,
+        8,
+        9,
+        11,
+        12
+      ],
+      "seasonality_score": 45.3,
+      "recommendation": "Increase ad spend in Spring (Apr, May). Consider reducing budget in Summer (Jul, Aug, Sep, Nov, Dec)."
+    },
+    {
+      "keyword": "plumbing services",
+      "peak_season": "Dec",
+      "peak_months": [
+        12
+      ],
+      "low_season": "Aug",
+      "low_months": [
+        8
+      ],
+      "seasonality_score": 55.0,
+      "recommendation": "Increase ad spend in Dec. Consider reducing budget in Aug."
+    }
+  ],
+  "timing_recommendations": [
+    {
+      "keyword": "plumber",
+      "best_months": [
+        "Jan",
+        "Feb",
+        "Mar",
+        "May"
+      ],
+      "avoid_months": [
+        "Aug",
+        "Nov"
+      ],
+      "current_trend": "falling",
+      "budget_advice": "High CPC. Test different ad copy to improve CTR."
+    },
+    {
+      "keyword": "emergency plumber",
+      "best_months": [
+        "Apr",
+        "May"
+      ],
+      "avoid_months": [
+        "Jul",
+        "Aug",
+        "Sep",
+        "Nov",
+        "Dec"
+      ],
+      "current_trend": "falling",
+      "budget_advice": "High CPC. Test different ad copy to improve CTR."
+    },
+    {
+      "keyword": "plumbing services",
+      "best_months": [
+        "Dec"
+      ],
+      "avoid_months": [
+        "Aug"
+      ],
+      "current_trend": "stable",
+      "budget_advice": "High CPC. Test different ad copy to improve CTR."
+    }
+  ],
+  "related_queries": [
+    "plumber near me",
+    "the plumber",
+    "emergency plumber",
+    "plumbing",
+    "aaron plumber",
+    "aaron the plumber",
+    "best plumber",
+    "plumber cost",
+    "plumbers",
+    "drain plumber"
+  ],
+  "rising_queries": [
+    "aaron the plumber age",
+    "aaron the plumber fight",
+    "aaron the plumber tv show",
+    "what show is aaron the plumber on",
+    "aaron the plumber height",
+    "jay hefner",
+    "lede",
+    "zeus network aaron the plumber",
+    "two ways with erica mena",
+    "how tall is aaron the plumber"
+  ]
+}
