@@ -118,6 +118,20 @@ API Keys (set as environment variables):
         help="Radius multiplier for worst-rated search (default: 3.0 = 3x normal radius)",
     )
     
+    parser.add_argument(
+        "--top-count",
+        type=int,
+        default=3,
+        help="Number of top-rated competitors to analyze (default: 3)",
+    )
+    
+    parser.add_argument(
+        "--worst-count",
+        type=int,
+        default=3,
+        help="Number of worst-rated competitors to analyze (default: 3)",
+    )
+    
     return parser.parse_args()
 
 
@@ -233,11 +247,12 @@ def main():
             business_type=params["business_type"],
             location=params["location"],
             radius_miles=params["radius_miles"],
-            max_competitors=params["max_competitors"],
             save=not args.no_save,
             output_dir=args.output_dir,
             include_worst_rated=not args.skip_worst,
             worst_radius_multiplier=args.worst_radius,
+            top_count=args.top_count,
+            worst_count=args.worst_count,
         )
         
         # Output as JSON if requested

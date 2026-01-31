@@ -334,10 +334,11 @@ class LocalIntelAgent:
         business_type: str,
         location: str,
         radius_miles: float = 10.0,
-        max_competitors: int = 20,
         manual_competitors: Optional[List[Dict[str, Any]]] = None,
         include_worst_rated: bool = True,
         worst_radius_multiplier: float = 3.0,
+        top_count: int = 3,
+        worst_count: int = 3,
     ) -> IntelligenceReport:
         """
         Run full competitive intelligence analysis.
@@ -346,16 +347,20 @@ class LocalIntelAgent:
             business_type: Type of business (e.g., "plumber", "restaurant")
             location: Location to search (city, zip, or coordinates)
             radius_miles: Search radius
-            max_competitors: Maximum competitors to analyze
             manual_competitors: Optional list of manually specified competitors
             include_worst_rated: Whether to include worst-rated competitor analysis
             worst_radius_multiplier: How much larger to search for worst-rated (3.0 = 3x radius)
+            top_count: Number of top-rated competitors to analyze
+            worst_count: Number of worst-rated competitors to analyze
         
         Returns:
             Complete IntelligenceReport with all insights
         """
         # Initialize process log
         process_log = ProcessLog()
+        
+        # Total competitors to analyze
+        max_competitors = top_count + worst_count
         
         search_input = SearchInput(
             business_type=business_type,
@@ -370,6 +375,7 @@ class LocalIntelAgent:
         print(f"Business Type: {business_type}")
         print(f"Location: {location}")
         print(f"Search Radius: {radius_miles} miles")
+        print(f"Analyzing: {top_count} top-rated + {worst_count} worst-rated = {max_competitors} total")
         print(f"{'='*60}\n")
         
         # Step 1: Discover competitors (two-pass strategy for top + worst)
@@ -388,16 +394,16 @@ class LocalIntelAgent:
             rated = [c for c in competitors if c.rating is not None]
             if rated:
                 rated.sort(key=lambda c: (c.rating or 0, c.review_count or 0), reverse=True)
-                top_competitors = rated[:3]
-                worst_competitors = rated[-3:] if len(rated) > 3 else []
+                top_competitors = rated[:top_count]
+                worst_competitors = rated[-worst_count:] if len(rated) > worst_count else []
         else:
             # Use two-pass discovery for top AND worst rated
             if include_worst_rated:
-                print(f"  Using two-pass search (top + worst rated, {worst_radius_multiplier}x radius for worst)...")
+                print(f"  Using two-pass search ({top_count} top + {worst_count} worst, {worst_radius_multiplier}x radius for worst)...")
                 discovery_config = DiscoveryConfig(
-                    top_count=max(3, max_competitors // 3),
+                    top_count=top_count,
                     find_worst=True,
-                    worst_count=3,
+                    worst_count=worst_count,
                     worst_radius_multiplier=worst_radius_multiplier,
                     worst_rating_threshold=4.0,
                 )
@@ -711,11 +717,12 @@ def run_analysis(
     business_type: str,
     location: str,
     radius_miles: float = 10.0,
-    max_competitors: int = 20,
     save: bool = True,
     output_dir: str = "output",
     include_worst_rated: bool = True,
     worst_radius_multiplier: float = 3.0,
+    top_count: int = 3,
+    worst_count: int = 3,
 ) -> IntelligenceReport:
     """
     Convenience function to run competitive analysis.
@@ -723,6 +730,8 @@ def run_analysis(
     Args:
         include_worst_rated: If True, do a second search to find low-rated competitors
         worst_radius_multiplier: How much larger to search for worst-rated (e.g., 3.0 = 3x radius)
+        top_count: Number of top-rated competitors to analyze
+        worst_count: Number of worst-rated competitors to analyze
     """
     agent = LocalIntelAgent()
     
@@ -730,9 +739,10 @@ def run_analysis(
         business_type=business_type,
         location=location,
         radius_miles=radius_miles,
-        max_competitors=max_competitors,
         include_worst_rated=include_worst_rated,
         worst_radius_multiplier=worst_radius_multiplier,
+        top_count=top_count,
+        worst_count=worst_count,
     )
     
     if save:

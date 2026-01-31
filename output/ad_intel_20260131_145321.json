@@ -1,0 +1,491 @@
+{
+  "business_type": "plumber",
+  "location": "Providence, RI",
+  "search_query": "plumber Providence, RI",
+  "competitors_found": 15,
+  "total_ads_analyzed": 26,
+  "competitor_ads": [
+    {
+      "page_name": "DramaBox- drama movies2",
+      "total_ads": 6,
+      "active_ads": 6,
+      "common_ctas": [
+        "Watch more"
+      ],
+      "common_hooks": [
+        "[relief]"
+      ],
+      "media_mix": {
+        "video": 6
+      },
+      "sample_ads": [
+        {
+          "ad_text": "Countryside girl Elise Jensen marries Cyrus Fenton in place of her twin, Sylvia, to secure an alliance between the two families. In the next three years, she endures neglect, misunderstandings, and harm, all for the promised pay. But when Sylvia reclaims her place, conflicts and complications arise,",
+          "headline": "Not His Choice, Not His Ending(DUBBED)",
+          "call_to_action": "Watch more",
+          "media_type": "video"
+        },
+        {
+          "ad_text": "Countryside girl Elise Jensen marries Cyrus Fenton in place of her twin, Sylvia, to secure an alliance between the two families. In the next three years, she endures neglect, misunderstandings, and harm, all for the promised pay. But when Sylvia reclaims her place, conflicts and complications arise,",
+          "headline": "Not His Choice, Not His Ending(DUBBED)",
+          "call_to_action": "Watch more",
+          "media_type": "video"
+        },
+        {
+          "ad_text": "Countryside girl Elise Jensen marries Cyrus Fenton in place of her twin, Sylvia, to secure an alliance between the two families. In the next three years, she endures neglect, misunderstandings, and harm, all for the promised pay. But when Sylvia reclaims her place, conflicts and complications arise,",
+          "headline": "Not His Choice, Not His Ending(DUBBED)",
+          "call_to_action": "Watch more",
+          "media_type": "video"
+        },
+        {
+          "ad_text": "Countryside girl Elise Jensen marries Cyrus Fenton in place of her twin, Sylvia, to secure an alliance between the two families. In the next three years, she endures neglect, misunderstandings, and harm, all for the promised pay. But when Sylvia reclaims her place, conflicts and complications arise,",
+          "headline": "Not His Choice, Not His Ending(DUBBED)",
+          "call_to_action": "Watch more",
+          "media_type": "video"
+        },
+        {
+          "ad_text": "🔥🔥 Countryside girl Elise Jensen marries Cyrus Fenton in place of her twin, Sylvia, to secure an alliance between the two families. In the next three years, she endures neglect, misunderstandings, and harm, all for the promised pay. But when Sylvia reclaims her place, conflicts and complications ari",
+          "headline": "🎬 Not His Choice, Not His Ending",
+          "call_to_action": "Watch more",
+          "media_type": "video"
+        }
+      ]
+    },
+    {
+      "page_name": "Ns-M31",
+      "total_ads": 4,
+      "active_ads": 4,
+      "common_ctas": [
+        "Watch more"
+      ],
+      "common_hooks": [
+        "[pain point]"
+      ],
+      "media_mix": {
+        "video": 4
+      },
+      "sample_ads": [
+        {
+          "ad_text": "👉You won’t get tired of watching it for 8 hours a day. Who can resist this short drama. Watch now💥",
+          "headline": "👉You won’t get tired of watching it for 8 hours a day. Who can resist this short drama. Watch now💥",
+          "call_to_action": "Watch more",
+          "media_type": "video"
+        },
+        {
+          "ad_text": "👉You won’t get tired of watching it for 8 hours a day. Who can resist this short drama. Watch now💥",
+          "headline": "👉You won’t get tired of watching it for 8 hours a day. Who can resist this short drama. Watch now💥",
+          "call_to_action": "Watch more",
+          "media_type": "video"
+        },
+        {
+          "ad_text": "👉You won’t get tired of watching it for 8 hours a day. Who can resist this short drama. Watch now💥",
+          "headline": "👉You won’t get tired of watching it for 8 hours a day. Who can resist this short drama. Watch now💥",
+          "call_to_action": "Watch more",
+          "media_type": "video"
+        },
+        {
+          "ad_text": "You'll be addicted in 5 seconds, and the plot is even more exciting later...",
+          "headline": "You'll be addicted in 5 seconds, and the plot is even more exciting later...",
+          "call_to_action": "Watch more",
+          "media_type": "video"
+        }
+      ]
+    },
+    {
+      "page_name": "Seen In Your City",
+      "total_ads": 2,
+      "active_ads": 2,
+      "common_ctas": [
+        "Download"
+      ],
+      "common_hooks": [],
+      "media_mix": {
+        "carousel": 2
+      },
+      "sample_ads": [
+        {
+          "ad_text": "{{product.brand}}",
+          "headline": "{{product.name}}",
+          "call_to_action": "Download",
+          "media_type": "carousel"
+        },
+        {
+          "ad_text": "{{product.brand}}",
+          "headline": "{{product.name}}",
+          "call_to_action": "Download",
+          "media_type": "carousel"
+        }
+      ]
+    },
+    {
+      "page_name": "DramaBox-minissérie",
+      "total_ads": 2,
+      "active_ads": 2,
+      "common_ctas": [
+        "Watch more"
+      ],
+      "common_hooks": [
+        "[relief]"
+      ],
+      "media_mix": {
+        "video": 2
+      },
+      "sample_ads": [
+        {
+          "ad_text": "Countryside girl Elise Jensen marries Cyrus Fenton in place of her twin, Sylvia, to secure an alliance between the two families. In the next three years, she endures neglect, misunderstandings, and harm, all for the promised pay. But when Sylvia reclaims her place, conflicts and complications arise,",
+          "headline": "Not His Choice, Not His Ending",
+          "call_to_action": "Watch more",
+          "media_type": "video"
+        },
+        {
+          "ad_text": "Countryside girl Elise Jensen marries Cyrus Fenton in place of her twin, Sylvia, to secure an alliance between the two families. In the next three years, she endures neglect, misunderstandings, and harm, all for the promised pay. But when Sylvia reclaims her place, conflicts and complications arise,",
+          "headline": "Not His Choice, Not His Ending",
+          "call_to_action": "Watch more",
+          "media_type": "video"
+        }
+      ]
+    },
+    {
+      "page_name": "Scope.Online",
+      "total_ads": 2,
+      "active_ads": 2,
+      "common_ctas": [
+        "Sign up"
+      ],
+      "common_hooks": [],
+      "media_mix": {
+        "image": 2
+      },
+      "sample_ads": [
+        {
+          "ad_text": "Most customers now ask AI who to hire.\nIf your business doesn’t show up, you don’t get the job.\n\nScan your business in 60 seconds.",
+          "headline": "Scan Your Business on AI",
+          "call_to_action": "Sign up",
+          "media_type": "image"
+        },
+        {
+          "ad_text": "Most customers now ask AI who to hire.\nIf your business doesn’t show up, you don’t get the job.\n\nScan your business in 60 seconds.",
+          "headline": "Scan Your Business on AI",
+          "call_to_action": "Sign up",
+          "media_type": "image"
+        }
+      ]
+    },
+    {
+      "page_name": "Unknown",
+      "total_ads": 1,
+      "active_ads": 1,
+      "common_ctas": [],
+      "common_hooks": [],
+      "media_mix": {
+        "image": 1
+      },
+      "sample_ads": [
+        {
+          "ad_text": "",
+          "headline": null,
+          "call_to_action": null,
+          "media_type": "image"
+        }
+      ]
+    },
+    {
+      "page_name": "Imapping by broadly",
+      "total_ads": 1,
+      "active_ads": 1,
+      "common_ctas": [
+        "Learn more"
+      ],
+      "common_hooks": [],
+      "media_mix": {
+        "image": 1
+      },
+      "sample_ads": [
+        {
+          "ad_text": "People are searching for your service right now.\n✓ If your business isn’t searchable, you won’t appear.\n📍 We set up your Google listing for you — quickly and correctly.",
+          "headline": "Make your business searchable",
+          "call_to_action": "Learn more",
+          "media_type": "image"
+        }
+      ]
+    },
+    {
+      "page_name": "SEOptimer",
+      "total_ads": 1,
+      "active_ads": 1,
+      "common_ctas": [
+        "Learn more"
+      ],
+      "common_hooks": [],
+      "media_mix": {
+        "carousel": 1
+      },
+      "sample_ads": [
+        {
+          "ad_text": "{{product.brand}}",
+          "headline": "{{product.name}}",
+          "call_to_action": "Learn more",
+          "media_type": "carousel"
+        }
+      ]
+    },
+    {
+      "page_name": "LPagery - Rank Higher in SEO and AI SEO",
+      "total_ads": 1,
+      "active_ads": 1,
+      "common_ctas": [
+        "Download"
+      ],
+      "common_hooks": [],
+      "media_mix": {
+        "carousel": 1
+      },
+      "sample_ads": [
+        {
+          "ad_text": "{{product.brand}}",
+          "headline": "{{product.name}}",
+          "call_to_action": "Download",
+          "media_type": "carousel"
+        }
+      ]
+    },
+    {
+      "page_name": "DramaBox- drama movies6",
+      "total_ads": 1,
+      "active_ads": 1,
+      "common_ctas": [
+        "Watch more"
+      ],
+      "common_hooks": [
+        "[relief]"
+      ],
+      "media_mix": {
+        "video": 1
+      },
+      "sample_ads": [
+        {
+          "ad_text": "Countryside girl Elise Jensen marries Cyrus Fenton in place of her twin, Sylvia, to secure an alliance between the two families. In the next three years, she endures neglect, misunderstandings, and harm, all for the promised pay. But when Sylvia reclaims her place, conflicts and complications arise,",
+          "headline": null,
+          "call_to_action": "Watch more",
+          "media_type": "video"
+        }
+      ]
+    },
+    {
+      "page_name": "Map Ranking Digital Marketing Agency",
+      "total_ads": 1,
+      "active_ads": 1,
+      "common_ctas": [
+        "Learn more"
+      ],
+      "common_hooks": [],
+      "media_mix": {
+        "image": 1
+      },
+      "sample_ads": [
+        {
+          "ad_text": "The game for local SEO and lead generation has completely shifted, and most businesses didn’t adapt.\n\n If you’re still using outdated tactics, you’re invisible to most customers searching right now.\nThe fastest way to beat competitors, generate consistent calls, and grow revenue—without burning mone",
+          "headline": "Get More Calls. Dominate Google Maps.",
+          "call_to_action": "Learn more",
+          "media_type": "image"
+        }
+      ]
+    },
+    {
+      "page_name": "SPRK IQ",
+      "total_ads": 1,
+      "active_ads": 1,
+      "common_ctas": [
+        "Learn more"
+      ],
+      "common_hooks": [
+        "🚨 Local Business Owners - When customers search your service,  do they see you or your competitors?"
+      ],
+      "media_mix": {
+        "image": 1
+      },
+      "sample_ads": [
+        {
+          "ad_text": "🚨 Local Business Owners - When customers search your service,  do they see you or your competitors?\n\nBecause Top 3 Google Maps listings get most of the calls.\n\nWe use our Local Authority Flywheel to force Google trust fast.\n\n🔥 Top 3 Google Maps ranking in 60 days — guaranteed.\nIf we don’t get you th",
+          "headline": "Top 3 Google Maps in 60 Days - Guaranteed",
+          "call_to_action": "Learn more",
+          "media_type": "image"
+        }
+      ]
+    },
+    {
+      "page_name": "Lion Bear AI",
+      "total_ads": 1,
+      "active_ads": 1,
+      "common_ctas": [
+        "Download"
+      ],
+      "common_hooks": [],
+      "media_mix": {
+        "carousel": 1
+      },
+      "sample_ads": [
+        {
+          "ad_text": "{{product.brand}}",
+          "headline": "{{product.name}}",
+          "call_to_action": "Download",
+          "media_type": "carousel"
+        }
+      ]
+    },
+    {
+      "page_name": "DramaBox- movies and drama",
+      "total_ads": 1,
+      "active_ads": 1,
+      "common_ctas": [
+        "Install now"
+      ],
+      "common_hooks": [
+        "[relief]"
+      ],
+      "media_mix": {
+        "video": 1
+      },
+      "sample_ads": [
+        {
+          "ad_text": "Countryside girl Elise Jensen marries Cyrus Fenton in place of her twin, Sylvia, to secure an alliance between the two families. In the next three years, she endures neglect, misunderstandings, and harm, all for the promised pay. But when Sylvia reclaims her place, conflicts and complications arise,",
+          "headline": null,
+          "call_to_action": "Install now",
+          "media_type": "video"
+        }
+      ]
+    },
+    {
+      "page_name": "DramaBox-fresh drama&movies",
+      "total_ads": 1,
+      "active_ads": 1,
+      "common_ctas": [
+        "Watch more"
+      ],
+      "common_hooks": [
+        "[relief]"
+      ],
+      "media_mix": {
+        "video": 1
+      },
+      "sample_ads": [
+        {
+          "ad_text": "Countryside girl Elise Jensen marries Cyrus Fenton in place of her twin, Sylvia, to secure an alliance between the two families. In the next three years, she endures neglect, misunderstandings, and harm, all for the promised pay. But when Sylvia reclaims her place, conflicts and complications arise,",
+          "headline": "Not His Choice, Not His Ending(DUBBED)",
+          "call_to_action": "Watch more",
+          "media_type": "video"
+        }
+      ]
+    }
+  ],
+  "patterns": {
+    "hook_types": [
+      {
+        "type": "[relief]",
+        "frequency": 11,
+        "percentage": 42.30769230769231
+      },
+      {
+        "type": "[pain point]",
+        "frequency": 3,
+        "percentage": 11.538461538461538
+      },
+      {
+        "type": "🚨 Local Business Owners - When customers search your service,  do they see you or your competitors?",
+        "frequency": 1,
+        "percentage": 3.8461538461538463
+      }
+    ],
+    "cta_types": [
+      {
+        "type": "Watch more",
+        "frequency": 14,
+        "percentage": 53.84615384615385
+      },
+      {
+        "type": "Learn more",
+        "frequency": 4,
+        "percentage": 15.384615384615385
+      },
+      {
+        "type": "Download",
+        "frequency": 4,
+        "percentage": 15.384615384615385
+      },
+      {
+        "type": "Sign up",
+        "frequency": 2,
+        "percentage": 7.6923076923076925
+      },
+      {
+        "type": "Install now",
+        "frequency": 1,
+        "percentage": 3.8461538461538463
+      }
+    ],
+    "offer_types": [
+      {
+        "type": "free offer",
+        "frequency": 1
+      }
+    ],
+    "media_distribution": {
+      "image": 23.076923076923077,
+      "carousel": 19.230769230769234,
+      "video": 57.692307692307686
+    },
+    "themes": [
+      "trust",
+      "local",
+      "guarantee",
+      "speed"
+    ],
+    "trust_signals": [
+      "local",
+      "guarantee"
+    ]
+  },
+  "hook_suggestions": [
+    "Finally, a plumber who shows up on time",
+    "Tired of unreliable plumbers?",
+    "Still searching for a reliable plumber?",
+    "What if your plumber actually showed up on time?",
+    "Ready to stop dealing with overpriced plumbers?"
+  ],
+  "headline_suggestions": [
+    "Your Local Plumber Experts",
+    "100% Satisfaction Guaranteed",
+    "Trusted by Your Neighbors",
+    "Same-Day Service Available"
+  ],
+  "cta_suggestions": [
+    "Watch more",
+    "Learn more",
+    "Download",
+    "Sign up",
+    "Install now",
+    "Call Now",
+    "Get Free Quote",
+    "Book Online",
+    "Schedule Today",
+    "Learn More"
+  ],
+  "creative_suggestions": [
+    "Video ads dominate this market - prioritize video content",
+    "Show real team members for trust",
+    "Include before/after photos if applicable",
+    "Add customer testimonial overlay",
+    "Show your branded vehicle/uniform"
+  ],
+  "messaging_gaps": [
+    "No one emphasizes: emergency/24-7 service",
+    "No one emphasizes: eco-friendly",
+    "No one emphasizes: senior discounts",
+    "No one emphasizes: financing available",
+    "No one emphasizes: same-day service",
+    "No one emphasizes: upfront pricing",
+    "No one emphasizes: background-checked",
+    "No one emphasizes: women-owned"
+  ],
+  "generated_at": "2026-01-31T14:53:21.655740"
+}
