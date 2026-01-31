@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """
 Runner script for Ad Intelligence Agent.
-Analyzes competitor Facebook ads to extract strategies and patterns.
+Analyzes competitor Google Ads (paid search) via SerpAPI.
+Uses the same SERPAPI_KEY as local_intel - no additional API needed.
 
 Usage:
     python run_ad_intel.py -b "plumber" -l "Providence, RI"
-    python run_ad_intel.py --business "restaurant" --location "Boston, MA" --max-ads 100
+    python run_ad_intel.py --business "restaurant" --location "Boston, MA" --max-ads 20
 """
 
 import argparse
@@ -83,15 +84,16 @@ def check_config():
     print("API Configuration Status")
     print("="*50)
     
-    api_key = os.getenv("APIFY_API_KEY")
+    api_key = os.getenv("SERPAPI_KEY")
     
     if api_key:
-        print("[OK] APIFY_API_KEY: Configured")
-        print("     -> Facebook Ads scraping enabled")
+        print("[OK] SERPAPI_KEY: Configured")
+        print("     -> Google Ads scraping enabled")
+        print("     -> Uses same key as local_intel")
     else:
-        print("[X] APIFY_API_KEY: Not configured")
-        print("    -> Set APIFY_API_KEY for Facebook ad scraping")
-        print("    -> Get key: https://apify.com (free $5/month)")
+        print("[X] SERPAPI_KEY: Not configured")
+        print("    -> Set SERPAPI_KEY for Google Ads scraping")
+        print("    -> Get key: https://serpapi.com (100 free/month)")
     
     print("="*50 + "\n")
 
@@ -103,10 +105,11 @@ def main():
         check_config()
         return 0
     
-    # Check for API key
-    if not os.getenv("APIFY_API_KEY"):
-        print("Error: APIFY_API_KEY not set in environment")
-        print("Get one at: https://apify.com (free $5/month credits)")
+    # Check for API key (uses same SerpAPI key as local_intel)
+    if not os.getenv("SERPAPI_KEY"):
+        print("Error: SERPAPI_KEY not set in environment")
+        print("Get one at: https://serpapi.com (100 free searches/month)")
+        print("This is the same key used by local_intel")
         print("\nRun with --check-config to see configuration status")
         return 1
     

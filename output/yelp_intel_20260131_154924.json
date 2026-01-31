@@ -1,0 +1,226 @@
+{
+  "business_type": "plumber",
+  "location": "Providence, RI",
+  "businesses_analyzed": 5,
+  "total_reviews_analyzed": 56,
+  "avg_rating": 4.05,
+  "rating_distribution": {
+    "1": 13,
+    "2": 0,
+    "3": 0,
+    "4": 1,
+    "5": 42
+  },
+  "businesses": [
+    {
+      "place_id": "SiZdQWpNoMDSUs0FbuYuuA",
+      "name": "Addessi Plumbing",
+      "link": "https://www.yelp.com/biz/addessi-plumbing-providence-2?osq=plumber&amp;override_cta=Get+pricing+%26+availability",
+      "rating": 5.0,
+      "review_count": 29,
+      "categories": [
+        "Plumbing"
+      ],
+      "price": null,
+      "neighborhood": "DownCity",
+      "phone": null,
+      "snippet": "Jim came out and did a great job taking care of all the plumbing issues.",
+      "service_options": {}
+    },
+    {
+      "place_id": "FpdXmNQJ3q-YlPdJV-kw2g",
+      "name": "Stonelink Plumbing & Heating",
+      "link": "https://www.yelp.com/biz/stonelink-plumbing-and-heating-rumford-2?osq=plumber&amp;override_cta=Get+pricing+%26+availability",
+      "rating": 4.8,
+      "review_count": 5,
+      "categories": [
+        "Plumbing",
+        "Heating & Air Conditioning/HVAC",
+        "Water Heater Installation/Repair"
+      ],
+      "price": null,
+      "neighborhood": null,
+      "phone": null,
+      "snippet": "If you want to be treated well and have your plumbing problems resolved in a fast, professional...",
+      "service_options": {}
+    },
+    {
+      "place_id": "iArNBJ0RXokIxPxQPYXn6w",
+      "name": "Roto-Rooter Plumbing & Water Cleanup",
+      "link": "https://www.yelp.com/biz/roto-rooter-plumbing-and-water-cleanup-providence?osq=plumber&amp;override_cta=Get+pricing+%26+availability",
+      "rating": 3.2,
+      "review_count": 138,
+      "categories": [
+        "Plumbing",
+        "Damage Restoration",
+        "Water Heater Installation/Repair"
+      ],
+      "price": null,
+      "neighborhood": "South Elmwood",
+      "phone": null,
+      "snippet": "They left the area clean and neat. Of course, quick plumbing service comes at a price.",
+      "service_options": {}
+    },
+    {
+      "place_id": "tWpDegqI6G6PvCcbgUQ8tg",
+      "name": "Wood’s Rooter Service",
+      "link": "https://www.yelp.com/biz/woods-rooter-service-east-providence-4?osq=plumber&amp;override_cta=Get+pricing+%26+availability",
+      "rating": 4.7,
+      "review_count": 57,
+      "categories": [
+        "Plumbing",
+        "Hydro-jetting"
+      ],
+      "price": null,
+      "neighborhood": null,
+      "phone": null,
+      "snippet": "Outstanding company to work with. I had a non urgent plumbing issue but still called around on...",
+      "service_options": {}
+    },
+    {
+      "place_id": "kfMaLTbF0BZCXgOKU7cNXg",
+      "name": "The Drain Pro",
+      "link": "https://www.yelp.com/biz/the-drain-pro-providence?osq=plumber&amp;override_cta=Get+pricing+%26+availability",
+      "rating": 5.0,
+      "review_count": 8,
+      "categories": [
+        "Plumbing"
+      ],
+      "price": null,
+      "neighborhood": "Charles",
+      "phone": null,
+      "snippet": "I will 100% call Joe again for any plumbing needs - and I confidently share his information with...",
+      "service_options": {}
+    }
+  ],
+  "insights": {
+    "pain_points": [
+      "didn't",
+      "never",
+      "unprofessional",
+      "terrible",
+      "don't",
+      "rude",
+      "late",
+      "wrong",
+      "scam",
+      "no-show",
+      "dirty",
+      "disgusting",
+      "gross",
+      "disappointed"
+    ],
+    "pain_point_quotes": [
+      "I bet you are having issues loading info. plumbing great. paid in full. now it is time to fuck my insurance company with a 18 grand + bill to slap a sheet of drywall up. I WANT OUT. Bait and switch bi",
+      "They quoted $750 for a 1 hour job of replacing the garbage disposal with the same exact unit.   The tech went into his truck to \"negotiate for me\" and came back and did $550 was the best they could do",
+      "Complete scam told me I needed to dig up my yard and replace the pipes and it was going to cost minimum $10k. I got a second opinion and the next plumber fixed the issue in 30 minutes for $300.",
+      "If I could give zero stars I would. I called yesterday morning when I found water in my basement. Was given 9-3 window for service with a call/text 30 mins prior. i called at 315 to check when I heard",
+      "I called to have a flange replaced and the tech quoted me $800 just for the flange. He saw my eyes bulge and said that since I would be installing the new toilet myself, he could do it for $500. I tha",
+      "Price gouging. More then double the price of other similar businesses. Will take advantage of any bad situation.",
+      "The estimated cost of the project we needed done was outrageous!  They wanted to charge me almost twice the average price of the job.",
+      "The service request was poor. They reached out and communicated they will call back to provide a quote and never did. Sent pictures and videos of the area I needed service on (which was asked for) and",
+      "I can't say much about the service. I tried scheduling a call, which I never received, and then I reached out to set up an in-home visit. The person I spoke with seemed knowledgeable and I was looking"
+    ],
+    "praise_points": [
+      "recommend",
+      "quick",
+      "professional",
+      "highly recommend",
+      "fair",
+      "friendly",
+      "honest",
+      "reasonable",
+      "fast",
+      "excellent",
+      "clean",
+      "best",
+      "helpful",
+      "on time",
+      "above and beyond"
+    ],
+    "praise_quotes": [
+      "Quick to respond and very helpful and informative; explains everything and prides himself on quality parts and workmanship. Highly recommended and will be using for all future plumbing needs.",
+      "Jim's come out and done a few jobs for us, great communicator, does excellent work, cleans up and is reasonably priced. He did a job for us one day and came back a couple of days later when our water ",
+      "Great value and well done, thank you so much Jim! Highly recommended and expertise plumber.",
+      "Jim installed a new hot water heater in our home (and got rid of the old one) on short notice and at a fair price. He was also very clear about our options, communicated what was going on during the w",
+      "Jim did a great job.  He removed & then installed 3 new toilets as well as hooking up a bathroom shower and 2 separate vanities. He shows up on time and has a friendly, down-to-earth personality.  He ",
+      "I called Jim to replace a broken, leaking outside faucet that could damage my gas meter. He responded quickly, was able to come out less than 2 days later. He charged a reasonable fee and was done ver",
+      "i call in the morning and he actually answered the phone. he was able to come to  see the problem I was having that afternoon. he fixed it in an hour. \nvery pleasant and courteous",
+      "Stonelink Plumbing saved the day, responding to an emergency situation with speed and perfection. They are my guys forever.\nDonna U :)",
+      "Stonelink Plumbing and Heating provided exceptional service. I called them about an issue, and they responded promptly. Tim visited the next day, quickly diagnosed the problem, and provided an estimat",
+      "Matt was very helpful they had him come out within an hour of the initial call. He was able to troubleshoot the issue I had with the shower and washer machine drain and got it cleared."
+    ],
+    "themes": [
+      "quality",
+      "timeliness",
+      "communication",
+      "pricing",
+      "professionalism",
+      "expertise",
+      "cleanliness",
+      "reliability"
+    ],
+    "customer_phrases": [
+      "highly recommend",
+      "very professional",
+      "on time",
+      "highly recommended",
+      "very helpful",
+      "fair price",
+      "would definitely use",
+      "great value",
+      "would recommend",
+      "extremely rude",
+      "best the drain has ever",
+      "would use",
+      "extremely professional",
+      "saved us hundreds",
+      "really helpful",
+      "will use again",
+      "so fast"
+    ],
+    "questions": [
+      "And I think affordable?",
+      "Did I have to worry about that?"
+    ],
+    "price_mentions": [
+      "And the cost of remediation was high, very high",
+      "Anytime you're dealing with plumbing, you know that it could go badly either in terms of what you need or how much it's going to cost",
+      "They charge the same for Sunday night as they would for Monday morning",
+      "Complete scam told me I needed to dig up my yard and replace the pipes and it was going to cost minimum $10k",
+      "Jim's come out and done a few jobs for us, great communicator, does excellent work, cleans up and is reasonably priced",
+      "Got the job done for an awesome price",
+      "Jim installed a new hot water heater in our home (and got rid of the old one) on short notice and at a fair price",
+      "It did cost about $90 just to get the system looked at which I was not expecting at the time",
+      "Problem solved at no charge",
+      "I got a second opinion and the next plumber fixed the issue in 30 minutes for $300"
+    ]
+  },
+  "ad_suggestions": {
+    "hooks": [
+      "Fair, transparent pricing - no surprises",
+      "On time, every time - we respect your schedule",
+      "Quality work that lasts",
+      "We answer your calls and keep you informed",
+      "Professional service from start to finish"
+    ],
+    "headlines": [
+      "Top-Rated Plumber in Your Area",
+      "Your Trusted Local Plumber",
+      "Professional Plumber Services",
+      "Fast, Reliable Plumber Service",
+      "Quality Plumber Work at Fair Prices"
+    ],
+    "pain_point_hooks": [
+      "Tired of unprofessional plumbers?"
+    ],
+    "trust_signals": [
+      "Highly Recommended by Customers",
+      "Quick Response Time",
+      "Licensed & Professional Service"
+    ],
+    "differentiators": [
+      "Emphasize reliability - customers want dependable service"
+    ]
+  }
+}

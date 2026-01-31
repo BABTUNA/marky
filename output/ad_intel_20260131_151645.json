@@ -1,0 +1,48 @@
+{
+  "business_type": "plumber",
+  "location": "Providence, RI",
+  "search_query": "plumber Providence, RI",
+  "competitors_found": 0,
+  "total_ads_analyzed": 0,
+  "competitor_ads": [],
+  "patterns": {
+    "hook_types": [],
+    "cta_types": [],
+    "offer_types": [],
+    "media_distribution": {},
+    "themes": [],
+    "trust_signals": []
+  },
+  "hook_suggestions": [
+    "Still searching for a reliable plumber?",
+    "What if your plumber actually showed up on time?",
+    "Ready to stop dealing with overpriced plumbers?"
+  ],
+  "headline_suggestions": [],
+  "cta_suggestions": [
+    "Call Now",
+    "Get Free Quote",
+    "Book Online",
+    "Schedule Today",
+    "Learn More",
+    "Get Started"
+  ],
+  "creative_suggestions": [
+    "Image ads are common - video could stand out",
+    "Show real team members for trust",
+    "Include before/after photos if applicable",
+    "Add customer testimonial overlay",
+    "Show your branded vehicle/uniform"
+  ],
+  "messaging_gaps": [
+    "No one emphasizes: emergency/24-7 service",
+    "No one emphasizes: eco-friendly",
+    "No one emphasizes: senior discounts",
+    "No one emphasizes: financing available",
+    "No one emphasizes: same-day service",
+    "No one emphasizes: upfront pricing",
+    "No one emphasizes: background-checked",
+    "No one emphasizes: women-owned"
+  ],
+  "generated_at": "2026-01-31T15:16:45.463887"
+}

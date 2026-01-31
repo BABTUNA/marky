@@ -1,0 +1,148 @@
+{
+  "business_type": "plumber",
+  "location": "Providence, RI",
+  "search_query": "plumber Providence, RI",
+  "competitors_found": 3,
+  "total_ads_analyzed": 4,
+  "competitor_ads": [
+    {
+      "page_name": "Roto-Rooter Plumbing & Water Cleanup",
+      "total_ads": 2,
+      "active_ads": 2,
+      "common_ctas": [
+        "Call Now"
+      ],
+      "common_hooks": [],
+      "media_mix": {
+        "local": 2
+      },
+      "sample_ads": [
+        {
+          "ad_text": "Plumbers | Serves Providence | Open 24 hours | 91+ years in business | Accepts urgent jobs | BBB Accredited A+ rated",
+          "headline": "Roto-Rooter Plumbing & Water Cleanup",
+          "call_to_action": "Call Now",
+          "media_type": "local"
+        },
+        {
+          "ad_text": "Plumbers | Serves Providence | Open 24/7 | 91+ years in business | Accepts urgent jobs | Free in-home estimate",
+          "headline": "Roto-Rooter Plumbing & Water Cleanup",
+          "call_to_action": "Call Now",
+          "media_type": "local"
+        }
+      ]
+    },
+    {
+      "page_name": "Mr. Rooter of Rhode Island",
+      "total_ads": 1,
+      "active_ads": 1,
+      "common_ctas": [
+        "Call Now"
+      ],
+      "common_hooks": [],
+      "media_mix": {
+        "local": 1
+      },
+      "sample_ads": [
+        {
+          "ad_text": "Plumbers | Serves Providence | Open 24 hours | 43+ years in business | Flat rate pricing | Accepts urgent jobs",
+          "headline": "Mr. Rooter of Rhode Island",
+          "call_to_action": "Call Now",
+          "media_type": "local"
+        }
+      ]
+    },
+    {
+      "page_name": "Top Champ Plumbing LLC",
+      "total_ads": 1,
+      "active_ads": 1,
+      "common_ctas": [
+        "Call Now"
+      ],
+      "common_hooks": [],
+      "media_mix": {
+        "local": 1
+      },
+      "sample_ads": [
+        {
+          "ad_text": "Plumbers | Serves Providence | Open now | 2+ years in business | Free consultation | Local business",
+          "headline": "Top Champ Plumbing LLC",
+          "call_to_action": "Call Now",
+          "media_type": "local"
+        }
+      ]
+    }
+  ],
+  "patterns": {
+    "hook_types": [],
+    "cta_types": [
+      {
+        "type": "Call Now",
+        "frequency": 4,
+        "percentage": 100.0
+      }
+    ],
+    "offer_types": [
+      {
+        "type": "free offer",
+        "frequency": 2
+      }
+    ],
+    "media_distribution": {
+      "local": 100.0
+    },
+    "themes": [
+      "4.8 stars",
+      "4.9 stars",
+      "2+ years in business",
+      "1000 reviews",
+      "3000 reviews",
+      "91+ years in business",
+      "5.0 stars",
+      "43+ years in business",
+      "77 reviews"
+    ],
+    "trust_signals": [
+      "4.8 stars",
+      "3000 reviews",
+      "91+ years in business",
+      "4.9 stars",
+      "1000 reviews",
+      "43+ years in business",
+      "5.0 stars",
+      "77 reviews",
+      "2+ years in business"
+    ]
+  },
+  "hook_suggestions": [
+    "Still searching for a reliable plumber?",
+    "What if your plumber actually showed up on time?",
+    "Ready to stop dealing with overpriced plumbers?"
+  ],
+  "headline_suggestions": [],
+  "cta_suggestions": [
+    "Call Now",
+    "Get Free Quote",
+    "Book Online",
+    "Schedule Today",
+    "Learn More",
+    "Get Started"
+  ],
+  "creative_suggestions": [
+    "Image ads are common - video could stand out",
+    "Show real team members for trust",
+    "Include before/after photos if applicable",
+    "Add customer testimonial overlay",
+    "Show your branded vehicle/uniform"
+  ],
+  "messaging_gaps": [
+    "No one emphasizes: emergency/24-7 service",
+    "No one emphasizes: eco-friendly",
+    "No one emphasizes: senior discounts",
+    "No one emphasizes: financing available",
+    "No one emphasizes: same-day service",
+    "No one emphasizes: upfront pricing",
+    "No one emphasizes: background-checked",
+    "No one emphasizes: women-owned"
+  ],
+  "generated_at": "2026-01-31T15:20:02.948066"
+}

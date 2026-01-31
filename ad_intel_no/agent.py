@@ -1,6 +1,6 @@
 """
 Ad Intelligence Agent.
-Analyzes competitor Facebook ads to extract strategies and patterns.
+Analyzes competitor Google Ads (paid search) to extract strategies and patterns.
 """
 
 import json
@@ -12,22 +12,24 @@ from typing import List, Optional, Dict, Any
 from collections import Counter
 
 from .models import AdData, CompetitorAds, AdPatterns, AdAnalysis
-from .scraper import FacebookAdsScraper
+from .scraper import GoogleAdsScraper
 
 
 class AdIntelAgent:
     """
     Ad Intelligence Agent.
     
-    Scrapes and analyzes competitor Facebook ads to extract:
-    - Hook patterns
-    - CTA strategies
-    - Creative formats
+    Scrapes and analyzes competitor Google Ads to extract:
+    - Hook patterns (headlines)
+    - Ad copy strategies
+    - Trust signals
     - Messaging themes
+    
+    Uses SerpAPI (same key as local_intel).
     """
     
     def __init__(self, api_key: Optional[str] = None):
-        self.scraper = FacebookAdsScraper(api_key)
+        self.scraper = GoogleAdsScraper(api_key)
     
     def analyze_market(
         self,
@@ -57,35 +59,40 @@ class AdIntelAgent:
         
         start_time = time.time()
         
-        # Build search queries
+        # Build search queries (local-focused for Google Ads)
         search_terms = [
             f"{business_type} {location}",
             f"{business_type} near me",
+            f"best {business_type} {location}",
         ]
         if additional_terms:
             search_terms.extend(additional_terms)
         
-        # Step 1: Scrape ads
-        print("Step 1: Scraping Facebook Ads Library...")
+        # Step 1: Scrape Google Ads
+        print("Step 1: Scraping Google Paid Ads (via SerpAPI)...")
         all_ads: List[AdData] = []
+        
+        # Calculate ads per query (minimum 5 to get useful results)
+        ads_per_query = max(5, max_ads // len(search_terms))
         
         for term in search_terms:
             print(f"  Searching: '{term}'...")
             ads = self.scraper.search_ads(
                 search_term=term,
-                max_ads=max_ads // len(search_terms),
+                location=location,
+                max_ads=ads_per_query,
             )
             print(f"    Found {len(ads)} ads")
             all_ads.extend(ads)
-            time.sleep(1)  # Rate limiting
+            time.sleep(0.5)  # Rate limiting for SerpAPI
         
         print(f"\n  Total ads found: {len(all_ads)}")
         
         if not all_ads:
-            print("\n  No ads found. This could mean:")
-            print("  - No active ads in this market")
-            print("  - Apify credits exhausted")
-            print("  - Search terms too specific")
+            print("\n  No paid ads found. This could mean:")
+            print("  - No competitors running Google Ads")
+            print("  - Search terms need adjustment")
+            print("  - Try broader terms like 'plumbing services'")
         
         # Step 2: Group by advertiser
         print("\nStep 2: Grouping by advertiser...")
