@@ -1,0 +1,15 @@
+{
+    "total_messages": 1,
+    "conversations": {
+        "agent1qg5waf2l44g6pnp0rwrjek8x6c7l3yfmd5h5flr72j3c70tzddw5cd5dppf": [
+            {
+                "role": "user",
+                "text": "@agent1qwtzk6mngzpw2qwqgj2llje4ldf6n6thdnuk6ff9yk7k6yket26xcjvs4lz hello"
+            },
+            {
+                "role": "model",
+                "text": "✅ Message confirmed! I received: '@agent1qwtzk6mngzpw2qwqgj2llje4ldf6n6thdnuk6ff9yk7k6yket26xcjvs4lz hello'\n\nMessage count: 1"
+            }
+        ]
+    }
+}

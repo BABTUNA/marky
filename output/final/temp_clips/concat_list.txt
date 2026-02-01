@@ -1,0 +1,5 @@
+file '/Users/tomalmog/programming/Febuary 2026/Brown/output/final/temp_clips/clip_01.mp4'
+file '/Users/tomalmog/programming/Febuary 2026/Brown/output/final/temp_clips/clip_02.mp4'
+file '/Users/tomalmog/programming/Febuary 2026/Brown/output/final/temp_clips/clip_03.mp4'
+file '/Users/tomalmog/programming/Febuary 2026/Brown/output/final/temp_clips/clip_04.mp4'
+file '/Users/tomalmog/programming/Febuary 2026/Brown/output/final/temp_clips/clip_05.mp4'

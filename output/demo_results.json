@@ -1,0 +1,331 @@
+{
+  "research": {
+    "industry": "food",
+    "product": "artisan coffee shop",
+    "top_videos": [
+      {
+        "title": "Vermont Artisan Coffee &amp; Tea Commercial",
+        "channel": "NSBVT",
+        "description": "Vermont Artisan Coffee & Tea grows with an impressive new headquarters.",
+        "url": "https://www.youtube.com/watch?v=w128Xp5i_CQ",
+        "thumbnail": "https://i.ytimg.com/vi/w128Xp5i_CQ/hqdefault.jpg"
+      },
+      {
+        "title": "Winks Organic Coffee &amp; Tea Youtube Ad, Specialty Coffee, Artisan Coffee",
+        "channel": "winkscoffee",
+        "description": "The freshest specialty coffee on the internet. Pulled and roasted when you order it, then shipped priority mail to your door.",
+        "url": "https://www.youtube.com/watch?v=Bj99vT2Wsnc",
+        "thumbnail": "https://i.ytimg.com/vi/Bj99vT2Wsnc/hqdefault.jpg"
+      },
+      {
+        "title": "Best coffee shop in Ahmedabad Gujarat | Roastea, Nexus Ahmedabad One",
+        "channel": "Roastea ",
+        "description": "You love coffee and your date loves chai? \u2615\ufe0f Where do you go Any of the Roastea outlets :) #Roastea #ahmedabadfood ...",
+        "url": "https://www.youtube.com/watch?v=iQP8cqCO0UM",
+        "thumbnail": "https://i.ytimg.com/vi/iQP8cqCO0UM/hqdefault.jpg"
+      },
+      {
+        "title": "From Bean to Brew \u2013 The Miniature Magic of Cothas UAE!",
+        "channel": "Cothas Coffee",
+        "description": "Watch tiny coffee artisans bring the bold Cothas flavor to life \u2013 from harvesting to roasting, grinding to brewing. Big taste, crafted in ...",
+        "url": "https://www.youtube.com/watch?v=3RypLt_EzsE",
+        "thumbnail": "https://i.ytimg.com/vi/3RypLt_EzsE/hqdefault.jpg"
+      }
+    ],
+    "patterns_identified": {
+      "common_hooks": [
+        "Slow motion taste shots",
+        "Customer reaction compilation",
+        "Chef preparing the meal",
+        "Steam/Sizzle sound design"
+      ],
+      "visual_styles": [
+        "High contrast lighting",
+        "Fast paced editing (cuts every 3s)",
+        "Text overlays for key benefits"
+      ],
+      "effective_ctas": [
+        "Click the link below",
+        "Limited time offer",
+        "Try it risk-free"
+      ],
+      "recommended_approach": {
+        "tone": "authentic_and_energetic",
+        "structure": "Hook -> Problem -> Solution -> Social Proof -> CTA"
+      }
+    },
+    "source": "youtube_api"
+  },
+  "location_scout": {
+    "locations": [
+      {
+        "name": "L'Artisan Cafe & Bakery",
+        "address": "15 Point St, Providence, RI 02903, United States",
+        "rating": 4.3,
+        "type": "location",
+        "price_level": "Moderate ($100-200/hr)",
+        "place_id": "ChIJo91-qkVF5IkRl65MD835g_E"
+      },
+      {
+        "name": "Artisan Bites at the Arcade",
+        "address": "65 Weybosset St Unit 118/119, Providence, RI 02903, United States",
+        "rating": "N/A",
+        "type": "location",
+        "price_level": "Contact for pricing",
+        "place_id": "ChIJlYPAFxhF5IkRi9e8iLZSaa8"
+      },
+      {
+        "name": "The Patio on Broadway - Providence",
+        "address": "166 Broadway, Providence, RI 02903, United States",
+        "rating": 4.7,
+        "type": "location",
+        "price_level": "Moderate ($100-200/hr)",
+        "place_id": "ChIJGZlg4zBF5IkRl0TOlIuxCmU"
+      },
+      {
+        "name": "Bayberry Garden Restaurant",
+        "address": "225 Dyer St, Providence, RI 02903, United States",
+        "rating": 4.6,
+        "type": "location",
+        "price_level": "Moderate ($100-200/hr)",
+        "place_id": "ChIJMY2LHelF5IkRiQthCiuPJtI"
+      },
+      {
+        "name": "Mare Rooftop",
+        "address": "229 Waterman St, Providence, RI 02906, United States",
+        "rating": 4.3,
+        "type": "location",
+        "price_level": "Premium ($200-400/hr)",
+        "place_id": "ChIJmw4TJixF5IkRyMHiQI-dsSw"
+      },
+      {
+        "name": "Urban Greens Co-op Market",
+        "address": "93 Cranston St, Providence, RI 02907, United States",
+        "rating": 4.6,
+        "type": "location",
+        "price_level": "Contact for pricing",
+        "place_id": "ChIJAQDthJxF5IkR0pSmrhhYc5c"
+      }
+    ],
+    "city": "Providence, RI",
+    "search_queries": [
+      "artisan coffee shop location Providence, RI",
+      "outdoor dining area Providence, RI",
+      "food market Providence, RI",
+      "park with food trucks Providence, RI"
+    ],
+    "tips": [
+      "Always get written permission before filming",
+      "Check if location requires permits or insurance",
+      "Scout locations at the same time of day you plan to film",
+      "Consider parking and power outlet availability",
+      "Ensure kitchen access for food shots",
+      "Check health permit requirements"
+    ]
+  },
+  "trend_analyzer": {
+    "analysis": {
+      "recommended_hook": "Slow motion shot of a barista expertly pouring steamed milk into a cup of coffee, with a focus on the creamy texture and the sound of the pour",
+      "ad_structure": [
+        {
+          "time": "0-3s",
+          "element": "Hook",
+          "description": "Slow motion shot of a barista pouring steamed milk into a cup of coffee"
+        },
+        {
+          "time": "3-6s",
+          "element": "Problem/Setup",
+          "description": "Quick cuts of busy mornings, long lines, and mediocre coffee to highlight the problem of a rushed and unsatisfying coffee experience"
+        },
+        {
+          "time": "6-10s",
+          "element": "Introduction to Solution",
+          "description": "Cut to a shot of the artisan coffee shop, with a warm and inviting atmosphere, and a barista carefully crafting a cup of coffee"
+        },
+        {
+          "time": "10-15s",
+          "element": "Key Benefits",
+          "description": "Text overlays highlighting the unique benefits of the coffee shop, such as 'Small-batch roasted beans' and 'Expertly crafted pour-overs'"
+        },
+        {
+          "time": "15-20s",
+          "element": "Customer Reaction",
+          "description": "Compilation of happy customers taking their first sips and reacting with delight"
+        },
+        {
+          "time": "20-25s",
+          "element": "Unique Selling Point",
+          "description": "Shot of the coffee shop's unique feature, such as a vintage coffee roaster or a coffee cupping session"
+        },
+        {
+          "time": "25-30s",
+          "element": "Call-to-Action",
+          "description": "Text overlay with a limited-time offer, such as 'Get 10% off your first purchase' and a call-to-action to visit the coffee shop"
+        }
+      ],
+      "visual_style": "High contrast lighting with a mix of warm and cool tones to create a cozy and inviting atmosphere, and fast-paced editing with cuts every 2-3 seconds to keep the energy high",
+      "audio_approach": "A combination of indie-folk music and sound design elements, such as the sound of steaming milk and pouring coffee, to create a sensory experience",
+      "key_messages": [
+        "Expertly crafted coffee made with love and care",
+        "Unique and high-quality coffee experience",
+        "Cozy and inviting atmosphere perfect for relaxing and socializing"
+      ],
+      "cta": "Visit us today and get 10% off your first purchase with code COFFEELOVE",
+      "unique_angle": "Highlighting the human touch and care that goes into crafting each cup of coffee, and the unique experience of visiting a specialty coffee shop",
+      "warnings": [
+        "Avoid using overly promotional language or focusing too much on price",
+        "Don't use low-quality footage or poor sound design, as it can detract from the overall experience",
+        "Be mindful of the pacing and editing, as a slow or disjointed ad can lose the viewer's attention"
+      ]
+    },
+    "product": "artisan coffee shop",
+    "industry": "food",
+    "target_duration": 30,
+    "tone": "friendly"
+  },
+  "script_writer": {
+    "script": "---\nSCENE 1 (0-5s): [HOOK]\nVisual: Slow motion shot of a barista's hands expertly pouring steamed milk into a cup of coffee, with a close-up of the creamy texture and a shallow depth of field to blur the background. The camera angle is directly above the cup, with a slight Dutch angle to add dynamism.\nAudio: Soft, indie-folk music starts playing, with a gentle acoustic guitar melody and a subtle coffee shop ambiance (e.g., gentle chatter, cups clinking) in the background.\nVoiceover: \"The perfect cup of coffee, crafted with love...\"\n\nSCENE 2 (5-10s): [SETUP]\nVisual: Quick cuts of busy mornings: a crowded street, a long line at a coffee shop, a person hastily drinking coffee on-the-go. The shots are fast-paced, with a mix of close-ups and wide shots, and a slightly desaturated color palette to convey a sense of monotony.\nAudio: The music and ambiance continue from the previous scene, but with a slightly more frantic and rushed feel.\nVoiceover: \"We've all been there - rushed, mediocre coffee, just to get us going.\"\n\nSCENE 3 (10-15s): [SOLUTION/PRODUCT]\nVisual: Cut to a warm and inviting shot of the artisan coffee shop, with a cozy atmosphere, comfortable seating, and plenty of natural light. The camera pans across the shop, showing customers relaxing and socializing, before focusing on a barista carefully crafting a cup of coffee.\nAudio: The music and ambiance transition to a warmer, more welcoming tone, with a subtle hiss of steam and gentle chatter in the background.\nVoiceover: \"But what if your coffee was more than just a rush?\"\n\nSCENE 4 (15-22s): [PROOF/BENEFITS]\nVisual: Text overlays appear on screen, highlighting the unique benefits of the coffee shop, such as 'Small-batch roasted beans' and 'Expertly crafted pour-overs'. The text is displayed in a clean, modern font, with a subtle animation to draw attention. The camera cuts to a compilation of happy customers taking their first sips and reacting with delight, with a mix of close-ups and wide shots to create a sense of intimacy and community.\nAudio: The music and ambiance continue, with a subtle increase in energy and warmth.\nVoiceover: \"At our shop, we're dedicated to crafting each cup with care...\"\n\nSCENE 5 (22-30s): [CTA]\nVisual: Text overlay appears on screen, with a limited-time offer: 'Get 10% off your first purchase with code COFFEELOVE'. The text is displayed in a prominent, easy-to-read font, with a subtle call-to-action to visit the coffee shop. The camera cuts to a shot of the coffee shop's exterior, with a warm and inviting glow, and a subtle motion to encourage the viewer to take action.\nAudio: The music and ambiance reach a warm, inviting conclusion, with a final subtle chime to signal the call-to-action.\nVoiceover: \"Visit us today, and taste the love in every cup. Use code COFFEELOVE for 10% off your first purchase!\"",
+    "scenes": [
+      {
+        "scene_number": 1,
+        "timing": "0-5s",
+        "title": "HOOK",
+        "visual": "Slow motion shot of a barista's hands expertly pouring steamed milk into a cup of coffee, with a close-up of the creamy texture and a shallow depth of field to blur the background. The camera angle is directly above the cup, with a slight Dutch angle to add dynamism.",
+        "audio": "Soft, indie-folk music starts playing, with a gentle acoustic guitar melody and a subtle coffee shop ambiance (e.g., gentle chatter, cups clinking) in the background.",
+        "voiceover": "The perfect cup of coffee, crafted with love..."
+      },
+      {
+        "scene_number": 2,
+        "timing": "5-10s",
+        "title": "SETUP",
+        "visual": "Quick cuts of busy mornings: a crowded street, a long line at a coffee shop, a person hastily drinking coffee on-the-go. The shots are fast-paced, with a mix of close-ups and wide shots, and a slightly desaturated color palette to convey a sense of monotony.",
+        "audio": "The music and ambiance continue from the previous scene, but with a slightly more frantic and rushed feel.",
+        "voiceover": "We've all been there - rushed, mediocre coffee, just to get us going."
+      },
+      {
+        "scene_number": 3,
+        "timing": "10-15s",
+        "title": "SOLUTION/PRODUCT",
+        "visual": "Cut to a warm and inviting shot of the artisan coffee shop, with a cozy atmosphere, comfortable seating, and plenty of natural light. The camera pans across the shop, showing customers relaxing and socializing, before focusing on a barista carefully crafting a cup of coffee.",
+        "audio": "The music and ambiance transition to a warmer, more welcoming tone, with a subtle hiss of steam and gentle chatter in the background.",
+        "voiceover": "But what if your coffee was more than just a rush?"
+      },
+      {
+        "scene_number": 4,
+        "timing": "15-22s",
+        "title": "PROOF/BENEFITS",
+        "visual": "Text overlays appear on screen, highlighting the unique benefits of the coffee shop, such as 'Small-batch roasted beans' and 'Expertly crafted pour-overs'. The text is displayed in a clean, modern font, with a subtle animation to draw attention. The camera cuts to a compilation of happy customers taking their first sips and reacting with delight, with a mix of close-ups and wide shots to create a sense of intimacy and community.",
+        "audio": "The music and ambiance continue, with a subtle increase in energy and warmth.",
+        "voiceover": "At our shop, we're dedicated to crafting each cup with care..."
+      },
+      {
+        "scene_number": 5,
+        "timing": "22-30s",
+        "title": "CTA",
+        "visual": "Text overlay appears on screen, with a limited-time offer: 'Get 10% off your first purchase with code COFFEELOVE'. The text is displayed in a prominent, easy-to-read font, with a subtle call-to-action to visit the coffee shop. The camera cuts to a shot of the coffee shop's exterior, with a warm and inviting glow, and a subtle motion to encourage the viewer to take action.",
+        "audio": "The music and ambiance reach a warm, inviting conclusion, with a final subtle chime to signal the call-to-action.",
+        "voiceover": "Visit us today, and taste the love in every cup. Use code COFFEELOVE for 10% off your first purchase!"
+      }
+    ],
+    "voiceover_text": "The perfect cup of coffee, crafted with love... We've all been there - rushed, mediocre coffee, just to get us going. But what if your coffee was more than just a rush? At our shop, we're dedicated to crafting each cup with care... Visit us today, and taste the love in every cup. Use code COFFEELOVE for 10% off your first purchase!",
+    "scene_count": 5,
+    "estimated_duration": 30
+  },
+  "voiceover": {
+    "audio_path": "output/voiceovers/voiceover_artisan_coffee_shop_30s.mp3",
+    "audio_url": "output/voiceovers/voiceover_artisan_coffee_shop_30s.mp3",
+    "duration": 24.8,
+    "character_count": 333,
+    "voice_id": "EXAVITQu4vr4xnSDxMaL",
+    "text_preview": "The perfect cup of coffee, crafted with love... We've all been there - rushed, mediocre coffee, just..."
+  },
+  "music": {
+    "suggestions": "1. PRIMARY RECOMMENDATION:\n- Genre: Acoustic/Folk\n- Tempo: 100-120 BPM\n- Mood: Warm, Inviting, Uplifting\n- Instruments: Acoustic guitar, piano, subtle strings\n- Search terms: \"acoustic folk background music\", \"coffee shop music\", \"upbeat instrumental\"\n- Example track style: A gentle, finger-picked acoustic guitar melody accompanied by a soft piano harmony, building into a lively and uplifting rhythm with subtle string additions.\n\n2. ALTERNATIVE OPTIONS:\n- Option A: Indie Pop - A bright and cheerful tune with a mix of acoustic and electronic elements, perfect for a modern coffee shop vibe.\n- Option B: Jazz Instrumental - A smooth and sophisticated jazz track featuring saxophone or trumpet, creating a relaxing atmosphere for a high-end coffee experience.\n\n3. MUSIC STRUCTURE:\n- Intro (0-5s): Gentle, soft music to match the slow-motion shot of the barista, setting a calm tone.\n- Build (5-15s): As the scene cuts to busy mornings, the music gradually builds in energy and tempo, introducing more instruments to create a sense of movement.\n- Peak (15-22s): The music reaches its peak as the scene cuts to the warm and inviting coffee shop, with a fuller and more uplifting sound to match the cozy atmosphere.\n- Outro (22-30s): The music slowly winds down, maintaining a warm and inviting tone, as the camera lingers on the coffee shop and the brand's message is conveyed.\n\n4. SPECIFIC TRACK SUGGESTIONS:\nSearch these terms on Pixabay Music or Mixkit:\n- \"acoustic background music for coffee shops\"\n- \"folk instrumental upbeat\"\n- \"warm and inviting music for commercials\"\n\nThese suggestions should provide a suitable background score for the artisan coffee shop commercial, creating a friendly and inviting atmosphere while highlighting the product and brand.",
+    "tone": "friendly",
+    "duration": 30,
+    "free_music_sources": [
+      {
+        "name": "Pixabay Music",
+        "url": "https://pixabay.com/music/"
+      },
+      {
+        "name": "Free Music Archive",
+        "url": "https://freemusicarchive.org/"
+      },
+      {
+        "name": "Mixkit",
+        "url": "https://mixkit.co/free-stock-music/"
+      },
+      {
+        "name": "YouTube Audio Library",
+        "url": "https://studio.youtube.com/channel/audio"
+      }
+    ],
+    "quick_recommendation": {
+      "genre": "Upbeat Corporate",
+      "search_terms": [
+        "upbeat background",
+        "commercial music",
+        "positive energy"
+      ],
+      "bpm": "100-120"
+    }
+  },
+  "audio_mixer": {
+    "mixed_audio_path": "output/mixed_audio/final_audio_artisan_coffee_shop_30s.mp3",
+    "voiceover_path": "output/voiceovers/voiceover_artisan_coffee_shop_30s.mp3",
+    "music_path": "output/mixed_audio/music_artisan_coffee_shop.mp3",
+    "duration": 30,
+    "music_genre": "Upbeat Corporate",
+    "music_bpm": "100-120",
+    "music_attribution": "Carefree by Kevin MacLeod",
+    "note": "Full audio track ready with voiceover and royalty-free music (CC-BY Kevin MacLeod)"
+  },
+  "cost_estimator": {
+    "total": 15000,
+    "breakdown": {
+      "talent": 2000,
+      "locations": 3000,
+      "equipment": 4000,
+      "props_wardrobe": 1000,
+      "food_craft": 1500,
+      "post_production": 3000,
+      "contingency": 1500
+    },
+    "assumptions": [
+      "Non-union talent with a daily rate of $200-$500",
+      "Indie production level with a crew size of 5-7 people",
+      "One-day shoot with a 10-hour duration"
+    ],
+    "budget_level": "medium",
+    "shoot_days": 1,
+    "crew_size": 6,
+    "actor_count": 10,
+    "tips": [
+      "Consider shooting during off-peak hours to reduce location fees",
+      "Use natural light to minimize lighting equipment costs",
+      "Negotiate with local coffee shops to use their location and reduce costs"
+    ]
+  },
+  "social_media": {
+    "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01kczs9netepk8422rqhdw1cvd` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99973, Requested 345. Please try again in 4m34.752s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+    "fallback": {
+      "platforms": [
+        "Instagram",
+        "Facebook",
+        "TikTok"
+      ],
+      "posting_times": [
+        "Mon-Fri 12pm-2pm",
+        "Wed-Thu 6pm-8pm"
+      ],
+      "hashtags": [
+        "#SmallBusiness",
+        "#LocalBusiness",
+        "#food"
+      ],
+      "caption": "Discover artisan coffee shop! Visit us today.",
+      "tip": "Post during peak engagement hours and use location tags"
+    }
+  }
+}
