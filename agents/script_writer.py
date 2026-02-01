@@ -53,7 +53,14 @@ class ScriptWriterAgent:
 
         try:
             prompt = self._build_prompt(
-                product, industry, duration, tone, city, trend_data, research_data, previous_results
+                product,
+                industry,
+                duration,
+                tone,
+                city,
+                trend_data,
+                research_data,
+                previous_results,
             )
 
             # Use the Groq client with automatic model fallback
@@ -85,7 +92,7 @@ class ScriptWriterAgent:
         research_data: dict,
         previous_results: dict,
     ) -> str:
-        """Build the script writing prompt with research and location data.\"""
+        """Build the script writing prompt with ALL research data."""
 
         analysis = trend_data.get("analysis", {})
 
@@ -102,25 +109,91 @@ class ScriptWriterAgent:
                 structure_text += f"- {item.get('time', '')}: {item.get('element', '')} - {item.get('description', '')}\n"
 
         location_ref = f" in {city}" if city else ""
-        
-        # Get enhanced research insights (YouTube + Google Ads)
+
+        # =============================================
+        # ENHANCED: Get ALL research insights
+        # =============================================
+
+        # Combined insights (already processed by EnhancedResearchAgent)
         research_insights = research_data.get("insights", [])
-        insights_text = "\n".join(f"- {insight}" for insight in research_insights[:5]) if research_insights else "- Focus on clear value proposition"
-        
-        # Get competitor hooks if available
+        insights_text = (
+            "\n".join(f"- {insight}" for insight in research_insights[:10])
+            if research_insights
+            else "- Focus on clear value proposition"
+        )
+
+        # Competitor hooks from Google Ads
         competitor_ads = research_data.get("competitor_ads", {})
         competitor_hooks = ""
         if competitor_ads:
             hooks = competitor_ads.get("hook_suggestions", [])[:3]
             if hooks:
-                competitor_hooks = "\nCOMPETITOR HOOKS (differentiate from these):\n" + "\n".join(f"- {hook}" for hook in hooks)
-        
+                competitor_hooks = (
+                    "\n\nCOMPETITOR HOOKS (differentiate from these):\n"
+                    + "\n".join(f"- {hook}" for hook in hooks)
+                )
+
+        # =============================================
+        # NEW: Customer Voice from Reviews
+        # =============================================
+        customer_voice_section = ""
+
+        # Google Reviews insights
+        google_reviews = research_data.get("google_reviews", {})
+        if google_reviews:
+            complaints = google_reviews.get("common_complaints", [])[:3]
+            praises = google_reviews.get("common_praises", [])[:3]
+
+            if complaints or praises:
+                customer_voice_section += "\n\nCUSTOMER VOICE (from real reviews):"
+                if complaints:
+                    customer_voice_section += "\nPain points to ADDRESS in the ad:"
+                    for c in complaints:
+                        customer_voice_section += f"\n  - Customers complain about: {c}"
+                if praises:
+                    customer_voice_section += "\nBenefits to HIGHLIGHT:"
+                    for p in praises:
+                        customer_voice_section += f"\n  - Customers love: {p}"
+
+        # Yelp insights
+        yelp_reviews = research_data.get("yelp_reviews", {})
+        if yelp_reviews:
+            loves = yelp_reviews.get("what_customers_love", [])[:2]
+            phrases = yelp_reviews.get("customer_phrases", [])[:2]
+
+            if loves:
+                customer_voice_section += "\n\nYelp customers especially value:"
+                for l in loves:
+                    customer_voice_section += f"\n  - {l}"
+            if phrases:
+                customer_voice_section += (
+                    "\nActual phrases customers use (incorporate naturally):"
+                )
+                for p in phrases:
+                    customer_voice_section += f'\n  - "{p}"'
+
+        # =============================================
+        # NEW: Keyword Trends
+        # =============================================
+        trends_section = ""
+        keyword_trends = research_data.get("keyword_trends", {})
+        if keyword_trends:
+            best_keywords = keyword_trends.get("best_keywords_for_ads", [])[:2]
+            seasonal = keyword_trends.get("seasonal_insights", [])[:1]
+
+            if best_keywords or seasonal:
+                trends_section = "\n\nKEYWORD TARGETING:"
+                if best_keywords:
+                    for kw in best_keywords:
+                        trends_section += f"\n  - {kw}"
+                if seasonal:
+                    trends_section += f"\n  - Seasonal insight: {seasonal[0]}"
+
         # Get location data for setting
         location_data = previous_results.get("location_scout", {})
         locations = location_data.get("locations", [])
         location_setting = ""
         if locations:
-            # Use first location as primary setting
             loc = locations[0]
             loc_name = loc.get("name", "")
             loc_type = loc.get("types", [""])[0] if loc.get("types") else ""
@@ -129,17 +202,25 @@ class ScriptWriterAgent:
 
         return f"""You are an award-winning advertising copywriter. Write a {duration}-second {tone} ad script for a {product}{location_ref}.
 
-RESEARCH INSIGHTS:
+RESEARCH INSIGHTS (USE THESE - they're based on real competitor analysis and customer reviews):
 {insights_text}
 - Recommended Hook: {recommended_hook}
 - Visual Style: {visual_style}
 - Key Messages: {", ".join(key_messages) if key_messages else "Highlight unique value"}
 - Call-to-Action: {cta}
 {competitor_hooks}
+{customer_voice_section}
+{trends_section}
 {location_setting}
 
 STRUCTURE GUIDANCE:
 {structure_text if structure_text else "Standard: Hook -> Problem -> Solution -> Social Proof -> CTA"}
+
+IMPORTANT: The script MUST:
+1. Address at least ONE customer pain point identified in the research
+2. Highlight at least ONE thing customers love (from reviews)
+3. Use natural, conversational language that matches how real customers talk
+4. Differentiate from competitor hooks listed above
 
 Write the script in this EXACT format:
 
@@ -149,10 +230,10 @@ Visual: [Describe exactly what we see - be specific about shots, angles, subject
 Audio: [Music/sound description]
 Voiceover: "[Exact words spoken]"
 
-SCENE 2 ({duration // 6}-{duration // 3}s): [SETUP]
-Visual: [Description]
+SCENE 2 ({duration // 6}-{duration // 3}s): [SETUP/PROBLEM]
+Visual: [Description - show the pain point customers complain about]
 Audio: [Description]
-Voiceover: "[Words]"
+Voiceover: "[Words - acknowledge the problem]"
 
 SCENE 3 ({duration // 3}-{duration // 2}s): [SOLUTION/PRODUCT]
 Visual: [Description]
@@ -160,9 +241,9 @@ Audio: [Description]
 Voiceover: "[Words]"
 
 SCENE 4 ({duration // 2}-{int(duration * 0.75)}s): [PROOF/BENEFITS]
-Visual: [Description]
+Visual: [Description - show what customers love]
 Audio: [Description]
-Voiceover: "[Words]"
+Voiceover: "[Words - use customer language]"
 
 SCENE 5 ({int(duration * 0.75)}-{duration}s): [CTA]
 Visual: [Description]
@@ -172,7 +253,7 @@ Voiceover: "[Words]"
 
 Requirements:
 1. The {tone} tone must come through clearly
-2. Voiceover should be natural and conversational
+2. Voiceover should be natural and conversational - use phrases real customers use
 3. Visual descriptions must be specific enough for a storyboard artist
 4. Total voiceover should fit within {duration} seconds (about {duration * 2.5} words max)
 5. Include at least one moment that creates emotional connection
