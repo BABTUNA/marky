@@ -341,44 +341,30 @@ class PDFBuilderAgent:
             )
             story.append(Spacer(1, 0.15 * inch))
 
-            pipeline_steps = [
-                "research",
-                "trend_analyzer",
-                "script_writer",
-                "image_generator",
-                "voiceover",
-                "music",
-                "video_assembly",
-                "cost_estimator",
-                "location_scout",
-                "pdf_builder",
-            ]
-
-            diagram = PipelineDiagram(7.5 * inch, 1.2 * inch, pipeline_steps)
-            story.append(diagram)
+            # Use static pipeline diagram image (generated once, reused for all PDFs)
+            # Shows research agents running concurrently, then production pipeline
+            static_diagram_path = Path(__file__).parent.parent / "docs" / "pipeline_diagram.png"
+            if static_diagram_path.exists():
+                try:
+                    diagram_img = RLImage(
+                        str(static_diagram_path),
+                        width=7.2 * inch,
+                        height=4.0 * inch,
+                    )
+                    story.append(diagram_img)
+                except Exception as e:
+                    print(f"  ⚠️ Could not load pipeline diagram: {e}")
             story.append(Spacer(1, 0.2 * inch))
 
-            step_descriptions = {
-                "research": "Collects YouTube trends, competitor data, reviews, and keyword insights",
-                "trend_analyzer": "Extracts viral patterns, hooks, visual styles, and CTAs",
-                "script_writer": "Writes scene-by-scene script with visual and voiceover details",
-                "image_generator": "Creates storyboard frames for each scene",
-                "voiceover": "Generates professional TTS voiceover from script",
-                "music": "Selects or generates background music matching tone",
-                "video_assembly": "Combines images, voiceover, and music into final video",
-                "cost_estimator": "Calculates detailed production budget and requirements",
-                "location_scout": "Finds filming locations with permits and pricing",
-                "pdf_builder": "Compiles all data into this comprehensive package",
-            }
-
-            for i, step in enumerate(pipeline_steps):
-                desc = step_descriptions.get(step, step)
-                story.append(
-                    Paragraph(
-                        f"{i + 1}. <b>{step.replace('_', ' ').title()}</b>: {desc}",
-                        body_style,
-                    )
+            # Pipeline step descriptions (compact list)
+            story.append(
+                Paragraph(
+                    "<b>Pipeline Stages:</b> Research (concurrent: Local Intel, Reviews, Yelp, Trends, Related Questions, Map) → "
+                    "Trend Analyzer → Script Writer → Image Generator → Video Assembly → Cost Estimator → "
+                    "Location Scout → Social Media → PDF Builder → Drive Upload",
+                    body_style,
                 )
+            )
 
             story.append(PageBreak())
 

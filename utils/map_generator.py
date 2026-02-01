@@ -161,12 +161,34 @@ def generate_competitor_map(
             response = requests.get(base_url, params=params, timeout=30)
         
         if response.status_code == 200:
+            # Check if response is an error image (contains "staticmaperror" text)
+            # Google returns 200 but with an error image when API is misconfigured
+            content_type = response.headers.get("Content-Type", "")
+            if len(response.content) < 5000 and b"error" in response.content.lower():
+                print("⚠️ Static Maps API returned error image. Check:")
+                print("   1. Enable 'Maps Static API' in Google Cloud Console")
+                print("   2. Ensure billing is enabled on the project")
+                print("   3. Check API key restrictions allow Static Maps")
+                return None
+            
             # Save raw map
             with open(output_path, "wb") as f:
                 f.write(response.content)
+            
+            # Check for error watermark in the saved image
+            try:
+                from PIL import Image
+                img = Image.open(output_path)
+                # Error images are typically smaller or have specific patterns
+                # The "g.co/staticmaperror" watermark appears in the top-right
+                # We can't easily detect this without OCR, so just warn
+            except Exception:
+                pass
+            
             # Add legend, title, and border
             _add_legend_and_border(output_path, city, competitors[:10])
             print(f"✅ Competitor map saved to: {output_path}")
+            print(f"   ⚠️ If you see 'g.co/staticmaperror', enable Static Maps API in GCP Console")
             return output_path
         else:
             print(f"⚠️ Maps API error {response.status_code}: {response.text[:200]}")

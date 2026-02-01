@@ -322,14 +322,48 @@ async def handle_message(ctx: Context, sender: str, msg: ChatMessage):
 
             # Build ASI:One preview: thumbnail + "Watch Full Video Here" + "View Full Analysis PDF"
             thumbnail_uri = None
-            if video_path:
+            ctx.logger.info(f"Preview check: video_path={video_path}, video_url={video_url is not None}, pdf_url={pdf_url is not None}")
+            
+            # Try 1: Extract thumbnail from video
+            if video_path and os.path.exists(video_path):
+                ctx.logger.info(f"Extracting thumbnail from: {video_path}")
                 thumb_bytes = extract_video_thumbnail(video_path)
                 if thumb_bytes:
+                    ctx.logger.info(f"Thumbnail extracted ({len(thumb_bytes)} bytes), uploading to Agentverse...")
                     thumbnail_uri, _ = upload_to_agentverse_storage(
                         thumb_bytes, "video_preview.png", "image/png", sender
                     )
+                    if thumbnail_uri:
+                        ctx.logger.info(f"Thumbnail uploaded: {thumbnail_uri}")
+                    else:
+                        ctx.logger.warning("Thumbnail upload failed - no URI returned")
+                else:
+                    ctx.logger.warning("Thumbnail extraction returned no bytes")
+            elif video_path:
+                ctx.logger.warning(f"Video path does not exist: {video_path}")
+            
+            # Try 2: Use first storyboard frame as fallback preview
+            pipeline_results = result.get("results", {})
+            if not thumbnail_uri and "image_generator" in pipeline_results:
+                img_data = pipeline_results["image_generator"]
+                frames = img_data.get("frames", [])
+                for frame in frames:
+                    frame_path = frame.get("path")
+                    if frame_path and os.path.exists(frame_path):
+                        ctx.logger.info(f"Using storyboard frame as preview: {frame_path}")
+                        try:
+                            with open(frame_path, "rb") as f:
+                                frame_bytes = f.read()
+                            thumbnail_uri, _ = upload_to_agentverse_storage(
+                                frame_bytes, "preview_frame.png", "image/png", sender
+                            )
+                            if thumbnail_uri:
+                                ctx.logger.info(f"Frame preview uploaded: {thumbnail_uri}")
+                                break
+                        except Exception as e:
+                            ctx.logger.warning(f"Could not read frame: {e}")
 
-            ctx.logger.info(f"Sending success response ({len(response_text)} chars)")
+            ctx.logger.info(f"Sending success response ({len(response_text)} chars), thumbnail_uri={thumbnail_uri is not None}")
             try:
                 if thumbnail_uri or (video_url and "View Full Video" in response_text):
                     msg = create_preview_response(
@@ -636,13 +670,13 @@ def format_results(result: dict, output_type: str) -> dict:
     # === VIDEO ===
     if "video_assembly" in results:
         video_data = results["video_assembly"]
+        # Always capture video_path for thumbnail extraction
+        video_path = video_data.get("final_video_path")
         if video_data.get("video_url"):
             video_url = video_data["video_url"]
-        else:
-            video_path = video_data.get("final_video_path")
-            if video_path and os.path.exists(video_path):
-                print("\nUploading video...")
-                video_url = upload_file(video_path)
+        elif video_path and os.path.exists(video_path):
+            print("\nUploading video...")
+            video_url = upload_file(video_path)
 
     # === PDF ===
     pdf_data = results.get("pdf_export") or results.get("pdf_builder")
