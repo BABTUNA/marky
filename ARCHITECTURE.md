@@ -426,6 +426,33 @@ RelatedQuestionsAnalysis {
 }
 ```
 
+#### 1.1.6 PDF Export & Google Drive Upload (MCP)
+
+**Files:**
+- `orchestrator/report_to_pdf.py` - Converts AdResearchResult to PDF
+- `mcp-agents/gdrive-pdf-upload-mcp-agent/server.py` - MCP tools for Drive upload
+
+**Purpose:** Optional end-to-end delivery: export report as PDF and upload to Google Drive.
+
+**Process:**
+1. **PDF Export** – After Stage 6, `result_to_pdf()` generates a PDF to `output/pdfs/`
+2. **Drive Upload** – If `include_drive_upload` and `drive_folder_id` (or `GDRIVE_DEFAULT_FOLDER_ID`), calls `upload_pdf_to_drive()` from the gdrive MCP server
+
+**Request params:**
+```python
+AdResearchRequest(
+    ...
+    include_pdf_export=True,      # Default: generate PDF
+    include_drive_upload=False,   # Default: no upload
+    drive_folder_id="...",        # Or from GDRIVE_DEFAULT_FOLDER_ID
+)
+```
+
+**Outputs:** `result.pdf_path`, `result.drive_upload_result` (file_id, web_view_link)
+
+**CLI:** `python run_marky.py --cli -b "plumber" -l "Boston" --drive-upload --drive-folder-id YOUR_ID`  
+**Chat:** Add "and upload to drive" to the query (requires GDRIVE_DEFAULT_FOLDER_ID in .env)
+
 ---
 
 ### 2. LOCATION SCOUT Agent
@@ -1080,6 +1107,11 @@ output/
 - `yelp_intel/agent.py` - Yelp reviews
 - `trends_intel/agent.py` - Keyword trends
 - `related_questions_intel/agent.py` - "People also ask"
+- `orchestrator/report_to_pdf.py` - Report-to-PDF export
+
+### MCP Agents
+- `mcp-agents/gdrive-pdf-upload-mcp-agent/server.py` - Google Drive PDF upload (FastMCP)
+- `mcp-agents/gdrive-pdf-upload-mcp-agent/agent.py` - uAgent wrapper (MCPServerAdapter)
 
 ### Production Agents
 - `agents/location_scout.py` - Location discovery

@@ -17,6 +17,9 @@ class AdResearchRequest:
     max_competitors: int = 5
     reviews_per_competitor: int = 10
     include_trends: bool = True
+    include_pdf_export: bool = True
+    include_drive_upload: bool = False
+    drive_folder_id: Optional[str] = None
 
 
 @dataclass
@@ -94,6 +97,10 @@ class AdResearchResult:
     recommended_hooks: List[str] = field(default_factory=list)
     emotional_angles: List[str] = field(default_factory=list)
     
+    # PDF & Drive
+    pdf_path: Optional[str] = None
+    drive_upload_result: Optional[Dict[str, Any]] = None
+
     # Metadata
     agents_used: List[str] = field(default_factory=list)
     total_time_seconds: float = 0.0
@@ -154,6 +161,8 @@ class AdResearchResult:
             "key_insights": self.key_insights,
             "recommended_hooks": self.recommended_hooks,
             "emotional_angles": self.emotional_angles,
+            "pdf_path": self.pdf_path,
+            "drive_upload_result": self.drive_upload_result,
             "agents_used": self.agents_used,
             "total_time_seconds": self.total_time_seconds,
             "errors": self.errors,
@@ -266,6 +275,23 @@ class AdResearchResponse:
         if r.market_summary:
             lines.append("## 📋 Market Summary (raw)")
             lines.append(r.market_summary)
+            lines.append("")
+        
+        # PDF & Drive
+        if r.pdf_path:
+            lines.append("## 📄 PDF Report")
+            lines.append(f"- Saved: {r.pdf_path}")
+            lines.append("")
+        if r.drive_upload_result:
+            dr = r.drive_upload_result
+            if dr.get("success"):
+                lines.append("## ☁️ Google Drive")
+                lines.append(f"- Uploaded: {dr.get('file_name', '')}")
+                if dr.get("web_view_link"):
+                    lines.append(f"- View: {dr['web_view_link']}")
+            else:
+                lines.append("## ☁️ Google Drive")
+                lines.append(f"- Upload failed: {dr.get('error', 'Unknown error')}")
             lines.append("")
         
         # Metadata

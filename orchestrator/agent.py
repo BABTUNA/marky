@@ -87,21 +87,34 @@ def create_chat_message(text: str, end_session: bool = False) -> ChatMessage:
 
 def parse_research_request(user_text: str) -> Optional[AdResearchRequest]:
     """
-    Parse user input to extract business type and location.
+    Parse user input to extract business type, location, and optional Drive upload.
     
     Expected formats:
     - "plumber in Boston, MA"
     - "research electrician Providence RI"
-    - "analyze restaurant near San Francisco"
+    - "electrician Providence RI and upload to drive"
     """
     # Clean up input
-    text = user_text.lower().strip()
+    text = user_text.strip()
+    text_lower = text.lower()
+    
+    # Check for Drive upload intent
+    include_drive = any(
+        phrase in text_lower
+        for phrase in ["upload to drive", "save to drive", "upload to google drive"]
+    )
+    if include_drive:
+        text = re.sub(r"\s+and\s+(?:upload|save)\s+to\s+(?:google\s+)?drive", "", text, flags=re.IGNORECASE)
+        text = re.sub(r"\s+(?:upload|save)\s+to\s+(?:google\s+)?drive", "", text, flags=re.IGNORECASE)
+        text = text.strip()
+        text_lower = text.lower()
     
     # Remove command prefixes
     prefixes = ["research", "analyze", "audit", "find", "search"]
     for prefix in prefixes:
-        if text.startswith(prefix):
+        if text_lower.startswith(prefix):
             text = text[len(prefix):].strip()
+            text_lower = text.lower()
     
     # Try to parse "X in Y" pattern
     in_pattern = r"(.+?)\s+(?:in|near|around)\s+(.+)"
@@ -113,6 +126,8 @@ def parse_research_request(user_text: str) -> Optional[AdResearchRequest]:
         return AdResearchRequest(
             business_type=business_type,
             location=location,
+            include_drive_upload=include_drive,
+            drive_folder_id=os.getenv("GDRIVE_DEFAULT_FOLDER_ID"),
         )
     
     # Try to parse "X, Y" pattern (business, location)
@@ -122,6 +137,8 @@ def parse_research_request(user_text: str) -> Optional[AdResearchRequest]:
             return AdResearchRequest(
                 business_type=parts[0].strip(),
                 location=parts[1].strip(),
+                include_drive_upload=include_drive,
+                drive_folder_id=os.getenv("GDRIVE_DEFAULT_FOLDER_ID"),
             )
     
     return None
@@ -155,12 +172,16 @@ Just tell me what business type and location you want to research:
 2. **Google Reviews** - Customer voice from competitor Google Reviews
 3. **Yelp Reviews** - Pain points, desires, and quotes from Yelp
 4. **Search Trends** - Seasonal timing, CPC, keyword volume
-5. **Raw Output** - Hooks, headlines, differentiators (no filtering applied)
+5. **Related Questions** - People also ask (content/FAQ)
+6. **PDF + Drive** - Optional PDF export and Google Drive upload
+
+Add "and upload to drive" to save the report to your Drive (set GDRIVE_DEFAULT_FOLDER_ID in .env).
 
 ## Example
 
 ```
 research plumber in Providence, RI
+electrician Boston MA and upload to drive
 ```
 
 Just type your request and I'll start the analysis!

@@ -1,0 +1,464 @@
+{
+  "search": {
+    "business_type": "plumber",
+    "location": "Providence, RI",
+    "radius_miles": 10.0
+  },
+  "generated_at": "2026-01-31T19:31:42.391027",
+  "competitors_found": 6,
+  "competitors": [
+    {
+      "name": "United Sewer And Drain",
+      "address": "431 Pawtucket Ave ste 3, Pawtucket, RI 02860",
+      "website": "http://www.unitedsds.com/",
+      "rating": 5,
+      "review_count": 77,
+      "services": [
+        "Maintenance",
+        "Service",
+        "Sump Pump",
+        "Repair",
+        "Installation",
+        "Hydro Jetting",
+        "Inspection",
+        "Drain Cleaning",
+        "Emergency",
+        "Water Heater",
+        "Garbage Disposal",
+        "Sewer Line",
+        "Faucet"
+      ],
+      "trust_signals": [
+        "Warranty",
+        "Fully Insured",
+        "Emergency Service",
+        "Certified",
+        "24/7",
+        "61 Reviews"
+      ],
+      "unique_selling_points": []
+    },
+    {
+      "name": "Mr. Sewer & Pipe LLC",
+      "address": "124 Atlantic Ave, Providence, RI 02907",
+      "website": "https://www.mrsewerandpipe.com/",
+      "rating": 5,
+      "review_count": 42,
+      "services": [
+        "Service",
+        "Hydro Jetting",
+        "Inspection",
+        "Drain Cleaning",
+        "Emergency",
+        "Maintenance",
+        "Repair"
+      ],
+      "trust_signals": [
+        "24/7",
+        "Emergency Service",
+        "Locally Owned"
+      ],
+      "unique_selling_points": [
+        "](https://www.mrsewerandpipe.com/24/why",
+        "[faq](https://www.mrsewerandpipe.com/24/faq)"
+      ]
+    },
+    {
+      "name": "Driver's Plumbing & Mechanical Inc.",
+      "address": "77 W Park St, Providence, RI 02908",
+      "website": "http://www.driversplumbing.com/",
+      "rating": 5,
+      "review_count": 11,
+      "services": [],
+      "trust_signals": [],
+      "unique_selling_points": []
+    },
+    {
+      "name": "Almeida Plumbing, Heating & Air",
+      "address": "22 Lark Industrial Dr unit B, Greenville, RI 02828",
+      "website": "http://callalmeida.com/",
+      "rating": 3.6,
+      "review_count": 12,
+      "services": [
+        "Repair",
+        "Service"
+      ],
+      "trust_signals": [],
+      "unique_selling_points": []
+    },
+    {
+      "name": "Roto-Rooter Plumbing & Water Cleanup",
+      "address": "1195 Broad St, Providence, RI 02905",
+      "website": "https://www.rotorooter.com/providence/?utm_source=Google&utm_medium=organic&utm_campaign=gmb&utm_content=website",
+      "rating": 4.8,
+      "review_count": 3052,
+      "services": [
+        "Backflow",
+        "Installation",
+        "Drain Cleaning",
+        "Garbage Disposal",
+        "Emergency Plumbing",
+        "Hydro Jetting",
+        "Leak Detection",
+        "Gas Line",
+        "Tankless",
+        "Water Softener",
+        "Sump Pump",
+        "Inspection",
+        "Emergency",
+        "Water Heater",
+        "Sewer Line",
+        "Repair",
+        "Faucet",
+        "Service",
+        "Trenchless",
+        "Estimate",
+        "Toilet Repair",
+        "Maintenance"
+      ],
+      "trust_signals": [
+        "Fully Licensed",
+        "Emergency Service",
+        "No Hidden Fees",
+        "Same-Day Service",
+        "Since 1935",
+        "24/7"
+      ],
+      "unique_selling_points": []
+    },
+    {
+      "name": "G.W.Wagner Plumbing,LLC",
+      "address": "144 Freeborn Ave, East Providence, RI 02914",
+      "website": "http://www.wagnerplumbingservices.com/",
+      "rating": 4.4,
+      "review_count": 190,
+      "services": [
+        "Faucet",
+        "Service",
+        "Installation",
+        "Drain Cleaning",
+        "Emergency",
+        "Water Heater",
+        "Maintenance",
+        "Repair"
+      ],
+      "trust_signals": [
+        "25 Years Of Experience",
+        "Since 1999",
+        "247",
+        "Locally Owned"
+      ],
+      "unique_selling_points": [
+        "#### experienced professionals"
+      ]
+    }
+  ],
+  "market_analysis": {
+    "common_services": [
+      "Maintenance",
+      "Service",
+      "Sump Pump",
+      "Repair",
+      "Installation",
+      "Hydro Jetting",
+      "Inspection",
+      "Drain Cleaning",
+      "Emergency",
+      "Water Heater",
+      "Garbage Disposal",
+      "Sewer Line",
+      "Faucet"
+    ],
+    "common_trust_signals": [
+      "Emergency Service",
+      "24/7",
+      "Locally Owned"
+    ],
+    "service_gaps": [
+      "Backflow",
+      "Emergency Plumbing",
+      "Leak Detection",
+      "Gas Line",
+      "Tankless",
+      "Water Softener",
+      "Trenchless",
+      "Estimate",
+      "Toilet Repair"
+    ],
+    "common_complaints": []
+  },
+  "insights": [
+    {
+      "type": "service_gap",
+      "title": "Service Opportunity: Backflow",
+      "description": "Only 1 of 6 competitors prominently offer Backflow.",
+      "suggested_copy": [
+        "Need backflow? We're the experts.",
+        "Specialized backflow services others can't match."
+      ],
+      "priority": 1
+    },
+    {
+      "type": "service_gap",
+      "title": "Service Opportunity: Emergency Plumbing",
+      "description": "Only 1 of 6 competitors prominently offer Emergency Plumbing.",
+      "suggested_copy": [
+        "Need emergency plumbing? We're the experts.",
+        "Specialized emergency plumbing services others can't match."
+      ],
+      "priority": 1
+    },
+    {
+      "type": "service_gap",
+      "title": "Service Opportunity: Leak Detection",
+      "description": "Only 1 of 6 competitors prominently offer Leak Detection.",
+      "suggested_copy": [
+        "Need leak detection? We're the experts.",
+        "Specialized leak detection services others can't match."
+      ],
+      "priority": 1
+    },
+    {
+      "type": "service_gap",
+      "title": "Service Opportunity: Gas Line",
+      "description": "Only 1 of 6 competitors prominently offer Gas Line.",
+      "suggested_copy": [
+        "Need gas line? We're the experts.",
+        "Specialized gas line services others can't match."
+      ],
+      "priority": 1
+    },
+    {
+      "type": "service_gap",
+      "title": "Service Opportunity: Tankless",
+      "description": "Only 1 of 6 competitors prominently offer Tankless.",
+      "suggested_copy": [
+        "Need tankless? We're the experts.",
+        "Specialized tankless services others can't match."
+      ],
+      "priority": 1
+    },
+    {
+      "type": "trust_differentiator",
+      "title": "Trust Opportunity: Background Checked",
+      "description": "Most competitors don't emphasize 'Background Checked' - this builds customer confidence.",
+      "suggested_copy": [
+        "Background Checked - peace of mind included.",
+        "We're proud to be background checked."
+      ],
+      "priority": 2
+    },
+    {
+      "type": "trust_differentiator",
+      "title": "Trust Opportunity: Same Day Service",
+      "description": "Most competitors don't emphasize 'Same Day Service' - this builds customer confidence.",
+      "suggested_copy": [
+        "Same Day Service - peace of mind included.",
+        "We're proud to be same day service."
+      ],
+      "priority": 2
+    },
+    {
+      "type": "trust_differentiator",
+      "title": "Trust Opportunity: Upfront Pricing",
+      "description": "Most competitors don't emphasize 'Upfront Pricing' - this builds customer confidence.",
+      "suggested_copy": [
+        "Upfront Pricing - peace of mind included.",
+        "We're proud to be upfront pricing."
+      ],
+      "priority": 2
+    },
+    {
+      "type": "messaging_angle",
+      "title": "Few competitors mention: 24/7 Service",
+      "description": "Messaging gap identified in competitor analysis.",
+      "suggested_copy": [],
+      "priority": 3
+    },
+    {
+      "type": "messaging_angle",
+      "title": "Few competitors mention: Same-Day Service",
+      "description": "Messaging gap identified in competitor analysis.",
+      "suggested_copy": [],
+      "priority": 3
+    },
+    {
+      "type": "messaging_angle",
+      "title": "Few competitors mention: Licensed And Insured",
+      "description": "Messaging gap identified in competitor analysis.",
+      "suggested_copy": [],
+      "priority": 3
+    }
+  ],
+  "differentiators": [
+    {
+      "angle": "Emergency Angle",
+      "hook": "Burst pipe at 2 AM? We're there in 60 minutes or less.",
+      "supporting_points": [
+        "Fast response time",
+        "Available 24/7",
+        "No extra fees for emergencies"
+      ],
+      "best_for": "Google Ads (search intent)"
+    },
+    {
+      "angle": "Trust Angle",
+      "hook": "The plumber your neighbors trust. 100+ 5-star reviews.",
+      "supporting_points": [
+        "Licensed and insured",
+        "Background-checked",
+        "Thousands of happy customers"
+      ],
+      "best_for": "Facebook/Instagram (social proof)"
+    },
+    {
+      "angle": "Pricing Angle",
+      "hook": "No hidden fees. The price we quote is the price you pay.",
+      "supporting_points": [
+        "Free estimates",
+        "No hidden fees",
+        "Price match guarantee"
+      ],
+      "best_for": "Google Ads, Website"
+    },
+    {
+      "angle": "Quality Angle",
+      "hook": "Fixed right the first time, guaranteed.",
+      "supporting_points": [
+        "Trained professionals",
+        "Premium materials",
+        "Satisfaction guaranteed"
+      ],
+      "best_for": "Instagram, Website portfolio"
+    },
+    {
+      "angle": "Speed Angle",
+      "hook": "Same-day service. Because leaks don't wait.",
+      "supporting_points": [
+        "Same-day availability",
+        "On-time guarantee",
+        "Efficient service"
+      ],
+      "best_for": "Google Ads, Google Business Profile"
+    },
+    {
+      "angle": "Service Opportunity: Backflow",
+      "hook": "Need backflow? We're the experts.",
+      "supporting_points": [
+        "Backflow mentioned by few competitors"
+      ],
+      "best_for": "Facebook/Instagram Ads"
+    },
+    {
+      "angle": "Service Opportunity: Emergency Plumbing",
+      "hook": "Need emergency plumbing? We're the experts.",
+      "supporting_points": [
+        "Emergency Plumbing mentioned by few competitors"
+      ],
+      "best_for": "Facebook/Instagram Ads"
+    },
+    {
+      "angle": "Service Opportunity: Leak Detection",
+      "hook": "Need leak detection? We're the experts.",
+      "supporting_points": [
+        "Leak Detection mentioned by few competitors"
+      ],
+      "best_for": "Facebook/Instagram Ads"
+    }
+  ],
+  "quick_use": {
+    "headlines": [
+      "The plumber your neighbors trust. 100+ 5-star reviews.",
+      "Plumbing Problems? Solved.",
+      "Fast. Reliable. Affordable.",
+      "Burst pipe at 2 AM? We're there in 60 minutes or less.",
+      "Same-day service. Because leaks don't wait.",
+      "Your Local Plumbing Experts",
+      "No hidden fees. The price we quote is the price you pay.",
+      "Fixed right the first time, guaranteed."
+    ],
+    "taglines": [
+      "Serving Providence, RI with pride",
+      "Quality you can trust, service you deserve",
+      "Your satisfaction, guaranteed",
+      "Locally owned, community trusted",
+      "Excellence in every job",
+      "Where quality meets reliability",
+      "Professional service, personal touch",
+      "Done right. Done on time."
+    ],
+    "trust_signals": [
+      "Licensed & Insured",
+      "Free Estimates",
+      "Satisfaction Guaranteed",
+      "Same-Day Service Available",
+      "Background-Checked Technicians",
+      "Upfront Pricing",
+      "Emergency Service",
+      "24/7",
+      "Locally Owned"
+    ]
+  },
+  "timing": {
+    "start_time": "2026-01-31T19:28:29.606024",
+    "end_time": "2026-01-31T19:31:42.391027",
+    "total_duration_seconds": 192.785003,
+    "steps": [
+      {
+        "step": "1. Competitor Discovery",
+        "duration_seconds": 8.451168060302734
+      },
+      {
+        "step": "2. Website Scraping",
+        "duration_seconds": 180.41186261177063
+      },
+      {
+        "step": "3. Content Extraction",
+        "duration_seconds": 0.036176204681396484
+      },
+      {
+        "step": "4. Market Analysis",
+        "duration_seconds": 0.0006494522094726562
+      },
+      {
+        "step": "5. Ad Differentiation Generation",
+        "duration_seconds": 0.0014960765838623047
+      },
+      {
+        "step": "6. AI Success/Failure Analysis",
+        "duration_seconds": 3.883650541305542
+      }
+    ]
+  },
+  "top_rated_competitors": [
+    {
+      "name": "United Sewer And Drain",
+      "rating": 5,
+      "review_count": 77
+    },
+    {
+      "name": "Mr. Sewer & Pipe LLC",
+      "rating": 5,
+      "review_count": 42
+    },
+    {
+      "name": "Driver's Plumbing & Mechanical Inc.",
+      "rating": 5,
+      "review_count": 11
+    }
+  ],
+  "worst_rated_competitors": [
+    {
+      "name": "Almeida Plumbing, Heating & Air",
+      "rating": 3.6,
+      "review_count": 12
+    }
+  ],
+  "success_failure_analysis": {
+    "source": "claude",
+    "raw_analysis": "{\n  \"success_factors\": [\n    \"Strong customer reviews and ratings\",\n    \"Offering a wide range of plumbing services\",\n    \"Providing emergency service and 24/7 availability\",\n    \"Signaling trust through warranties, insurance, and local ownership\",\n    \"Maintaining a professional and reliable brand image\"\n  ],\n  \"failure_patterns\": [\n    \"Lack of customer reviews and low ratings\",\n    \"Unclear or limited service offerings\",\n    \"Absence of trust signals like warranties and emergency service\",\n    \"Poor brand reputation and customer trust\",\n    \"Lack of local market presence and community engagement\"\n  ],\n  \"key_differentiators\": [\n    \"Top competitors offer a comprehensive suite of plumbing services, from maintenance to installation, with a focus on emergency and on-demand support\",\n    \"They have built strong local reputations through positive customer reviews and signals of trust, reliability, and professionalism\",\n    \"Struggling competitors lack the diverse service offerings, customer trust, and market presence that define the successful businesses\"\n  ],\n  \"recommendations\": [\n    \"Develop a wide range of plumbing services to cater to diverse customer needs\",\n    \"Invest in building a strong local brand reputation through excellent customer service, positive reviews, and trust signals\",\n    \"Emphasize 24/7 emergency support and rapid response times to differentiate from the competition\",\n    \"Engage with the local community and build partnerships to increase visibility and trust\",\n    \"Leverage digital marketing strategies to reach potential customers and showcase your expertise and reliability\"\n  ],\n  \"ad_angles_from_analysis\": [\n    \"Reliable and trusted plumbing services for your home or business, with 24/7 emergency support\",\n    \"Comprehensive plumbing solutions, from maintenance to installation, backed by a team of experts\",\n    \"Experience the difference of a locally-owned, fully-insured plumbing company with a proven track record of customer satisfaction\"\n  }\n}",
+    "success_factors": [],
+    "failure_patterns": [],
+    "recommendations": []
+  }
+}

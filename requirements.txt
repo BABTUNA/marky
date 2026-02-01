@@ -33,3 +33,11 @@ pydantic>=2.0.0
 
 # OpenAI-compatible client (for ASI:One if needed)
 openai>=1.0.0
+
+# MCP agents (Google Drive PDF upload)
+mcp>=1.0.0
+fastmcp>=2.0.0
+uagents-adapter[mcp]>=0.1.0
+google-auth>=2.0.0
+google-auth-oauthlib>=1.0.0
+google-api-python-client>=2.0.0

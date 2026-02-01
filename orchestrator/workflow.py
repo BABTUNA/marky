@@ -22,6 +22,7 @@ from .models import (
     SeasonalTiming,
     AdDifferentiator,
 )
+from .report_to_pdf import result_to_pdf
 
 # Import our agents
 import sys
@@ -325,6 +326,55 @@ class MarkyWorkflow:
             # ================================================================
             log("📦 Stage 6/6: Raw data collection complete...")
             log("  ✓ All data collected (unfiltered)")
+
+            # ================================================================
+            # Stage 7: PDF Export (optional)
+            # ================================================================
+            if request.include_pdf_export or request.include_drive_upload:
+                log("📄 Exporting report to PDF...")
+                try:
+                    project_root = Path(__file__).resolve().parent.parent
+                    pdf_dir = str(project_root / "output" / "pdfs")
+                    pdf_path = result_to_pdf(result, output_dir=pdf_dir)
+                    if pdf_path:
+                        result.pdf_path = pdf_path
+                        log(f"  ✓ PDF saved: {pdf_path}")
+                    else:
+                        log("  ⚠ PDF export skipped (ReportLab may not be installed)")
+                except Exception as e:
+                    result.errors.append(f"pdf_export: {str(e)}")
+                    log(f"  ⚠ PDF export error: {e}")
+
+            # ================================================================
+            # Stage 8: Google Drive Upload (optional)
+            # ================================================================
+            if request.include_drive_upload and result.pdf_path:
+                folder_id = request.drive_folder_id or os.getenv("GDRIVE_DEFAULT_FOLDER_ID")
+                if folder_id:
+                    log("☁️ Uploading PDF to Google Drive...")
+                    try:
+                        gdrive_agent_path = Path(__file__).resolve().parent.parent / "mcp-agents" / "gdrive-pdf-upload-mcp-agent"
+                        if str(gdrive_agent_path) not in sys.path:
+                            sys.path.insert(0, str(gdrive_agent_path))
+                        from server import upload_pdf_to_drive
+                        upload_result = upload_pdf_to_drive(
+                            file_path=result.pdf_path,
+                            folder_id=folder_id,
+                        )
+                        import json as _json
+                        result.drive_upload_result = _json.loads(upload_result)
+                        if result.drive_upload_result.get("success"):
+                            log(f"  ✓ Uploaded to Drive: {result.drive_upload_result.get('web_view_link', '')}")
+                        else:
+                            log(f"  ⚠ Drive upload failed: {result.drive_upload_result.get('error', '')}")
+                    except Exception as e:
+                        result.errors.append(f"drive_upload: {str(e)}")
+                        result.drive_upload_result = {"success": False, "error": str(e)}
+                        log(f"  ⚠ Drive upload error: {e}")
+                else:
+                    log("☁️ Drive upload skipped (no folder_id or GDRIVE_DEFAULT_FOLDER_ID)")
+            elif request.include_drive_upload and not result.pdf_path:
+                log("☁️ Drive upload skipped (no PDF generated)")
             
             # ================================================================
             # Finalize
@@ -349,6 +399,9 @@ def run_workflow(
     location: str,
     max_competitors: int = 5,
     include_trends: bool = True,
+    include_pdf_export: bool = True,
+    include_drive_upload: bool = False,
+    drive_folder_id: Optional[str] = None,
 ) -> AdResearchResponse:
     """
     Convenience function to run the Marky workflow.
@@ -368,5 +421,8 @@ def run_workflow(
         location=location,
         max_competitors=max_competitors,
         include_trends=include_trends,
+        include_pdf_export=include_pdf_export,
+        include_drive_upload=include_drive_upload,
+        drive_folder_id=drive_folder_id,
     )
     return workflow.run(request)

@@ -1,0 +1,306 @@
+{
+  "business_type": "plumber",
+  "location": "Providence, RI",
+  "competitors_analyzed": 6,
+  "total_reviews_analyzed": 12,
+  "competitor_reviews": [
+    {
+      "business_name": "United Sewer And Drain",
+      "overall_rating": 5,
+      "total_reviews": 77,
+      "reviews_scraped": 2,
+      "common_praise": [
+        "fair pricing",
+        "communication",
+        "recommendation"
+      ],
+      "common_complaints": [],
+      "response_rate": 0.0,
+      "sample_reviews": [
+        {
+          "rating": 5.0,
+          "text": "David was super helpful. Easy to communicate with and had the job done in no time. Would definitely call him again if needed. Support local independent businesses whenever you can.",
+          "sentiment": "positive"
+        },
+        {
+          "rating": 5.0,
+          "text": "I called this company early Sunday morning for a service call as our mainline was partially clogged. He came out within a few hours and took care of the problem in a very timely manner. He explained e",
+          "sentiment": "positive"
+        }
+      ]
+    },
+    {
+      "business_name": "Mr. Sewer & Pipe LLC",
+      "overall_rating": 5,
+      "total_reviews": 42,
+      "reviews_scraped": 2,
+      "common_praise": [
+        "expertise",
+        "fair pricing",
+        "speed",
+        "recommendation",
+        "cleanliness"
+      ],
+      "common_complaints": [],
+      "response_rate": 0.5,
+      "sample_reviews": [
+        {
+          "rating": 5.0,
+          "text": "“Called the number online and spoke with Hector, who asked me to send him some pictures. Even while he was at another job, he quickly reviewed them and gave me a quote. I provided my information and h",
+          "sentiment": "positive"
+        },
+        {
+          "rating": 5.0,
+          "text": "Excellent service, provided a detailed explanation of what the problem was with my toilet & reassured me that there was a solution. Throughout this messy job they maintained to keep and leave everythi",
+          "sentiment": "positive"
+        }
+      ]
+    },
+    {
+      "business_name": "Driver's Plumbing & Mechanical Inc.",
+      "overall_rating": 5,
+      "total_reviews": 11,
+      "reviews_scraped": 2,
+      "common_praise": [
+        "expertise",
+        "speed"
+      ],
+      "common_complaints": [],
+      "response_rate": 0.0,
+      "sample_reviews": [
+        {
+          "rating": 5.0,
+          "text": "They did great work, were very fast and professional. Price was great. Will 100% use again",
+          "sentiment": "positive"
+        },
+        {
+          "rating": 5.0,
+          "text": "Josh is awesome! He takes great care of us, and they are my go to for all my plumbing needs.",
+          "sentiment": "positive"
+        }
+      ]
+    },
+    {
+      "business_name": "Almeida Plumbing, Heating & Air",
+      "overall_rating": 3.6,
+      "total_reviews": 12,
+      "reviews_scraped": 2,
+      "common_praise": [
+        "recommendation"
+      ],
+      "common_complaints": [],
+      "response_rate": 0.0,
+      "sample_reviews": [
+        {
+          "rating": 5.0,
+          "text": "I was impressed with the amount of information Fred gave during his visit. It's great to be informed of how your furnace works, why it failed, and why he may recommend future repairs or upgrades based",
+          "sentiment": "positive"
+        },
+        {
+          "rating": 5.0,
+          "text": "Almeida Plumbing is your choice if you want the confidence that your repair/install will be done completely and properly.  They've done several different repairs in my home, and they'll always be my f",
+          "sentiment": "positive"
+        }
+      ]
+    },
+    {
+      "business_name": "Roto-Rooter Plumbing & Water Cleanup",
+      "overall_rating": 4.8,
+      "total_reviews": 3052,
+      "reviews_scraped": 2,
+      "common_praise": [
+        "expertise",
+        "cleanliness",
+        "communication",
+        "availability",
+        "friendly service"
+      ],
+      "common_complaints": [],
+      "response_rate": 1.0,
+      "sample_reviews": [
+        {
+          "rating": 5.0,
+          "text": "I was very impressed with this Roto rooter serviceman. He was very knowledgeable and explained everything upfront after he assessed my situation. I felt I could trust him. He proved to be an impressiv",
+          "sentiment": "positive"
+        },
+        {
+          "rating": 5.0,
+          "text": "Shawn, the technician who did the work at my house is a superb individual. Extremely polite, respectful, and well versed in his job responsibilities. Roto-Rooter is very fortunate to have someone like",
+          "sentiment": "positive"
+        }
+      ]
+    },
+    {
+      "business_name": "G.W.Wagner Plumbing,LLC",
+      "overall_rating": 4.4,
+      "total_reviews": 190,
+      "reviews_scraped": 2,
+      "common_praise": [
+        "punctuality",
+        "communication",
+        "recommendation"
+      ],
+      "common_complaints": [
+        "unreliable timing",
+        "poor quality work"
+      ],
+      "response_rate": 1.0,
+      "sample_reviews": [
+        {
+          "rating": 1.0,
+          "text": "Please do research before using this company. I made the mistake of utilizing their service because I had an emergency the night before-a leaky hot water pipe.\nI called the night before and made them ",
+          "sentiment": "negative"
+        },
+        {
+          "rating": 5.0,
+          "text": "Arrived punctual actually earlier which was great. Miguel was awesome and explained everything throughout the whole procedure. We had a leak under our kitchen sink. He redid the piping in less than an",
+          "sentiment": "positive"
+        }
+      ]
+    }
+  ],
+  "voice_of_customer": {
+    "praise_quotes": [
+      "David was super helpful.",
+      "I called this company early Sunday morning for a service call as our mainline was partially clogged.",
+      "“Called the number online and spoke with Hector, who asked me to send him some pictures.",
+      "Excellent service, provided a detailed explanation of what the problem was with my toilet & reassured me that there was a solution.",
+      "They did great work, were very fast and professional.",
+      "Josh is awesome! He takes great care of us, and they are my go to for all my plumbing needs.",
+      "I was impressed with the amount of information Fred gave during his visit.",
+      "Almeida Plumbing is your choice if you want the confidence that your repair/install will be done completely and properly.",
+      "I was very impressed with this Roto rooter serviceman.",
+      "Shawn, the technician who did the work at my house is a superb individual.",
+      "Arrived punctual actually earlier which was great."
+    ],
+    "complaint_quotes": [
+      "Please do research before using this company."
+    ],
+    "pain_points": [
+      {
+        "point": "unreliable timing",
+        "frequency": 1,
+        "percentage": 50.0
+      },
+      {
+        "point": "poor quality work",
+        "frequency": 1,
+        "percentage": 50.0
+      }
+    ],
+    "desires": [
+      {
+        "desire": "recommendation",
+        "frequency": 4,
+        "percentage": 20.0
+      },
+      {
+        "desire": "expertise",
+        "frequency": 4,
+        "percentage": 20.0
+      },
+      {
+        "desire": "communication",
+        "frequency": 3,
+        "percentage": 15.0
+      },
+      {
+        "desire": "fair pricing",
+        "frequency": 2,
+        "percentage": 10.0
+      },
+      {
+        "desire": "speed",
+        "frequency": 2,
+        "percentage": 10.0
+      },
+      {
+        "desire": "cleanliness",
+        "frequency": 2,
+        "percentage": 10.0
+      },
+      {
+        "desire": "availability",
+        "frequency": 1,
+        "percentage": 5.0
+      },
+      {
+        "desire": "friendly service",
+        "frequency": 1,
+        "percentage": 5.0
+      },
+      {
+        "desire": "punctuality",
+        "frequency": 1,
+        "percentage": 5.0
+      }
+    ],
+    "objections": [],
+    "power_words": [
+      "great",
+      "recommend",
+      "professional",
+      "clean",
+      "helpful",
+      "thorough",
+      "fair",
+      "quick",
+      "excellent",
+      "fast",
+      "knowledgeable",
+      "punctual"
+    ],
+    "emotional_triggers": [
+      "frustration with waiting",
+      "confidence in value",
+      "anxiety about wasted money",
+      "trust in quality"
+    ],
+    "trust_phrases": [
+      "Recommended by your neighbors",
+      "Trusted experts in your area",
+      "We keep you informed every step",
+      "Honest pricing with no surprises",
+      "Fast response when you need it",
+      "We leave your home cleaner than we found it",
+      "Available when you need us most",
+      "Friendly, respectful service",
+      "We show up on time, every time"
+    ],
+    "hook_templates": [
+      "Tired of plumbers who don't show up?",
+      "Had a plumber who didn't fix it right?",
+      "Expert plumber your neighbors trust"
+    ]
+  },
+  "top_competitor_themes": [
+    "expertise",
+    "fair pricing",
+    "recommendation",
+    "speed",
+    "communication"
+  ],
+  "worst_competitor_themes": [
+    "unreliable timing",
+    "poor quality work"
+  ],
+  "ad_hooks": [
+    "Tired of plumbers who don't show up?",
+    "Had a plumber who didn't fix it right?",
+    "Expert plumber your neighbors trust",
+    "\"David was super helpful.\"",
+    "Stop dealing with unreliable timing"
+  ],
+  "headline_suggestions": [
+    "Recommended by your neighbors",
+    "Trusted experts in your area",
+    "We keep you informed every step",
+    "Honest pricing with no surprises",
+    "Fast response when you need it",
+    "Great & Recommend Service",
+    "Recommendation Guaranteed",
+    "Expertise Guaranteed",
+    "Communication Guaranteed"
+  ],
+  "generated_at": "2026-01-31T19:47:55.810092"
+}
