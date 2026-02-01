@@ -138,7 +138,7 @@ def get_help_message() -> str:
     """Return help message."""
     return """# 🎯 Marky - Ad Research Agent
 
-I help you research local competitors and generate advertising strategies.
+I collect raw data on local competitors and customer voice for ad research.
 
 ## How to Use
 
@@ -149,13 +149,13 @@ Just tell me what business type and location you want to research:
 - `electrician Providence RI`
 - `dentist, Chicago IL`
 
-## What I Analyze
+## What I Collect (Raw Data, Unfiltered)
 
-1. **Local Competitors** - Find and analyze competitor websites
+1. **Local Competitors** - Competitor websites, services, trust signals
 2. **Google Reviews** - Customer voice from competitor Google Reviews
-3. **Yelp Reviews** - Pain points and desires from Yelp
-4. **Search Trends** - Seasonal timing and keyword data
-5. **Ad Strategy** - Generate hooks, headlines, and differentiators
+3. **Yelp Reviews** - Pain points, desires, and quotes from Yelp
+4. **Search Trends** - Seasonal timing, CPC, keyword volume
+5. **Raw Output** - Hooks, headlines, differentiators (no filtering applied)
 
 ## Example
 
@@ -262,7 +262,7 @@ async def handle_chat_message(ctx: Context, sender: str, msg: ChatMessage):
                 # Send progress update
                 await ctx.send(sender, create_chat_message(
                     f"🔍 Starting analysis for **{request.business_type}** in **{request.location}**...\n\n"
-                    "This may take 2-4 minutes (4 agents: Local, Google Reviews, Yelp, Trends)."
+                    "Collecting raw data (2-4 min, 4 agents: Local, Google Reviews, Yelp, Trends). No filtering applied."
                 ))
                 
                 # Run workflow
@@ -271,7 +271,7 @@ async def handle_chat_message(ctx: Context, sender: str, msg: ChatMessage):
                     
                     # Progress callback to send updates
                     async def send_progress(msg: str):
-                        if msg.startswith("🔍") or msg.startswith("🗣️") or msg.startswith("📈") or msg.startswith("🧠"):
+                        if msg.startswith("🔍") or msg.startswith("🗣️") or msg.startswith("📈") or msg.startswith("📦") or msg.startswith("📋"):
                             await ctx.send(sender, create_chat_message(msg))
                     
                     # Run in thread pool to avoid blocking
