@@ -1,268 +1,264 @@
-# AdBoard AI - 12-Agent Campaign Generator 🤖
+# AdBoard AI
 
-![tag:innovationlab](https://img.shields.io/badge/innovationlab-3D8BD3)
-![tag:hackathon](https://img.shields.io/badge/hackathon-5F43F1)
-![tag:fetch.ai](https://img.shields.io/badge/Fetch.AI-Agentverse-00D4AA)
+Multi-agent ad campaign generator built on Fetch.ai uAgents. Generates storyboard videos, viral videos, and campaign PDFs for small businesses.
 
-> **A sophisticated multi-agent orchestration system that generates complete advertising campaigns automatically via ASI:One chat interface.**
-
-Powered by **12 specialized AI agents** working in concert to deliver professional storyboards, viral videos, market research, and campaign strategies—all without expensive agency fees.
+**Built at Hack@Brown 2026 for the Fetch.AI track.**
 
 ---
 
-## 🎯 The Problem
+## Quick Start
 
-Small businesses spend **$5,000-$50,000** on ad agencies for campaign development. They lack resources for:
-- ✗ In-depth market & competitor research
-- ✗ Professional scriptwriting
-- ✗ Visual storyboarding & concept validation
-- ✗ Viral short-form video content
-- ✗ Multi-platform distribution strategy
-- ✗ Production cost estimation
-
-## 💡 Our Solution
-
-AdBoard AI replaces traditional agencies with an intelligent 12-agent system that delivers:
-
-✅ **Complete Market Research** (5 concurrent intelligence agents)  
-✅ **AI-Generated Scripts** (Groq LLaMA 3.3 70B)  
-✅ **Black & White Storyboard Videos** (Google Imagen 3) 
-✅ **Photorealistic Viral Videos** (Google VEO 3) *[Coming Soon]*  
-✅ **Comprehensive PDF Packages** (Strategy, Budget, Timeline)  
-✅ **Multi-Platform Distribution Plans** (TikTok, Instagram, YouTube)
-
-**Total cost: ~$2.50 per campaign** (vs $5,000-$50,000 agency fees)
-
----
-
-## 🏗️ Architecture
-
-![Agent Architecture](docs/agent_architecture_diagram.png)
-
-### 12-Agent Orchestration System
-
-**Layer 1: Interface** (1 agent)
-- ASI:One Chat Interface Agent
-
-**Layer 2: Intelligence Gathering** (5 agents - *parallel execution*)
-- Google Trends Intelligence
-- Google Places Discovery
-- Google Reviews Analysis
-- Yelp Intelligence
-- Related Questions Parser
-
-**Layer 3: Synthesis** (1 agent)
-- Research Aggregation & Strategy
-
-**Layer 4: Content Creation** (1 agent)
-- AI Script Writer (Groq LLaMA)
-
-**Layer 5: Visual Production** (2 agents - *parallel execution*)
-- Storyboard Generator (Imagen 3)
-- Viral Video Generator (VEO 3) *[Coming Soon]*
-
-**Layer 6: Package Assembly** (1 agent)
-- Campaign PDF Builder
-
-**Layer 7: Delivery** (1 agent)
-- Response Formatter & File Hosting
-
-> **Key Innovation:** Parallel agent execution enables **3-5 second research phase** with 5 concurrent intelligence agents.
-
----
-
-## 🚀 Quick Start
-
-### Prerequisites
 ```bash
-# Python 3.8+
-pip install uagents groq reportlab requests pytrends google-cloud-aiplatform
-```
+# 1. Install dependencies
+pip install -r requirements.txt
 
-### Environment Setup
-```bash
-# Copy example env file
+# 2. Set up environment
 cp .env.example .env
+# Add your API keys (see Environment Variables below)
 
-# Required API Keys (add to .env)
-GROQ_API_KEY=your-key-here              # Free tier available
-AGENTVERSE_API_KEY=your-key-here        # Fetch.AI Agentverse
-GOOGLE_PLACES_API_KEY=your-key-here     # Google Cloud
-SERPAPI_KEY=your-key-here               # SerpAPI for searches
-GCP_PROJECT_ID=your-project-id          # For Imagen/VEO
-
-# Optional (for enhanced features)
-REPLICATE_API_TOKEN=your-key-here       # Alternative image generation
-```
-
-### Run the Agent
-```bash
-# Start the orchestrator
+# 3. Run the agent
 python agents/orchestrator.py
-
-# The agent will register on Agentverse at:
-# agent1q2xwg46kfvvrv05dez0ala9evfmwjnzhq8nsu3t8uly2vmt3245sk9v84tc
 ```
 
-### Test on ASI:One
-1. Go to [asi1.ai](https://asi1.ai)
-2. Search for agent: **"AdBoard AI"**
-3. Send message: `Create a campaign for my coffee shop in Providence`
-4. Receive complete campaign package in ~2-3 minutes!
+The agent registers on Agentverse automatically. Chat with it on [ASI:One](https://asi1.ai) by searching "AdBoard AI".
 
 ---
 
-## 💰 Cost Breakdown
+## Architecture
 
-Leveraging **$410 Google Cloud credits** for maximum value:
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         ASI:One Chat                            │
+└─────────────────────────────────┬───────────────────────────────┘
+                                  │
+                                  ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    ORCHESTRATOR (uAgent)                        │
+│  agents/orchestrator.py                                         │
+│  • Chat Protocol (uagents_core.contrib.protocols.chat)          │
+│  • Mailbox/Proxy for Agentverse discovery                       │
+│  • Intent extraction → Pipeline execution → Response formatting │
+└─────────────────────────────────┬───────────────────────────────┘
+                                  │
+                                  ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                      PIPELINE (core/pipeline.py)                │
+│  Sequential agent execution with accumulated results            │
+└─────────────────────────────────┬───────────────────────────────┘
+                                  │
+        ┌─────────────┬───────────┼───────────┬─────────────┐
+        ▼             ▼           ▼           ▼             ▼
+┌─────────────┐ ┌───────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐
+│  Research   │ │  Script   │ │  Image  │ │  Video  │ │   PDF   │
+│  Agents     │ │  Writer   │ │  Gen    │ │  Gen    │ │ Builder │
+└─────────────┘ └───────────┘ └─────────┘ └─────────┘ └─────────┘
+```
 
-| Component | Technology | Cost per Campaign |
-|-----------|-----------|------------------|
-| Research (5 agents) | Google Trends, Places, Reviews | **FREE** |
-| Script Writing | Groq LLaMA 3.3 70B | **FREE** (quota) |
-| Storyboard (5-7 frames) | Google Imagen 3 | **$0.10-0.14** |
-| Viral Video (15s) | Google VEO 3 | **$2.00** |
-| PDF Package | ReportLab | **FREE** |
-| File Hosting | tmpfiles.org | **FREE** |
-| **TOTAL** | | **~$2.50** |
+### uAgents Integration
 
-Compare to agency: **$5,000-$50,000** → **99.95% cost reduction**
+The orchestrator (`agents/orchestrator.py`) is the backbone:
 
----
+```python
+from uagents import Agent, Context, Protocol
+from uagents_core.contrib.protocols.chat import (
+    ChatMessage, ChatAcknowledgement, TextContent, ResourceContent
+)
 
-## 📦 Campaign Deliverables
+# Agent with mailbox for Agentverse discovery
+agent = Agent(
+    name="AdBoardAI",
+    seed=SEED_PHRASE,
+    mailbox=True,
+    network="testnet",
+)
 
-### 1. 📹 Storyboard Video (30-60s)
-- Black & white pencil sketch animation
-- Ken Burns effects for dynamic presentation
-- Silent (no audio) - concept validation focused
-- Perfect for client presentations & approvals
+# Chat protocol for ASI:One compatibility
+protocol = Protocol(spec=chat_protocol_spec)
 
-### 2. 🎬 Viral Short Video (15s) *[Coming Soon]*
-- Photorealistic 4K quality
-- Optimized for TikTok/Instagram Reels
-- Trending audio integration
-- Platform-specific formatting
+@protocol.on_message(ChatMessage)
+async def handle_message(ctx: Context, sender: str, msg: ChatMessage):
+    # 1. Send acknowledgement
+    await ctx.send(sender, ChatAcknowledgement(...))
+    
+    # 2. Extract intent from message
+    intent = extract_intent(user_text)
+    
+    # 3. Run pipeline
+    pipeline = AdBoardPipeline(product=..., industry=..., ...)
+    result = await pipeline.run(progress_callback=on_progress)
+    
+    # 4. Upload outputs and send response
+    await ctx.send(sender, create_preview_response(...))
 
-### 3. 📄 Complete PDF Package
-Comprehensive 20-30 page document including:
-- **Campaign Strategy** - Multi-platform distribution plan
-- **Market Research** - Competitor analysis, customer insights
-- **Complete Script** - Scene-by-scene breakdown
-- **Storyboard Frames** - Visual concept art
-- **A/B Testing Recommendations** - Optimization strategies
-- **Budget & Timeline** - 4-week campaign roadmap
-- **Production Costs** - Detailed breakdown
-- **Location Recommendations** - Filming venues with Google Maps
-- **Social Media Assets** - Platform-specific captions & hashtags
+agent.include(protocol, publish_manifest=True)
+```
 
----
+### Pipeline Agents
 
-## 🎨 Features
+Each agent in `agents/` follows the same interface:
 
-### ✨ Research Intelligence
-- **Google Trends** - Keyword analysis & seasonal timing
-- **Competitor Discovery** - Local business analysis via Google Places
-- **Customer Sentiment** - Google Reviews + Yelp insights
-- **Viral Patterns** - YouTube trending video analysis
-- **Intent Mapping** - "People Also Ask" question extraction
+```python
+class SomeAgent:
+    async def run(self, product, industry, duration, tone, city, previous_results) -> dict:
+        # Access previous agent outputs via previous_results
+        # Return dict with results (stored in previous_results for next agent)
+```
 
-### 🎬 Creative Generation
-- **AI Scriptwriting** - Groq LLaMA 3.3 70B (state-of-the-art)
-- **Storyboard Art** - Authentic B&W pencil sketch style
-- **Dynamic Videos** - Ken Burns camera effects
-- **Professional Audio** - ElevenLabs TTS (optional)
-
-### 📊 Campaign Strategy
-- **Multi-Platform Plans** - TikTok, Instagram, YouTube optimization
-- **A/B Test Frameworks** - Hook, CTA, and visual variations
-- **Budget Allocation** - Smart spend distribution across platforms
-- **4-Week Timeline** - Launch → Test → Optimize → Scale
-
----
-
-## 🛠️ Tech Stack
-
-| Category | Technology | Purpose |
-|----------|-----------|---------|
-| **Agent Framework** | Fetch.AI uAgents | Multi-agent orchestration |
-| **Deployment** | Agentverse | Cloud-hosted agent runtime |
-| **LLM** | Google Gemini 2.0 Flash | Script generation, intent extraction |
-| **Image AI** | Google Vertex AI Imagen 3 | Storyboard sketch generation |
-| **Video AI** | Google Veo 3 | Photorealistic viral videos |
-| **Research APIs** | Google Trends (free) | Keyword & trend analysis |
-| | Google Places API | Competitor discovery |
-| | Google Maps Reviews | Customer sentiment |
-| | SerpAPI | Yelp & search data |
-| **PDF Generation** | ReportLab | Professional package assembly |
-| **File Hosting** | tmpfiles.org | Temporary public file links |
-
----
-
-## 📚 Documentation
-
-- [**Agent Architecture**](docs/AGENT_ARCHITECTURE.md) - Detailed 12-agent system overview
-- [**API Reference**](docs/API_REFERENCE.md) - Complete API documentation
-- [**Quick Start Guide**](docs/QUICK_START.md) - Step-by-step setup
-- [**Master Plan**](docs/MASTER_PLAN.md) - Development roadmap
-
----
-
-## 🎯 Roadmap
-
-### ✅ Completed (Hack@Brown 2026)
-- [x] 12-agent orchestration system
-- [x] Google Trends integration (free!)
-- [x] Parallel research execution
-- [x] B&W storyboard video generation
-- [x] Campaign-focused PDF packages
-- [x] A/B testing recommendations
-- [x] Multi-platform distribution strategy
-
-### 🚧 In Progress
-- [ ] Google VEO 3 viral video generation
-- [ ] Video preview on ASI:One chat
-- [ ] Real-time campaign analytics
-
-### 📅 Future Enhancements
-- [ ] Multi-language support
-- [ ] Brand voice customization
-- [ ] Historical campaign analytics
-- [ ] Automated ad platform deployment
-- [ ] ROI tracking & optimization
+**Full Campaign Pipeline** (`full_campaign`):
+1. `research` - Market research via Marky (5 parallel intel agents)
+2. `location_scout` - Filming locations via Google Places
+3. `trend_analyzer` - Viral patterns from trends
+4. `script_writer` - Script via Gemini
+5. `image_generator` - Storyboard frames via Imagen 3
+6. `lyria_music` - Background music via Lyria
+7. `voiceover` - TTS via Google Cloud TTS
+8. `audio_mixer` - Mix voiceover + music
+9. `video_assembly` - Storyboard video (FFmpeg)
+10. `veo3_generator` - Viral video via VEO 3
+11. `viral_video_assembler` - Viral video + audio
+12. `cost_estimator` - Production budget
+13. `social_media` - Platform strategy
+14. `pdf_builder` - Campaign PDF via ReportLab
 
 ---
 
-## 🏆 Hack@Brown 2026
+## API Reference
 
-Built for the Fetch.AI challenge at Hack@Brown, demonstrating:
-- ✅ Sophisticated **multi-agent orchestration** (12 agents)
-- ✅ **Parallel execution** for performance (5 concurrent research agents)
-- ✅ Practical **real-world application** (replacing $5K-$50K agency work)
-- ✅ **Cost optimization** through Google Cloud credits
-- ✅ **Production-ready** deployment on Agentverse
+### External APIs
+
+| API | Agent | Purpose | Env Variable |
+|-----|-------|---------|--------------|
+| **Google Gemini** | intent_extractor, script_writer | Intent parsing, script generation | `GOOGLE_API_KEY` |
+| **Google Imagen 3** | image_generator | Storyboard frame generation | `GCP_PROJECT_ID` |
+| **Google VEO 3** | veo3_generator | Photorealistic viral video | `GCP_PROJECT_ID` |
+| **Google Lyria** | lyria_agent | Background music generation | `GCP_PROJECT_ID` |
+| **Google Cloud TTS** | voiceover_agent | Text-to-speech narration | `GCP_PROJECT_ID` |
+| **Google Places** | location_scout | Filming location discovery | `GOOGLE_PLACES_API_KEY` |
+| **SerpAPI** | research (via Marky) | Google/Yelp reviews, trends | `SERPAPI_KEY` |
+| **DataForSEO** | trends_intel | Keyword volume, CPC data | `DATAFORSEO_LOGIN`, `DATAFORSEO_PASSWORD` |
+| **Agentverse** | orchestrator | Agent registration, storage | `AGENTVERSE_API_KEY` |
+
+### Agentverse Storage
+
+Thumbnails are uploaded to Agentverse External Storage for inline preview in ASI:One:
+
+```python
+from uagents_core.storage import ExternalStorage
+
+storage = ExternalStorage(api_token=AGENTVERSE_KEY, storage_url=STORAGE_URL)
+asset_id = storage.create_asset(name="preview.jpg", content=thumb_bytes, mime_type="image/jpeg")
+storage.set_permissions(asset_id=asset_id, agent_address=sender)
+# Returns: agent-storage://agentverse.ai/v1/storage/{asset_id}
+```
+
+Falls back to Google Drive or tmpfiles.org if Agentverse storage fails.
+
+### Response Format
+
+ASI:One responses use `ResourceContent` for inline images:
+
+```python
+ChatMessage(
+    content=[
+        ResourceContent(
+            type="resource",
+            resource=Resource(uri="agent-storage://...", metadata={"mime_type": "image/jpeg"})
+        ),
+        TextContent(type="text", text="View Storyboard: https://..."),
+        EndSessionContent(type="end-session")
+    ]
+)
+```
 
 ---
 
-## 📝 License
+## Environment Variables
 
-MIT License - see [LICENSE](LICENSE) file for details
+```bash
+# Required
+AGENTVERSE_API_KEY=         # Fetch.ai Agentverse API key
+AGENT_SEED_PHRASE=          # Deterministic agent address
+
+# Google Cloud (for Imagen/VEO/Lyria/TTS)
+GCP_PROJECT_ID=
+GOOGLE_APPLICATION_CREDENTIALS=  # Path to service account JSON
+
+# Google APIs
+GOOGLE_API_KEY=             # For Gemini
+GOOGLE_PLACES_API_KEY=      # For location scout
+
+# Research APIs
+SERPAPI_KEY=                # For Google/Yelp scraping
+DATAFORSEO_LOGIN=           # For keyword data
+DATAFORSEO_PASSWORD=
+
+# Optional
+GDRIVE_DEFAULT_FOLDER_ID=   # Google Drive folder for uploads
+TEST_MODE=false             # Echo mode for testing
+MOCK_MODE=false             # Return mock data without pipeline
+QUICK_FULL=false            # Skip research for faster runs
+```
 
 ---
 
-## 🤝 Contributors
+## Deliverables
 
-Built with ❤️ at Hack@Brown 2026
+The agent produces three outputs:
 
-**Powered by:**
-- [Fetch.AI](https://fetch.ai) - Agent orchestration
-- [Google Cloud](https://cloud.google.com) - AI infrastructure ($410 credits)
-- [Groq](https://groq.com) - Lightning-fast LLM inference
+1. **Storyboard Video** - Silent B&W sketch animation for concept validation
+2. **Viral Video** - Ready-to-post short-form video with music and voiceover
+3. **Campaign PDF** - Full brief with research, script, costs, locations, social strategy
 
 ---
 
-<div align="center">
+## Testing
 
-**🚀 Try it now on [ASI:One](https://asi1.ai) - Search "AdBoard AI"**
+```bash
+# Test mode (echo messages, no pipeline)
+TEST_MODE=true python agents/orchestrator.py
 
-</div>
+# Mock mode (return sample data)
+MOCK_MODE=true python agents/orchestrator.py
+
+# Quick mode (skip research)
+QUICK_FULL=true python agents/orchestrator.py
+
+# CLI test
+python run_example.py --product "coffee shop" --city "Providence"
+```
+
+---
+
+## Project Structure
+
+```
+├── agents/
+│   ├── orchestrator.py      # Main uAgent (Chat Protocol, Agentverse)
+│   ├── script_writer.py     # Gemini script generation
+│   ├── image_generator.py   # Imagen 3 storyboard frames
+│   ├── veo3_agent.py        # VEO 3 viral video
+│   ├── lyria_agent.py       # Lyria music generation
+│   ├── voiceover_agent.py   # Google Cloud TTS
+│   ├── video_assembly_agent.py    # FFmpeg storyboard video
+│   ├── viral_video_assembler.py   # FFmpeg viral video
+│   ├── pdf_builder.py       # ReportLab PDF generation
+│   └── ...
+├── core/
+│   ├── pipeline.py          # Sequential agent orchestration
+│   ├── intent_extractor.py  # Gemini intent parsing
+│   └── gemini_client.py     # Gemini API wrapper
+├── orchestrator/            # Marky research system
+│   ├── workflow.py          # 5-agent research pipeline
+│   └── ...
+├── local_intel/             # Competitor discovery
+├── review_intel/            # Google Reviews analysis
+├── yelp_intel/              # Yelp sentiment analysis
+├── trends_intel/            # Keyword/trend data
+└── related_questions_intel/ # "People also ask" data
+```
+
+---
+
+## License
+
+MIT
