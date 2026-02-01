@@ -1,20 +1,49 @@
-# Local Business Ad Research Agent
+# 🎯 Marky - Ad Research Orchestrator Agent
 
-An intelligent agent that discovers local competitors, scrapes their websites, and generates advertising differentiation insights for small businesses like plumbers, restaurants, contractors, and more.
+A single-entry-point uAgent that orchestrates multiple intelligence agents to generate comprehensive ad research and differentiation strategies for local businesses.
+
+**Built for the Fetch.ai Track** using the uAgents framework with chat protocol for Agentverse/ASI:One compatibility.
 
 ## What It Does
 
-Given a **business type** and **location**, this agent:
+Given a **business type** and **location**, Marky:
 
 1. **Discovers local competitors** via Google Maps (SerpAPI)
 2. **Scrapes competitor websites** for services, pricing, and messaging
-3. **Extracts competitive intelligence**: services offered, trust signals, unique selling points
-4. **Analyzes the market**: finds gaps and opportunities
+3. **Extracts customer voice** from Yelp reviews (pain points, desires)
+4. **Analyzes search trends** for seasonal timing (DataForSEO)
 5. **Generates ad differentiation**:
    - Competitive insights
    - Ad hooks and headlines
+   - Optimal timing recommendations
    - Trust signals to emphasize
-   - Tagline suggestions
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                     MARKY (uAgent Entry Point)                   │
+│                  Chat Protocol / Agentverse Compatible          │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    SEQUENTIAL WORKFLOW                          │
+│                                                                 │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐          │
+│  │ Local Intel  │→ │  Yelp Intel  │→ │ Trends Intel │          │
+│  │ (SerpAPI +   │  │  (Customer   │  │ (DataForSEO) │          │
+│  │  Firecrawl)  │  │   Reviews)   │  │              │          │
+│  └──────────────┘  └──────────────┘  └──────────────┘          │
+│                              │                                  │
+│                              ▼                                  │
+│                    ┌──────────────┐                            │
+│                    │  Synthesis   │                            │
+│                    │  (Combine &  │                            │
+│                    │   Report)    │                            │
+│                    └──────────────┘                            │
+└─────────────────────────────────────────────────────────────────┘
+```
 
 ## Quick Start
 
@@ -24,225 +53,149 @@ Given a **business type** and **location**, this agent:
 pip install -r requirements.txt
 ```
 
-### 2. Set Up API Keys (Optional but Recommended)
+### 2. Set Up API Keys
 
-```powershell
-# Windows PowerShell
-$env:SERPAPI_KEY = "your_serpapi_key"           # For competitor discovery
-$env:FIRECRAWL_API_KEY = "your_firecrawl_key"   # For premium scraping (optional)
-```
+Copy `env.example` to `.env` and fill in your keys:
 
 ```bash
-# Linux/Mac
-export SERPAPI_KEY="your_serpapi_key"
-export FIRECRAWL_API_KEY="your_firecrawl_key"
+cp env.example .env
 ```
 
-**Get API Keys:**
-- **SerpAPI**: https://serpapi.com (100 free searches/month)
-- **Firecrawl**: https://firecrawl.dev (500 free pages)
+**Required:**
+- `SERPAPI_KEY` - For competitor discovery & Yelp reviews ([serpapi.com](https://serpapi.com))
 
-**Note:** Jina Reader is used as a free fallback for website scraping - no API key needed!
+**Optional:**
+- `FIRECRAWL_API_KEY` - Premium website scraping ([firecrawl.dev](https://firecrawl.dev))
+- `DATAFORSEO_LOGIN` / `DATAFORSEO_PASSWORD` - Keyword trends ([dataforseo.com](https://dataforseo.com))
 
-### 3. Run Analysis
+### 3. Run Marky
+
+**As a uAgent (for Fetch.ai Agentverse):**
 
 ```bash
-# Analyze plumbers in Providence, RI
-python run_local_intel.py --business "plumber" --location "Providence, RI"
+python run_marky.py
+```
 
-# Analyze restaurants in a specific zip code
-python run_local_intel.py --business "restaurant" --location "02903" --radius 5
+**CLI mode (direct analysis):**
 
-# Interactive mode
-python run_local_intel.py --interactive
+```bash
+python run_marky.py --cli -b "plumber" -l "Boston, MA"
+```
 
-# Check your API configuration
-python run_local_intel.py --check-config
+**Check configuration:**
+
+```bash
+python run_marky.py --check-config
+```
+
+## Usage Examples
+
+### Chat Protocol (Agentverse/ASI:One)
+
+Once running, send messages like:
+
+```
+plumber in Boston, MA
+```
+```
+research electrician Providence RI
+```
+```
+restaurant near San Francisco
+```
+
+### CLI Mode
+
+```bash
+# Full analysis
+python run_marky.py --cli -b "plumber" -l "Providence, RI"
+
+# Faster (skip trends)
+python run_marky.py --cli -b "plumber" -l "Providence, RI" --no-trends
+
+# Output as JSON
+python run_marky.py --cli -b "plumber" -l "Providence, RI" --json
+```
+
+### Individual Agents
+
+Each sub-agent can also be run standalone:
+
+```bash
+# Local competitor analysis
+python run_local_intel.py -b "plumber" -l "Providence, RI" --max-competitors 5
+
+# Yelp reviews
+python run_yelp_intel.py -b "plumber" -l "Providence, RI" --max-businesses 5
+
+# Keyword trends
+python run_trends_intel.py -k "plumber" "emergency plumber" "plumbing services"
 ```
 
 ## Example Output
 
 ```
-==============================================================
-COMPETITIVE INTELLIGENCE SUMMARY
-==============================================================
+# 📊 Ad Research Report: plumber in Boston, MA
 
-### Competitors Analyzed: 12
-  - ABC Plumbing ★ 4.8
-    Services: Drain Cleaning, Water Heater, Emergency Plumbing
-  - XYZ Plumbers ★ 4.5
-    Services: Pipe Repair, Leak Detection, Bathroom Remodel
+## Executive Summary
+Analysis of plumber market in Boston, MA. Identified 5 competitors. 
+Key customer pain points include: late arrivals, hidden fees, poor communication.
+Best time to run ads: January, February, March.
 
-### Market Insights
-  Common services: Drain Cleaning, Water Heater, Pipe Repair
-  Trust signals used: Licensed And Insured, Free Estimates
+## 💡 Key Insights
+- Market has 5 competitors with avg rating 4.3⭐
+- Top competitor: ABC Plumbing (4.8⭐, 234 reviews)
+- Top customer pain point: Late arrivals and no-shows
+- Best months to advertise: Jan, Feb, Mar
 
-  Service gaps (opportunities):
-    - Hydro Jetting
-    - Tankless Water Heater
-    - Trenchless Repair
+## 🎯 Recommended Ad Hooks
+1. "Burst pipe at 2 AM? We're there in 60 minutes."
+2. "No hidden fees. Upfront pricing before we start."
+3. "The plumber your neighbors trust. 100+ 5-star reviews."
 
-### Top Ad Differentiators
-  [Emergency Angle]
-    Hook: "Burst pipe at 2 AM? We're there in 60 minutes or less."
-    Best for: Google Ads (search intent)
-
-  [Trust Angle]
-    Hook: "The plumber your neighbors trust. 100+ 5-star reviews."
-    Best for: Facebook/Instagram (social proof)
-
-### Headline Suggestions
-  • Fast. Reliable. Affordable.
-  • Plumbing Problems? Solved.
-  • Same-day service. Because leaks don't wait.
-
-### Trust Signals to Emphasize
-  ✓ Background Checked
-  ✓ Same Day Service
-  ✓ Upfront Pricing
-  ✓ Satisfaction Guarantee
+## ✍️ Headline Suggestions
+- Fast. Reliable. Affordable.
+- Plumbing Problems? Solved.
+- Same-day service. Because leaks don't wait.
 ```
-
-## Supported Business Types
-
-The agent has industry-specific intelligence for:
-- **Plumbers** - drain cleaning, water heaters, emergency service
-- **Electricians** - panel upgrades, EV chargers, safety
-- **HVAC** - AC repair, heating, maintenance plans
-- **Restaurants** - dine-in, catering, online ordering
-- **Contractors** - remodeling, new construction, permits
-
-Other business types use generic service detection.
-
-## API Options Summary
-
-### Competitor Discovery
-
-| Provider | Free Tier | Setup |
-|----------|-----------|-------|
-| **SerpAPI** | 100 searches/mo | `SERPAPI_KEY` |
-| **Outscraper** | 500 results | `OUTSCRAPER_API_KEY` |
-| Manual input | Unlimited | No key needed |
-
-### Website Scraping
-
-| Provider | Free Tier | Setup |
-|----------|-----------|-------|
-| **Jina Reader** | Unlimited | No key needed (default) |
-| **Firecrawl** | 500 pages | `FIRECRAWL_API_KEY` |
 
 ## Project Structure
 
 ```
-hackbrown_testing/
-├── run_local_intel.py      # CLI entry point
-├── requirements.txt
-├── README.md
-├── local_intel/
+marky/
+├── run_marky.py              # Main entry point
+├── orchestrator/
 │   ├── __init__.py
-│   ├── config.py           # Configuration management
-│   ├── models.py           # Data models
-│   ├── competitor_discovery.py  # Find competitors
-│   ├── website_scraper.py  # Scrape websites
-│   ├── content_extractor.py    # Extract services/signals
-│   ├── ad_generator.py     # Generate ad differentiation
-│   └── agent.py            # Main orchestrator
-└── output/                 # Generated reports (JSON)
+│   ├── agent.py              # uAgent with chat protocol
+│   ├── workflow.py           # Sequential orchestration
+│   └── models.py             # Data models
+├── local_intel/              # Competitor website analysis
+├── review_intel/             # Google Reviews (not currently used)
+├── yelp_intel/               # Yelp review analysis
+├── trends_intel/             # DataForSEO keyword trends
+├── requirements.txt
+├── env.example
+└── output/                   # Generated reports
 ```
 
-## Python API
+## API Services Used
 
-```python
-from local_intel.agent import LocalIntelAgent
+| Agent | API | Free Tier | Purpose |
+|-------|-----|-----------|---------|
+| local_intel | SerpAPI | 100/mo | Google Maps competitors |
+| local_intel | Firecrawl | 500 pages | Website scraping |
+| yelp_intel | SerpAPI | 100/mo | Yelp search & reviews |
+| trends_intel | DataForSEO | $1 trial | Keyword volume & trends |
 
-# Initialize
-agent = LocalIntelAgent()
+## Fetch.ai Integration
 
-# Run analysis
-report = agent.analyze(
-    business_type="plumber",
-    location="Providence, RI",
-    radius_miles=10,
-    max_competitors=15,
-)
+Marky uses the uAgents framework:
 
-# Access results
-for insight in report.insights:
-    print(f"{insight.title}: {insight.description}")
-
-for diff in report.differentiators:
-    print(f"Hook: {diff.hook}")
-
-# Save report
-agent.save_report(report, output_dir="my_output")
-```
-
-### Manual Competitor Input
-
-If you don't have API keys, you can manually specify competitors:
-
-```python
-from local_intel.agent import LocalIntelAgent
-
-agent = LocalIntelAgent()
-
-report = agent.analyze(
-    business_type="plumber",
-    location="Providence, RI",
-    manual_competitors=[
-        {"name": "ABC Plumbing", "website": "https://abcplumbing.com"},
-        {"name": "XYZ Plumbers", "website": "https://xyzplumbers.com"},
-        {"name": "Quick Fix Plumbing", "website": "https://quickfixplumbing.com"},
-    ]
-)
-```
-
-## How It Works
-
-### 1. Competitor Discovery
-Uses SerpAPI to search Google Maps for businesses matching your type and location. Extracts name, address, website, rating, and review count.
-
-### 2. Website Scraping
-Scrapes competitor homepages plus key pages (/services, /about, /pricing) using Jina Reader (free) or Firecrawl. Converts to clean markdown.
-
-### 3. Content Extraction
-Uses pattern matching to extract:
-- **Services**: Industry-specific service detection
-- **Trust signals**: "Licensed & Insured", "24/7", "Free Estimates"
-- **Pricing**: Dollar amounts, "free estimate", "financing available"
-- **Taglines**: Short, punchy messaging
-
-### 4. Market Analysis
-Aggregates data across competitors to find:
-- Common services (table stakes)
-- Rare services (differentiation opportunities)
-- Trust signal gaps
-- Pricing transparency opportunities
-
-### 5. Ad Generation
-Creates advertising angles based on:
-- Industry-specific hooks
-- Competitor gaps
-- Trust signal opportunities
-- Proven messaging patterns
-
-## Troubleshooting
-
-### "No competitors found"
-- Check your API key: `python run_local_intel.py --check-config`
-- Try a different location format (city vs zip vs coordinates)
-- Use manual competitor input as fallback
-
-### Website scraping fails
-- Some sites block scrapers - this is expected
-- The agent continues with sites that work
-- Jina Reader handles most sites well
-
-### Missing services in extraction
-- The agent uses industry-specific keywords
-- For uncommon business types, extraction may be limited
-- Results still provide competitive overview
+- **Chat Protocol** - Compatible with `chat_protocol_spec` for Agentverse
+- **Mailbox Enabled** - Discoverable on the Fetch.ai network
+- **Single Entry Point** - One agent, internal sub-agent orchestration
+- **ASI:One Compatible** - Can be chatted with via ASI:One interface
 
 ## License
 
-MIT - Use freely for hackathons and beyond!
+MIT - Built for HackBrown 2026
