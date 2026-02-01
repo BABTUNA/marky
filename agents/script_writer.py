@@ -53,7 +53,7 @@ class ScriptWriterAgent:
 
         try:
             prompt = self._build_prompt(
-                product, industry, duration, tone, city, trend_data, research_data
+                product, industry, duration, tone, city, trend_data, research_data, previous_results
             )
 
             # Use the Groq client with automatic model fallback
@@ -83,8 +83,9 @@ class ScriptWriterAgent:
         city: str,
         trend_data: dict,
         research_data: dict,
+        previous_results: dict,
     ) -> str:
-        """Build the script writing prompt."""
+        """Build the script writing prompt with research and location data.\"""
 
         analysis = trend_data.get("analysis", {})
 
@@ -101,14 +102,41 @@ class ScriptWriterAgent:
                 structure_text += f"- {item.get('time', '')}: {item.get('element', '')} - {item.get('description', '')}\n"
 
         location_ref = f" in {city}" if city else ""
+        
+        # Get enhanced research insights (YouTube + Google Ads)
+        research_insights = research_data.get("insights", [])
+        insights_text = "\n".join(f"- {insight}" for insight in research_insights[:5]) if research_insights else "- Focus on clear value proposition"
+        
+        # Get competitor hooks if available
+        competitor_ads = research_data.get("competitor_ads", {})
+        competitor_hooks = ""
+        if competitor_ads:
+            hooks = competitor_ads.get("hook_suggestions", [])[:3]
+            if hooks:
+                competitor_hooks = "\nCOMPETITOR HOOKS (differentiate from these):\n" + "\n".join(f"- {hook}" for hook in hooks)
+        
+        # Get location data for setting
+        location_data = previous_results.get("location_scout", {})
+        locations = location_data.get("locations", [])
+        location_setting = ""
+        if locations:
+            # Use first location as primary setting
+            loc = locations[0]
+            loc_name = loc.get("name", "")
+            loc_type = loc.get("types", [""])[0] if loc.get("types") else ""
+            if loc_name:
+                location_setting = f"\n\nFILMING LOCATION:\nShoot at or near: {loc_name} ({loc_type})\nIncorporate this or similar setting into the visuals."
 
         return f"""You are an award-winning advertising copywriter. Write a {duration}-second {tone} ad script for a {product}{location_ref}.
 
 RESEARCH INSIGHTS:
+{insights_text}
 - Recommended Hook: {recommended_hook}
 - Visual Style: {visual_style}
 - Key Messages: {", ".join(key_messages) if key_messages else "Highlight unique value"}
 - Call-to-Action: {cta}
+{competitor_hooks}
+{location_setting}
 
 STRUCTURE GUIDANCE:
 {structure_text if structure_text else "Standard: Hook -> Problem -> Solution -> Social Proof -> CTA"}
@@ -117,7 +145,7 @@ Write the script in this EXACT format:
 
 ---
 SCENE 1 (0-{duration // 6}s): [HOOK]
-Visual: [Describe exactly what we see - be specific about shots, angles, subjects]
+Visual: [Describe exactly what we see - be specific about shots, angles, subjects. Use the filming location if relevant.]
 Audio: [Music/sound description]
 Voiceover: "[Exact words spoken]"
 
@@ -149,6 +177,7 @@ Requirements:
 4. Total voiceover should fit within {duration} seconds (about {duration * 2.5} words max)
 5. Include at least one moment that creates emotional connection
 6. End with a clear, memorable call-to-action
+7. If location data is provided, incorporate that setting naturally into the visuals
 
 Write the complete script now:"""
 

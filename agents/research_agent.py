@@ -49,17 +49,27 @@ class ResearchAgent:
         print(f"  🔍 Researching viral '{industry}' ads on YouTube...")
 
         if not self.api_key:
-            print("  ⚠️ No YOUTUBE_API_KEY found - falling back to dummy data")
-            from core.dummy_research import get_dummy_research
-            return get_dummy_research(industry, product)
+            print("  ⚠️ No YOUTUBE_API_KEY found - skipping YouTube research")
+            return {
+                "industry": industry,
+                "product": product,
+                "top_videos": [],
+                "patterns_identified": {},
+                "source": "none"
+            }
 
         # 1. Search for videos
         videos = self._search_videos(industry, product)
         
         if not videos:
-            print("  ⚠️ No videos found - falling back to dummy data")
-            from core.dummy_research import get_dummy_research
-            return get_dummy_research(industry, product)
+            print("  ⚠️ No videos found for this industry")
+            return {
+                "industry": industry,
+                "product": product,
+                "top_videos": [],
+                "patterns_identified": {},
+                "source": "youtube_api_empty"
+            }
 
         # 2. Analyze patterns (Simulation - in real world would use LLM to analyze transcripts)
         # We'll generate dynamic insights based on the real video titles we found

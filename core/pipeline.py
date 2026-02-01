@@ -136,7 +136,7 @@ class AdBoardPipeline:
         from agents.voiceover_agent import VoiceoverAgent
         from agents.video_assembly_agent import VideoAssemblyAgent
 
-        from agents.research_agent import ResearchAgent
+        from agents.enhanced_research import ResearchAgent  # Now includes YouTube + Google Ads
 
         self._agents = {
             "research": ResearchAgent(),
