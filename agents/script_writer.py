@@ -203,6 +203,16 @@ class ScriptWriterAgent:
                 if seasonal:
                     trends_section += f"\n  - Seasonal insight: {seasonal[0]}"
 
+        # =============================================
+        # NEW: Related Questions (Content Intent)
+        # =============================================
+        related_questions_section = ""
+        related_questions = research_data.get("related_questions", [])
+        if related_questions:
+            related_questions_section = "\n\nCUSTOMER QUESTIONS (Address these in your script):\n"
+            for q in related_questions[:5]:
+                related_questions_section += f"\n  - {q}"
+
         # Get location data for setting
         location_data = previous_results.get("location_scout", {})
         locations = location_data.get("locations", [])
@@ -225,6 +235,7 @@ RESEARCH INSIGHTS (USE THESE - they're based on real competitor analysis and cus
 {competitor_hooks}
 {customer_voice_section}
 {trends_section}
+{related_questions_section}
 {location_setting}
 
 STRUCTURE GUIDANCE:

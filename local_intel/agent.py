@@ -586,6 +586,7 @@ class LocalIntelAgent:
         report._top_competitors = top_competitors
         report._worst_competitors = worst_competitors
         report._claude_analysis = claude_analysis
+        report._website_data = website_data
         
         print(f"\n{'='*60}")
         print("Analysis complete!")
@@ -636,6 +637,18 @@ class LocalIntelAgent:
         # Add Claude analysis
         if hasattr(report, '_claude_analysis') and report._claude_analysis:
             report_dict["success_failure_analysis"] = report._claude_analysis
+        
+        # Add raw website data (full_text, homepage_html) for downstream use
+        if hasattr(report, '_website_data') and report._website_data:
+            report_dict["website_data"] = [
+                {
+                    "competitor_name": w.competitor_name,
+                    "website_url": w.website_url,
+                    "full_text": w.full_text,
+                    "homepage_html": getattr(w, "homepage_html", None),
+                }
+                for w in report._website_data
+            ]
         
         with open(filepath, 'w', encoding='utf-8') as f:
             json.dump(report_dict, f, indent=2, ensure_ascii=False)

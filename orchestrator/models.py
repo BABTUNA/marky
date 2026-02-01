@@ -79,7 +79,10 @@ class AdResearchResult:
     
     # Seasonal timing
     timing: List[SeasonalTiming] = field(default_factory=list)
-    
+
+    # Related questions (People also ask)
+    related_questions: List[str] = field(default_factory=list)
+
     # Generated ad strategies
     differentiators: List[AdDifferentiator] = field(default_factory=list)
     headline_suggestions: List[str] = field(default_factory=list)
@@ -89,6 +92,7 @@ class AdResearchResult:
     executive_summary: str = ""
     key_insights: List[str] = field(default_factory=list)
     recommended_hooks: List[str] = field(default_factory=list)
+    emotional_angles: List[str] = field(default_factory=list)
     
     # Metadata
     agents_used: List[str] = field(default_factory=list)
@@ -132,6 +136,7 @@ class AdResearchResult:
                 }
                 for t in self.timing
             ],
+            "related_questions": self.related_questions,
             "differentiators": [
                 {
                     "angle_name": d.angle_name,
@@ -148,6 +153,7 @@ class AdResearchResult:
             "executive_summary": self.executive_summary,
             "key_insights": self.key_insights,
             "recommended_hooks": self.recommended_hooks,
+            "emotional_angles": self.emotional_angles,
             "agents_used": self.agents_used,
             "total_time_seconds": self.total_time_seconds,
             "errors": self.errors,
@@ -162,77 +168,104 @@ class AdResearchResponse:
     error: Optional[str] = None
     
     def to_markdown(self) -> str:
-        """Convert result to markdown for chat display."""
+        """Convert result to markdown for chat display (raw data, unfiltered)."""
         if not self.success or not self.result:
             return f"❌ Error: {self.error or 'Unknown error'}"
         
         r = self.result
         lines = [
-            f"# 📊 Ad Research Report: {r.business_type} in {r.location}",
+            f"# 📊 Raw Data: {r.business_type} in {r.location}",
             "",
-            "## Executive Summary",
-            r.executive_summary or "_No summary available_",
+            "_Unfiltered data from all agents. No synthesis or filtering applied._",
             "",
         ]
         
-        # Key Insights
-        if r.key_insights:
-            lines.append("## 💡 Key Insights")
-            for insight in r.key_insights[:5]:
-                lines.append(f"- {insight}")
-            lines.append("")
-        
-        # Competitor Overview
+        # Competitors (raw)
         if r.competitors:
-            lines.append("## 🏢 Competitor Overview")
-            for c in r.competitors[:5]:
+            lines.append("## 🏢 Competitors (raw)")
+            for c in r.competitors:
                 lines.append(f"- **{c.name}** ({c.rating}⭐, {c.review_count} reviews)")
+                if c.website:
+                    lines.append(f"  - Website: {c.website}")
                 if c.strengths:
-                    lines.append(f"  - Strengths: {', '.join(c.strengths[:3])}")
+                    lines.append(f"  - Strengths: {', '.join(c.strengths)}")
                 if c.weaknesses:
-                    lines.append(f"  - Weaknesses: {', '.join(c.weaknesses[:3])}")
+                    lines.append(f"  - Weaknesses: {', '.join(c.weaknesses)}")
+                if c.services:
+                    lines.append(f"  - Services: {', '.join(c.services[:15])}")
             lines.append("")
         
-        # Customer Voice
+        # Customer Voice (raw)
         if r.customer_voice:
-            lines.append("## 🗣️ Customer Voice")
+            lines.append("## 🗣️ Customer Voice (raw)")
             if r.customer_voice.pain_points:
                 lines.append("**Pain Points:**")
-                for p in r.customer_voice.pain_points[:5]:
+                for p in r.customer_voice.pain_points:
                     lines.append(f"- {p}")
             if r.customer_voice.desires:
-                lines.append("\n**What Customers Want:**")
-                for d in r.customer_voice.desires[:5]:
+                lines.append("\n**Desires:**")
+                for d in r.customer_voice.desires:
                     lines.append(f"- {d}")
+            if r.customer_voice.praise_quotes:
+                lines.append("\n**Praise Quotes:**")
+                for q in r.customer_voice.praise_quotes:
+                    lines.append(f"- {q}")
+            if r.customer_voice.complaint_quotes:
+                lines.append("\n**Complaint Quotes:**")
+                for q in r.customer_voice.complaint_quotes:
+                    lines.append(f"- {q}")
+            if r.customer_voice.common_themes:
+                lines.append("\n**Themes:**")
+                for t in r.customer_voice.common_themes:
+                    lines.append(f"- {t}")
             lines.append("")
         
-        # Timing
+        # Differentiators (raw)
+        if r.differentiators:
+            lines.append("## 📐 Differentiators (raw)")
+            for d in r.differentiators:
+                lines.append(f"- **{d.angle_name}**: {d.hook}")
+            lines.append("")
+        
+        # Timing (raw)
         if r.timing:
-            lines.append("## 📅 Seasonal Timing")
-            for t in r.timing[:3]:
-                lines.append(f"- **{t.keyword}**: Peak in {', '.join(t.peak_months[:3])}")
-                lines.append(f"  - CPC: ${t.avg_cpc:.2f}, Volume: {t.monthly_volume:,}/mo")
+            lines.append("## 📅 Seasonal Timing (raw)")
+            for t in r.timing:
+                lines.append(f"- **{t.keyword}**: Peak {', '.join(t.peak_months)} | CPC ${t.avg_cpc:.2f} | {t.monthly_volume:,}/mo")
             lines.append("")
-        
-        # Recommended Hooks
+
+        # Related Questions (raw)
+        if r.related_questions:
+            lines.append("## ❓ Related Questions (raw)")
+            for q in r.related_questions:
+                lines.append(f"- {q}")
+            lines.append("")
+
+        # Ad Hooks (raw)
         if r.recommended_hooks:
-            lines.append("## 🎯 Recommended Ad Hooks")
-            for i, hook in enumerate(r.recommended_hooks[:5], 1):
+            lines.append("## 🎯 Ad Hooks (raw)")
+            for i, hook in enumerate(r.recommended_hooks, 1):
                 lines.append(f"{i}. \"{hook}\"")
             lines.append("")
         
-        # Headlines
+        # Headlines (raw)
         if r.headline_suggestions:
-            lines.append("## ✍️ Headline Suggestions")
-            for h in r.headline_suggestions[:5]:
+            lines.append("## ✍️ Headlines (raw)")
+            for h in r.headline_suggestions:
                 lines.append(f"- {h}")
             lines.append("")
         
-        # Trust Signals
+        # Trust Signals (raw)
         if r.trust_signals:
-            lines.append("## ✅ Trust Signals to Emphasize")
-            for s in r.trust_signals[:5]:
+            lines.append("## ✅ Trust Signals (raw)")
+            for s in r.trust_signals:
                 lines.append(f"- {s}")
+            lines.append("")
+        
+        # Market Summary (raw)
+        if r.market_summary:
+            lines.append("## 📋 Market Summary (raw)")
+            lines.append(r.market_summary)
             lines.append("")
         
         # Metadata

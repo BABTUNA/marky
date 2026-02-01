@@ -32,26 +32,29 @@ from local_intel.agent import LocalIntelAgent
 from review_intel.agent import ReviewIntelAgent
 from yelp_intel.agent import YelpIntelAgent
 from trends_intel.agent import TrendsIntelAgent
+from related_questions_intel.agent import RelatedQuestionsIntelAgent
 
 
 class MarkyWorkflow:
     """
     Sequential workflow that orchestrates all intelligence agents.
     
-    Pipeline:
+    Pipeline (raw data collection, no filtering):
     1. Local Intel - Find competitors, scrape websites
     2. Review Intel - Google Reviews from competitors (needs place_ids from Local)
     3. Yelp Intel - Extract customer voice from Yelp reviews
     4. Trends Intel - Get seasonal timing data
-    5. Synthesis - Combine insights into ad recommendations
+    5. Related Questions Intel - People also ask (content/intent)
+    6. Output - All collected data combined, unfiltered
     """
-    
+
     def __init__(self):
         """Initialize the workflow with agent instances."""
         self.local_intel = LocalIntelAgent()
         self.review_intel = ReviewIntelAgent()
         self.yelp_intel = YelpIntelAgent()
         self.trends_intel = TrendsIntelAgent()
+        self.related_questions_intel = RelatedQuestionsIntelAgent()
         
     def run(
         self,
@@ -84,7 +87,7 @@ class MarkyWorkflow:
             # ================================================================
             # Stage 1: Local Intelligence
             # ================================================================
-            log("🔍 Stage 1/5: Running Local Intelligence...")
+            log("🔍 Stage 1/6: Running Local Intelligence...")
             
             local_report = None
             try:
@@ -99,35 +102,35 @@ class MarkyWorkflow:
                 
                 result.agents_used.append("local_intel")
                 
-                # Extract competitor insights
+                # Extract competitor insights (raw, no limits)
                 for comp in local_report.competitors[:request.max_competitors]:
                     insight = CompetitorInsight(
                         name=comp.name,
                         rating=comp.rating or 0.0,
                         review_count=comp.review_count or 0,
                         website=comp.website,
-                        strengths=comp.trust_signals[:5] if comp.trust_signals else [],
+                        strengths=comp.trust_signals or [],
                         weaknesses=[],  # Not available in source model
-                        services=comp.services[:10] if comp.services else [],
+                        services=comp.services or [],
                     )
                     result.competitors.append(insight)
                 
-                # Extract differentiators
+                # Extract differentiators (raw, no limits)
                 if local_report.differentiators:
-                    for diff in local_report.differentiators[:5]:
+                    for diff in local_report.differentiators:
                         ad_diff = AdDifferentiator(
                             angle_name=diff.angle_name,
                             hook=diff.hook,
                             headline=diff.hook,  # Use hook as headline
-                            description=", ".join(diff.supporting_points[:3]) if diff.supporting_points else "",
+                            description=", ".join(diff.supporting_points) if diff.supporting_points else "",
                             best_for=diff.best_for,
                             trust_signals=[],  # Not available in source model
                         )
                         result.differentiators.append(ad_diff)
                 
-                # Headlines and trust signals
-                result.headline_suggestions = local_report.headline_suggestions[:10]
-                result.trust_signals = local_report.trust_signals_to_use[:10]
+                # Headlines and trust signals (raw, no limits)
+                result.headline_suggestions = local_report.headline_suggestions
+                result.trust_signals = local_report.trust_signals_to_use
                 
                 # Market summary from analysis
                 if local_report.market_analysis:
@@ -135,9 +138,9 @@ class MarkyWorkflow:
                     # Build summary from available fields
                     parts = []
                     if ma.common_services:
-                        parts.append(f"Common services: {', '.join(ma.common_services[:5])}")
+                        parts.append(f"Common services: {', '.join(ma.common_services)}")
                     if ma.service_gaps:
-                        parts.append(f"Gaps: {', '.join(ma.service_gaps[:3])}")
+                        parts.append(f"Gaps: {', '.join(ma.service_gaps)}")
                     result.market_summary = ". ".join(parts) if parts else ""
                     
                 log(f"  ✓ Found {len(result.competitors)} competitors")
@@ -149,7 +152,7 @@ class MarkyWorkflow:
             # ================================================================
             # Stage 2: Review Intelligence (Google Reviews - needs place_ids)
             # ================================================================
-            log("📋 Stage 2/5: Running Review Intelligence (Google Reviews)...")
+            log("📋 Stage 2/6: Running Review Intelligence (Google Reviews)...")
             
             try:
                 if local_report and local_report.competitors:
@@ -170,19 +173,19 @@ class MarkyWorkflow:
                         # Add Review Intel voice-of-customer (Yelp will merge later)
                         if review_analysis.voice_of_customer:
                             voc = review_analysis.voice_of_customer
-                            pain_strs = [p["point"] for p in voc.pain_points[:8] if isinstance(p, dict) and p.get("point")]
-                            desire_strs = [d["desire"] for d in voc.desires[:8] if isinstance(d, dict) and d.get("desire")]
+                            pain_strs = [p["point"] for p in voc.pain_points if isinstance(p, dict) and p.get("point")]
+                            desire_strs = [d["desire"] for d in voc.desires if isinstance(d, dict) and d.get("desire")]
                             
                             result.customer_voice = CustomerVoice(
                                 pain_points=pain_strs,
                                 desires=desire_strs,
-                                praise_quotes=voc.praise_quotes[:5],
-                                complaint_quotes=voc.complaint_quotes[:5],
-                                common_themes=review_analysis.top_competitor_themes[:5],
+                                praise_quotes=voc.praise_quotes,
+                                complaint_quotes=voc.complaint_quotes,
+                                common_themes=review_analysis.top_competitor_themes,
                             )
                         
-                        result.recommended_hooks.extend(review_analysis.ad_hooks[:5])
-                        result.headline_suggestions.extend(review_analysis.headline_suggestions[:5])
+                        result.recommended_hooks.extend(review_analysis.ad_hooks)
+                        result.headline_suggestions.extend(review_analysis.headline_suggestions)
                         
                         log(f"  ✓ Analyzed {review_analysis.total_reviews_analyzed} Google Reviews")
                     else:
@@ -197,7 +200,7 @@ class MarkyWorkflow:
             # ================================================================
             # Stage 3: Yelp Intelligence
             # ================================================================
-            log("🗣️ Stage 3/5: Running Yelp Intelligence...")
+            log("🗣️ Stage 3/6: Running Yelp Intelligence...")
             
             try:
                 yelp_analysis = self.yelp_intel.analyze_market(
@@ -219,30 +222,20 @@ class MarkyWorkflow:
                         complaint_quotes=insights.pain_point_quotes[:5],
                         common_themes=insights.themes[:10] if insights.themes else [],
                     )
-                    # Merge with Review Intel if present
+                    # Merge with Review Intel if present (raw merge, no dedup)
                     if result.customer_voice:
-                        result.customer_voice.pain_points = list(dict.fromkeys(
-                            result.customer_voice.pain_points + yelp_voice.pain_points
-                        ))[:12]
-                        result.customer_voice.desires = list(dict.fromkeys(
-                            result.customer_voice.desires + yelp_voice.desires
-                        ))[:12]
-                        result.customer_voice.praise_quotes = (result.customer_voice.praise_quotes + yelp_voice.praise_quotes)[:8]
-                        result.customer_voice.complaint_quotes = (result.customer_voice.complaint_quotes + yelp_voice.complaint_quotes)[:8]
-                        result.customer_voice.common_themes = list(dict.fromkeys(
-                            result.customer_voice.common_themes + yelp_voice.common_themes
-                        ))[:10]
+                        result.customer_voice.pain_points = result.customer_voice.pain_points + yelp_voice.pain_points
+                        result.customer_voice.desires = result.customer_voice.desires + yelp_voice.desires
+                        result.customer_voice.praise_quotes = result.customer_voice.praise_quotes + yelp_voice.praise_quotes
+                        result.customer_voice.complaint_quotes = result.customer_voice.complaint_quotes + yelp_voice.complaint_quotes
+                        result.customer_voice.common_themes = result.customer_voice.common_themes + yelp_voice.common_themes
                     else:
                         result.customer_voice = yelp_voice
                     
-                    # Add Yelp-generated hooks to recommendations
+                    # Add Yelp-generated hooks (raw, no filter)
                     if yelp_analysis.ad_suggestions:
-                        result.recommended_hooks.extend(
-                            yelp_analysis.ad_suggestions.hooks[:5]
-                        )
-                        result.headline_suggestions.extend(
-                            yelp_analysis.ad_suggestions.headlines[:5]
-                        )
+                        result.recommended_hooks.extend(yelp_analysis.ad_suggestions.hooks)
+                        result.headline_suggestions.extend(yelp_analysis.ad_suggestions.headlines)
                 
                 log(f"  ✓ Analyzed {yelp_analysis.total_reviews_analyzed} reviews")
                 
@@ -251,10 +244,10 @@ class MarkyWorkflow:
                 log(f"  ⚠ Yelp Intel error: {e}")
             
             # ================================================================
-            # Stage 3: Trends Intelligence
+            # Stage 4: Trends Intelligence
             # ================================================================
             if request.include_trends:
-                log("📈 Stage 4/5: Running Trends Intelligence...")
+                log("📈 Stage 4/6: Running Trends Intelligence...")
                 
                 try:
                     # Build keywords from business type
@@ -307,25 +300,31 @@ class MarkyWorkflow:
                     result.errors.append(f"trends_intel: {str(e)}")
                     log(f"  ⚠ Trends Intel error: {e}")
             else:
-                log("📈 Stage 4/5: Trends Intelligence (skipped)")
-            
+                log("📈 Stage 4/6: Trends Intelligence (skipped)")
+
             # ================================================================
-            # Stage 5: Synthesis
+            # Stage 5: Related Questions Intelligence
             # ================================================================
-            log("🧠 Stage 5/5: Synthesizing insights...")
-            
-            result.key_insights = self._generate_key_insights(result)
-            result.executive_summary = self._generate_executive_summary(result)
-            
-            # Deduplicate and prioritize hooks
-            all_hooks = list(dict.fromkeys(result.recommended_hooks))  # preserve order
-            result.recommended_hooks = all_hooks[:10]
-            
-            # Deduplicate headlines and trust signals
-            result.headline_suggestions = list(dict.fromkeys(result.headline_suggestions))[:15]
-            result.trust_signals = list(dict.fromkeys(result.trust_signals))[:10]
-            
-            log("  ✓ Synthesis complete")
+            log("❓ Stage 5/6: Running Related Questions Intelligence...")
+            try:
+                rq_analysis = self.related_questions_intel.analyze(
+                    business_type=request.business_type,
+                    location=request.location,
+                    seed_queries=None,
+                    max_questions_per_query=15,
+                )
+                result.agents_used.append("related_questions_intel")
+                result.related_questions = rq_analysis.all_questions()
+                log(f"  ✓ Collected {len(result.related_questions)} related questions")
+            except Exception as e:
+                result.errors.append(f"related_questions_intel: {str(e)}")
+                log(f"  ⚠ Related Questions Intel error: {e}")
+
+            # ================================================================
+            # Stage 6: Data Collection Complete (no filtering)
+            # ================================================================
+            log("📦 Stage 6/6: Raw data collection complete...")
+            log("  ✓ All data collected (unfiltered)")
             
             # ================================================================
             # Finalize
@@ -345,79 +344,6 @@ class MarkyWorkflow:
                 error=str(e),
             )
     
-    def _generate_key_insights(self, result: AdResearchResult) -> List[str]:
-        """Generate key insights from the collected data."""
-        insights = []
-        
-        # Competitor insights
-        if result.competitors:
-            avg_rating = sum(c.rating for c in result.competitors) / len(result.competitors)
-            insights.append(
-                f"Market has {len(result.competitors)} competitors with avg rating {avg_rating:.1f}⭐"
-            )
-            
-            top_comp = max(result.competitors, key=lambda c: c.rating)
-            insights.append(
-                f"Top competitor: {top_comp.name} ({top_comp.rating}⭐, {top_comp.review_count} reviews)"
-            )
-        
-        # Customer voice insights
-        if result.customer_voice:
-            if result.customer_voice.pain_points:
-                pt = result.customer_voice.pain_points[0]
-                pt = pt[:80] + "..." if len(pt) > 80 else pt
-                insights.append(f"Top customer pain point: {pt}")
-            if result.customer_voice.desires:
-                d = result.customer_voice.desires[0]
-                d = d[:80] + "..." if len(d) > 80 else d
-                insights.append(f"What customers want most: {d}")
-        
-        # Timing insights
-        if result.timing:
-            best_timing = result.timing[0]
-            if best_timing.peak_months:
-                insights.append(
-                    f"Best months to advertise: {', '.join(best_timing.peak_months[:3])}"
-                )
-            if best_timing.avg_cpc > 0:
-                insights.append(
-                    f"Average CPC for '{best_timing.keyword}': ${best_timing.avg_cpc:.2f}"
-                )
-        
-        return insights[:7]
-    
-    def _generate_executive_summary(self, result: AdResearchResult) -> str:
-        """Generate an executive summary from the results."""
-        parts = []
-        
-        parts.append(
-            f"Analysis of {result.business_type} market in {result.location}."
-        )
-        
-        if result.competitors:
-            parts.append(
-                f"Identified {len(result.competitors)} competitors in the area."
-            )
-        
-        if result.customer_voice and result.customer_voice.pain_points:
-            pts = [p[:60] + "..." if len(p) > 60 else p for p in result.customer_voice.pain_points[:3]]
-            parts.append(
-                f"Key customer pain points include: {'; '.join(pts)}."
-            )
-        
-        if result.timing and result.timing[0].peak_months:
-            parts.append(
-                f"Best time to run ads: {', '.join(result.timing[0].peak_months[:2])}."
-            )
-        
-        if result.differentiators:
-            parts.append(
-                f"Top differentiation angle: {result.differentiators[0].angle_name}."
-            )
-        
-        return " ".join(parts)
-
-
 def run_workflow(
     business_type: str,
     location: str,

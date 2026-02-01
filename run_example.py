@@ -129,15 +129,34 @@ async def main():
 
         # Show research summary
         print("\n" + "-" * 40)
-        print("📊 RESEARCH SUMMARY:")
+        print("📊 RESEARCH SUMMARY (Marky Research Suite):")
         print("-" * 40)
         research = result["results"].get("research", {})
         summary = research.get("research_summary", {})
-        print(f"  YouTube videos analyzed: {summary.get('youtube_videos', 0)}")
-        print(f"  Google Ads analyzed:     {summary.get('google_ads', 0)}")
-        print(f"  Reviews analyzed:        {summary.get('reviews_analyzed', 0)}")
-        print(f"  Yelp businesses:         {summary.get('yelp_businesses', 0)}")
-        print(f"  Keywords analyzed:       {summary.get('keywords_analyzed', 0)}")
+        
+        # Marky research uses these keys
+        competitors = research.get("local_intel", {}).get("competitors_found", summary.get('competitors_found', 0))
+        google_reviews = summary.get('google_reviews', 0)
+        yelp_reviews = summary.get('yelp_reviews', 0)
+        keywords = summary.get('keywords_analyzed', 0)
+        related_questions = len(research.get("related_questions", []))
+        
+        print(f"  Competitors found:       {competitors}")
+        print(f"  Google Reviews analyzed: {google_reviews}")
+        print(f"  Yelp reviews analyzed:   {yelp_reviews}")
+        print(f"  Keywords analyzed:       {keywords}")
+        print(f"  Related questions:       {related_questions}")
+        
+        # Show Marky differentiators if available
+        differentiators = research.get("local_intel", {}).get("differentiators", [])
+        if differentiators:
+            print(f"  Differentiators:         {len(differentiators)}")
+        
+        # Show customer themes
+        customer_voice = research.get("google_reviews", {})
+        themes = customer_voice.get("common_themes", [])
+        if themes:
+            print(f"  Customer themes:         {len(themes)}")
 
         # Show generated assets if available
         print("\n" + "-" * 40)
@@ -147,25 +166,30 @@ async def main():
         # Images
         image_result = result["results"].get("image_generator", {})
         if image_result and not image_result.get("error"):
-            images = image_result.get("images", [])
-            print(f"  Images generated: {len(images)}")
-            for img in images[:3]:
+            frames = image_result.get("frames", [])
+            print(f"  Images generated: {len(frames)}")
+            for img in frames[:3]:
                 if isinstance(img, dict):
-                    print(f"    - {img.get('path', 'N/A')}")
+                    print(f"    - {img.get('url', img.get('path', 'N/A'))[:60]}...")
 
         # Audio
         voiceover_result = result["results"].get("voiceover", {})
         if voiceover_result and not voiceover_result.get("error"):
-            print(f"  Voiceover: {voiceover_result.get('audio_path', 'N/A')}")
+            vo_path = voiceover_result.get('audio_path', 'N/A')
+            print(f"  Voiceover: {vo_path.split('/')[-1] if '/' in vo_path else vo_path}")
 
         music_result = result["results"].get("music", {})
         if music_result and not music_result.get("error"):
-            print(f"  Music: {music_result.get('music_path', 'N/A')}")
+            music_path = music_result.get('music_path', 'N/A')
+            print(f"  Music: {music_path.split('/')[-1] if '/' in music_path else music_path}")
 
         # Video
         video_result = result["results"].get("video_assembly", {})
         if video_result and not video_result.get("error"):
-            print(f"  Final Video: {video_result.get('video_path', 'N/A')}")
+            video_path = video_result.get('video_path', 'N/A')
+            size = video_result.get('file_size', 'N/A')
+            print(f"  Final Video: {video_path.split('/')[-1]}")
+            print(f"    Size: {size if isinstance(size, str) else f'{size/1024/1024:.1f}MB'}")
 
         # PDF
         pdf_result = result["results"].get("pdf_builder", {})

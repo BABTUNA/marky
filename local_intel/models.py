@@ -92,6 +92,8 @@ class WebsiteData:
     
     # Raw content for analysis
     full_text: str = ""
+    # Raw HTML of the frontend (homepage) for downstream use
+    homepage_html: Optional[str] = None
 
 
 # ============================================================================

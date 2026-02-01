@@ -1,18 +1,19 @@
 # AdBoard AI - Context Restore File
-**Last Updated:** January 31, 2026
-**Session Summary:** Integrated teammate's Marky research agents into AdBoard pipeline
+**Last Updated:** January 31, 2026 (Evening)
+**Session Summary:** Integrated teammate's Marky research agents including new Related Questions Intel
 
 ---
 
 ## Current State
 
 ### What's Working
-1. **Full Marky Research Suite** - All 5 research agents are integrated and working:
+1. **Full Marky Research Suite** - All 6 research agents are integrated and working:
    - YouTube viral ad analysis (finds 5+ videos)
    - Local Intel (competitor discovery, website scraping, Claude success/failure analysis)
    - Google Reviews (40+ reviews analyzed via place_ids)
    - Yelp Reviews (65+ reviews with pain/praise extraction)
    - Trends Intel (keyword data from DataForSEO)
+   - Related Questions Intel (People also ask questions for content intent)
 
 2. **Video Generation Pipeline** - Complete storyboard_video pipeline works:
    - Research → Location Scout → Trend Analyzer → Script Writer → Image Generator → Voiceover → Music → Video Assembly
@@ -40,8 +41,9 @@
 #### Files Pulled from Teammate's `main` Branch
 - `local_intel/` - Full competitor intelligence suite
 - `review_intel/` - Google Reviews agent
-- `yelp_intel/` - Yelp reviews agent  
+- `yelp_intel/` - Yelp reviews agent
 - `trends_intel/` - DataForSEO trends agent
+- `related_questions_intel/` - Google "People also ask" questions agent (NEW)
 - `orchestrator/` - Marky workflow orchestrator
 - `run_marky.py` - Standalone Marky runner
 
@@ -90,28 +92,32 @@ Pipeline Runner (core/pipeline.py)
 │                    RESEARCH STAGE                            │
 │  EnhancedResearchAgent (agents/enhanced_research.py)         │
 │                                                              │
-│  [1/5] YouTube Research (agents/research_agent.py)           │
+│  [1/6] YouTube Research (agents/research_agent.py)           │
 │        → Viral ad patterns, hooks, visual styles             │
 │                                                              │
-│  [2/5] Local Intel (local_intel/agent.py)                    │
+│  [2/6] Local Intel (local_intel/agent.py)                    │
 │        → Competitor discovery via SerpAPI                    │
 │        → Website scraping (services, trust signals)          │
 │        → Claude analysis (success vs failure patterns)       │
 │                                                              │
-│  [3/5] Review Intel (review_intel/agent.py)                  │
+│  [3/6] Review Intel (review_intel/agent.py)                  │
 │        → Google Reviews via place_ids                        │
 │        → Pain points, desires, customer quotes               │
 │        → Ad hooks and headlines                              │
 │                                                              │
-│  [4/5] Yelp Intel (yelp_intel/agent.py)                      │
+│  [4/6] Yelp Intel (yelp_intel/agent.py)                      │
 │        → Yelp reviews with sentiment analysis                │
 │        → Pain points and praise extraction                   │
 │        → Customer themes and phrases                         │
 │                                                              │
-│  [5/5] Trends Intel (trends_intel/agent.py)                  │
+│  [5/6] Trends Intel (trends_intel/agent.py)                  │
 │        → DataForSEO keyword data                             │
 │        → Search volume, CPC, competition                     │
 │        → Seasonal timing insights                            │
+│                                                              │
+│  [6/6] Related Questions Intel (related_questions_intel/)    │
+│        → Google "People also ask" questions                  │
+│        → Content intent and FAQ opportunities                │
 └─────────────────────────────────────────────────────────────┘
     │
     ▼

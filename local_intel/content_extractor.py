@@ -166,17 +166,13 @@ class ContentExtractor:
         return list(set(found_services))
     
     def _extract_trust_signals(self, content: str) -> List[str]:
-        """Extract trust signals from content."""
+        """Extract trust signals from content (raw matched text, no normalization)."""
         signals = []
-        
-        for pattern, signal_type in self.TRUST_PATTERNS:
+        for pattern, _ in self.TRUST_PATTERNS:
             match = re.search(pattern, content, re.IGNORECASE)
             if match:
-                # Format the signal nicely
-                matched_text = match.group(0)
-                signals.append(matched_text.strip().title())
-        
-        return list(set(signals))
+                signals.append(match.group(0).strip().title())
+        return list(dict.fromkeys(signals))
     
     def _extract_pricing(self, content: str) -> List[str]:
         """Extract pricing information from content."""
@@ -216,8 +212,32 @@ class ContentExtractor:
         
         return list(set(taglines))[:5]
     
+    def _is_valid_usp(self, text: str) -> bool:
+        """Filter out junk: URLs, markdown fragments, non-text."""
+        if not text or len(text) < 10 or len(text) > 200:
+            return False
+        # Reject URL/markdown fragments
+        if "](http" in text or "](https" in text or "](/" in text:
+            return False
+        if text.startswith(("]", "[", "(", ")")) or text.startswith("http"):
+            return False
+        # Reject if mostly non-letters
+        letters = sum(1 for c in text if c.isalpha())
+        if letters < len(text) * 0.4:
+            return False
+        # Reject if looks like markdown link or contains URL
+        if re.match(r"^\]\s*\(", text) or "http" in text.lower() or "www." in text.lower():
+            return False
+        return True
+    
+    def _clean_usp(self, text: str) -> str:
+        """Remove markdown links, extra whitespace."""
+        # Strip markdown links: [text](url) -> text
+        text = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", text)
+        return text.strip()
+    
     def _extract_unique_points(self, content: str) -> List[str]:
-        """Extract unique selling points."""
+        """Extract unique selling points, filtering junk."""
         unique_points = []
         
         # Look for "why choose us" type sections
@@ -234,11 +254,11 @@ class ContentExtractor:
                 # Extract bullet points or sentences
                 points = re.split(r'[•\-\*\n]', text)
                 for point in points:
-                    point = point.strip()
-                    if 10 < len(point) < 200:
+                    point = self._clean_usp(point)
+                    if self._is_valid_usp(point):
                         unique_points.append(point)
         
-        return list(set(unique_points))[:10]
+        return list(dict.fromkeys(unique_points))[:10]
 
 
 class MarketAnalyzer:
