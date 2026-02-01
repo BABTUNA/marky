@@ -124,7 +124,20 @@ def upload_file_to_drive(
             fields="id, name, webViewLink, webContentLink",
         ).execute()
 
+        file_id = file.get("id")
         link = file.get("webViewLink") or file.get("webContentLink")
+
+        # For images: make publicly viewable and use direct embed URL for chat preview
+        if file_id and mime_type and mime_type.startswith("image/"):
+            try:
+                service.permissions().create(
+                    fileId=file_id,
+                    body={"type": "anyone", "role": "reader"},
+                ).execute()
+                link = f"https://drive.google.com/uc?export=view&id={file_id}"
+            except Exception as perm_err:
+                print(f"  ⚠️ Could not make image public: {perm_err}")
+
         if link:
             print(f"✅ Uploaded to Drive: {name} -> {link[:60]}...")
         return link

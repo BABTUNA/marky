@@ -10,7 +10,9 @@ AdBoard AI is a sophisticated multi-agent orchestration system that leverages sp
 
 ## Architecture Diagram
 
-![AdBoard AI Multi-Agent Pipeline](agent_architecture_diagram.png)
+![AdVantage Full Campaign Pipeline](agent_architecture_diagram.png)
+
+> **Update diagram:** Edit `docs/agent_architecture_diagram.html`, open in browser, screenshot/save as PNG → overwrite `agent_architecture_diagram.png`
 
 > **Multi-Agent Orchestration:** This system coordinates **12 autonomous agents** across 7 layers, with parallel execution in research (5 agents) and video generation (2 agents) phases.
 

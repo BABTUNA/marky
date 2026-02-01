@@ -20,29 +20,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Models ordered by preference (fastest/cheapest first for AdBoard use case)
+# Models ordered by preference (Gemini 1.5/1.0 retired May 2025; use 2.0+)
+# Override via GEMINI_MODELS env: comma-separated e.g. "gemini-2.0-flash-001"
 GEMINI_MODELS = [
-    {
-        "id": "gemini-2.0-flash-exp",
-        "name": "Gemini 2.0 Flash",
-        "max_tokens": 8192,
-        "cost_per_1m_input": 0.10,
-        "cost_per_1m_output": 0.40,
-    },
-    {
-        "id": "gemini-1.5-flash",
-        "name": "Gemini 1.5 Flash",
-        "max_tokens": 8192,
-        "cost_per_1m_input": 0.075,
-        "cost_per_1m_output": 0.30,
-    },
-    {
-        "id": "gemini-1.5-pro",
-        "name": "Gemini 1.5 Pro",
-        "max_tokens": 8192,
-        "cost_per_1m_input": 1.25,
-        "cost_per_1m_output": 5.00,
-    },
+    {"id": "gemini-2.0-flash-001", "name": "Gemini 2.0 Flash", "max_tokens": 8192},
+    {"id": "gemini-2.0-flash-exp", "name": "Gemini 2.0 Flash Exp", "max_tokens": 8192},
+    {"id": "gemini-2.0-flash-lite-001", "name": "Gemini 2.0 Flash Lite", "max_tokens": 8192},
+    {"id": "gemini-2.5-flash", "name": "Gemini 2.5 Flash", "max_tokens": 8192},
 ]
 
 
@@ -63,8 +47,12 @@ class GeminiClient:
         # Initialize Vertex AI
         vertexai.init(project=self.project_id, location=self.location)
         
-        self.models = GEMINI_MODELS.copy()
-        self.current_model_index = 0
+        # Allow env override of model list (comma-separated)
+        env_models = os.getenv("GEMINI_MODELS", "").strip()
+        if env_models:
+            self.models = [{"id": m.strip(), "name": m.strip(), "max_tokens": 8192} for m in env_models.split(",") if m.strip()]
+        else:
+            self.models = [m.copy() for m in GEMINI_MODELS]
         
         # Track rate-limited models
         self.rate_limited_models: Dict[str, float] = {}
@@ -205,14 +193,18 @@ class GeminiClient:
                 error_str = str(e)
                 last_error = e
 
-                # Check for rate limit errors
+                # Rate limit → try next model
                 if "429" in error_str or "quota" in error_str.lower() or "rate" in error_str.lower():
                     self._mark_rate_limited(model_id, 60)
                     continue
-                else:
-                    # Non-rate-limit error, raise it
-                    print(f"  ❌ Gemini error: {error_str}")
-                    raise e
+                # 404 / model not found → try next model (project may not have access)
+                if "404" in error_str or "not found" in error_str.lower() or "does not have access" in error_str.lower():
+                    print(f"  ⚠️  Gemini model {model_id} not available, trying next...")
+                    self._mark_rate_limited(model_id, 300)  # Skip for 5 min
+                    continue
+                # Other error, raise
+                print(f"  ❌ Gemini error: {error_str}")
+                raise e
 
         # All retries exhausted
         raise Exception(

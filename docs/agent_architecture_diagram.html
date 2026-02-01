@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AdVantage - Full Campaign Generation Pipeline</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f5f5;
+      padding: 40px;
+      margin: 0;
+    }
+    .diagram {
+      max-width: 720px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      padding: 32px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+    h1 {
+      text-align: center;
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
+      margin: 0 0 24px 0;
+    }
+    .node {
+      border-radius: 10px;
+      padding: 14px 20px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 500;
+      color: #333;
+      margin: 0 auto;
+    }
+    .node .sub {
+      font-size: 11px;
+      font-weight: 400;
+      color: #666;
+      margin-top: 4px;
+    }
+    .arrow {
+      color: #999;
+      font-size: 18px;
+      text-align: center;
+      margin: 4px 0;
+    }
+    .layer {
+      margin-bottom: 8px;
+    }
+    .layer-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #555;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+      padding: 6px 12px;
+      background: #e8e8e8;
+      border-radius: 6px;
+    }
+    .parallel-box {
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 8px;
+      background: #fafafa;
+    }
+    .parallel-row {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .parallel-item {
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 12px;
+      font-weight: 500;
+      min-width: 120px;
+    }
+    .input { background: #e8e8e8; color: #444; }
+    .research-1 { background: #2ecc71; color: white; }
+    .research-2 { background: #3498db; color: white; }
+    .synthesis { background: #9b59b6; color: white; }
+    .script { background: #e67e22; color: white; }
+    .storyboard { background: #e91e63; color: white; }
+    .viral { background: #c62828; color: white; }
+    .builder { background: #00897b; color: white; }
+    .output { background: #e8e8e8; color: #444; }
+  </style>
+</head>
+<body>
+  <div class="diagram">
+    <h1>AdVantage — Full Campaign Generation Pipeline</h1>
+
+    <div class="layer">
+      <div class="node input" style="max-width: 320px;">
+        💬 ASI:One Chat Interface
+        <div class="sub">Orchestrator + Intent Extractor (Gemini)</div>
+      </div>
+    </div>
+    <div class="arrow">↓</div>
+
+    <div class="layer">
+      <div class="layer-label">PARALLEL RESEARCH LAYER</div>
+      <div class="parallel-box">
+        <div class="parallel-row">
+          <div class="parallel-item research-1">🔍 Local Intel<br><small>SerpAPI, Places</small></div>
+          <div class="parallel-item research-1">🔍 Review Intel<br><small>Google Reviews</small></div>
+          <div class="parallel-item research-2">🔍 Yelp Intel</div>
+          <div class="parallel-item research-1">🔍 Google Trends</div>
+          <div class="parallel-item research-2">🔍 Related Questions</div>
+        </div>
+      </div>
+    </div>
+    <div class="arrow">↓</div>
+
+    <div class="layer">
+      <div class="node synthesis" style="max-width: 320px;">
+        🤖 Research Synthesis Agent
+        <div class="sub">+ Competitor Map (Google Static Maps)</div>
+      </div>
+    </div>
+    <div class="arrow">↓</div>
+
+    <div class="layer">
+      <div class="parallel-row" style="gap: 8px; margin-bottom: 8px;">
+        <div class="node" style="background: #ecf0f1; flex: 1; max-width: 200px;">Location Scout<br><small>Google Places</small></div>
+        <div class="node" style="background: #ecf0f1; flex: 1; max-width: 200px;">Trend Analyzer<br><small>Viral patterns</small></div>
+      </div>
+    </div>
+    <div class="arrow">↓</div>
+
+    <div class="layer">
+      <div class="node script" style="max-width: 320px;">
+        🤖 AI Script Writer (Gemini)
+        <div class="sub">Scene breakdown for storyboard + viral</div>
+      </div>
+    </div>
+    <div class="arrow">↓</div>
+
+    <div class="layer">
+      <div class="layer-label">PARALLEL CONTENT CREATION</div>
+      <div class="parallel-box">
+        <div class="parallel-row">
+          <div class="parallel-item storyboard" style="min-width: 200px;">
+            🎬 Long-Form Storyboard (Imagen 3)
+            <div class="sub">30-60s B&W sketches + Ken Burns</div>
+          </div>
+          <div class="parallel-item viral" style="min-width: 200px;">
+            🎬 Short-Form Viral (VEO 3 + Lyria)
+            <div class="sub">15s TikTok-style, photorealistic + TTS</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="arrow">↓</div>
+
+    <div class="layer">
+      <div class="node builder" style="max-width: 360px;">
+        📄 Campaign Package Builder
+        <div class="sub">Cost Estimator · Social Media · PDF · Upload to Drive</div>
+      </div>
+    </div>
+    <div class="arrow">↓</div>
+
+    <div class="layer">
+      <div class="node output" style="max-width: 320px;">
+        💬 ASI:One Response
+        <div class="sub">Thumbnail preview + Drive links (video, PDF)</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

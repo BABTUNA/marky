@@ -2,12 +2,21 @@
 Video Assembly Agent
 
 Combines video or images with audio (voiceover + optional music) into final MP4 using FFmpeg.
+
+Supports three modes:
+1. Image frames → Ken Burns storyboard
+2. Video clips → concatenate
+3. Sample video → use STORYBOARD_VIDEO_PATH or VEO_PLACEHOLDER_PATH as storyboard (when no frames)
 """
 
 import os
 import re
+import shutil
 from pathlib import Path
 import subprocess
+
+STORYBOARD_VIDEO_PATH = os.getenv("STORYBOARD_VIDEO_PATH", "")
+VEO_PLACEHOLDER_PATH = os.getenv("VEO_PLACEHOLDER_PATH", "")
 
 
 class VideoAssemblyAgent:
@@ -51,24 +60,31 @@ class VideoAssemblyAgent:
         image_data = previous_results.get("image_generator", {})
         voiceover_data = previous_results.get("voiceover", {})
         audio_mixer_data = previous_results.get("audio_mixer", {})
-        music_data = previous_results.get("music", {})
+        music_data = previous_results.get("music", {}) or previous_results.get("lyria_music", {})
         
         video_clips = veo_data.get("video_clips", [])
         image_frames = image_data.get("frames", [])
         voiceover_path = voiceover_data.get("audio_path")
         mixed_audio_path = audio_mixer_data.get("mixed_audio_path")
-        music_path = music_data.get("music_path")
+        music_path = music_data.get("music_path") or music_data.get("audio_path")
         
-        # Determine mode: video or storyboard
+        # Determine mode: sample (when env set), video, or storyboard (from images)
         mode = None
-        if video_clips:
+        sample_video_path = None
+        if STORYBOARD_VIDEO_PATH and Path(STORYBOARD_VIDEO_PATH).exists():
+            mode = "sample"
+            sample_video_path = STORYBOARD_VIDEO_PATH
+        elif VEO_PLACEHOLDER_PATH and Path(VEO_PLACEHOLDER_PATH).exists():
+            mode = "sample"
+            sample_video_path = VEO_PLACEHOLDER_PATH
+        elif video_clips:
             mode = "video"
         elif image_frames:
             mode = "storyboard"
-        
+
         if not mode:
             return {
-                "error": "No video clips or image frames available",
+                "error": "No video clips, image frames, or STORYBOARD_VIDEO_PATH available",
                 "skipped": True,
             }
         
@@ -77,20 +93,29 @@ class VideoAssemblyAgent:
         audio_type = "mixed" if mixed_audio_path else ("voiceover" if voiceover_path else ("music-only" if music_path else "silent"))
         
         print(f"\n🎬 Video Assembly Agent - {mode.upper()} Mode")
-        print(f"   {'Video Clips' if mode == 'video' else 'Image Frames'}: {len(video_clips) if mode == 'video' else len(image_frames)}")
+        if mode == "sample":
+            print(f"   Source: sample video ({sample_video_path})")
+        else:
+            print(f"   {'Video Clips' if mode == 'video' else 'Image Frames'}: {len(video_clips) if mode == 'video' else len(image_frames)}")
         print(f"   Audio: {audio_type}")
-        
+
         try:
-            if mode == "storyboard":
+            if mode == "sample":
+                # Use sample video as storyboard (will add audio if available)
+                safe_product = re.sub(r"[^\w\s-]", "", product).strip().replace(" ", "_")
+                video_path = self.output_dir / f"{safe_product}_storyboard_{duration}s.mp4"
+                shutil.copy(sample_video_path, video_path)
+                print(f"\n   📹 Using sample video as storyboard: {video_path.name}")
+            elif mode == "storyboard":
                 # Convert images to video with Ken Burns effects
                 print(f"\n   🖼️  Step 1: Converting {len(image_frames)} images to video with Ken Burns effects...")
                 video_path = await self._create_video_from_images(image_frames, product, duration)
-            else:
+            elif mode == "video":
                 # Concatenate video clips
                 print(f"\n   📹 Step 1: Concatenating {len(video_clips)} video clips...")
                 video_path = await self._concatenate_videos(video_clips, product)
-            
-            # Step 2: Add audio if available (optional for silent mode)
+
+            # Step 2: Add audio if available (storyboard gets TTS + music)
             if audio_path:
                 print(f"   🎵 Step 2: Adding audio track...")
                 final_video = await self._add_audio_to_video(

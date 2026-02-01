@@ -18,7 +18,6 @@ load_dotenv()
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY")
 REPLICATE_API_TOKEN = os.getenv("REPLICATE_API_TOKEN")
-ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY")
 GOOGLE_PLACES_API_KEY = os.getenv("GOOGLE_PLACES_API_KEY")
 
 # Fetch.AI
@@ -34,7 +33,6 @@ AGENTVERSE_API_KEY = os.getenv("AGENTVERSE_API_KEY")
 
 GROQ_BASE_URL = "https://api.groq.com/openai/v1"
 YOUTUBE_BASE_URL = "https://www.googleapis.com/youtube/v3"
-ELEVENLABS_BASE_URL = "https://api.elevenlabs.io/v1"
 GOOGLE_PLACES_BASE_URL = "https://places.googleapis.com/v1"
 
 
@@ -51,20 +49,7 @@ GROQ_TEMPERATURE = 0.7
 REPLICATE_IMAGE_MODEL = "black-forest-labs/flux-schnell"  # Fast, good for hackathon
 REPLICATE_IMAGE_MODEL_HQ = "black-forest-labs/flux-dev"  # Higher quality, slower
 
-# ElevenLabs Voice IDs (free tier voices)
-ELEVENLABS_VOICES = {
-    "female": {
-        "professional": "21m00Tcm4TlvDq8ikWAM",  # Rachel
-        "friendly": "EXAVITQu4vr4xnSDxMaL",  # Bella
-        "energetic": "AZnzlk1XvdvUeBnXmlld",  # Domi
-    },
-    "male": {
-        "professional": "ErXwobaYiN019PkySvjV",  # Antoni
-        "friendly": "VR6AewLTigWG4xSOukaG",  # Arnold
-        "energetic": "pNInz6obpgDQGcFmaJgB",  # Adam
-    },
-}
-ELEVENLABS_MODEL = "eleven_monolingual_v1"
+# Voiceover uses Google Cloud Text-to-Speech (same GOOGLE_APPLICATION_CREDENTIALS)
 
 
 # ============================================

@@ -46,7 +46,7 @@ class AudioMixerAgent:
         try:
             # Get voiceover data
             voiceover_data = previous_results.get("voiceover", {})
-            music_data = previous_results.get("music", {})
+            music_data = previous_results.get("music", {}) or previous_results.get("lyria_music", {})
 
             voiceover_path = voiceover_data.get("audio_path")
             if not voiceover_path or not os.path.exists(voiceover_path):
@@ -55,8 +55,8 @@ class AudioMixerAgent:
                     "skipped": True,
                 }
 
-            # Check for music
-            music_path = music_data.get("music_path")
+            # Check for music (music agent uses music_path, lyria_music uses audio_path)
+            music_path = music_data.get("music_path") or music_data.get("audio_path")
             has_music = music_path and os.path.exists(music_path)
 
             if has_music:

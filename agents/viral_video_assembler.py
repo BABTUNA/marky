@@ -15,8 +15,6 @@ Output: Ready-to-upload TikTok/Reels video with complete audio
 
 TESTING MODE:
 - Set ASSEMBLER_USE_MOCK=true to skip actual assembly and return mock paths
-- Set ASSEMBLER_USE_ELEVENLABS=true to use ElevenLabs TTS instead of Google TTS
-- This allows testing the full pipeline without all dependencies
 """
 
 import asyncio
@@ -55,10 +53,6 @@ except ImportError:
 
 # Testing flags
 ASSEMBLER_USE_MOCK = os.getenv("ASSEMBLER_USE_MOCK", "false").lower() == "true"
-# ElevenLabs is now a fallback - Google TTS is the default
-ASSEMBLER_USE_ELEVENLABS = (
-    os.getenv("ASSEMBLER_USE_ELEVENLABS", "false").lower() == "true"
-)
 
 
 class ViralVideoAssembler:
@@ -128,33 +122,20 @@ class ViralVideoAssembler:
             }
 
         # Generate voiceover from script
-        # Priority: 1) Existing voiceover, 2) Google TTS (default), 3) ElevenLabs (fallback)
+        # Priority: 1) Existing voiceover from voiceover agent, 2) Google TTS
         voiceover_path = None
 
-        # Check if voiceover already exists from voiceover agent
         existing_voiceover = previous_results.get("voiceover", {})
         if existing_voiceover.get("audio_path"):
             voiceover_path = existing_voiceover.get("audio_path")
             print(f"   🎤 Using existing voiceover: {voiceover_path}")
         else:
-            # Extract narration text from script
             narration_text = self._extract_narration(script_data, product)
-
-            # Try Google TTS first (default)
             if TTS_AVAILABLE:
                 voiceover_path = await self._google_tts_generate(
                     text=narration_text,
                     product=product,
                     tone=tone,
-                )
-
-            # Fall back to ElevenLabs if Google TTS fails and flag is set
-            if not voiceover_path and ASSEMBLER_USE_ELEVENLABS:
-                print("   ⚠️  Google TTS failed, trying ElevenLabs...")
-                voiceover_path = await self._generate_elevenlabs_voiceover(
-                    script_data=script_data,
-                    duration=duration,
-                    product=product,
                 )
 
         print(f"   🎤 Voiceover path: {voiceover_path}")
@@ -232,142 +213,6 @@ class ViralVideoAssembler:
 
         return narration_text
 
-    async def _generate_voiceover(
-        self,
-        script_data: dict,
-        duration: int,
-        product: str,
-    ) -> Optional[str]:
-        """
-        Generate voiceover narration using Google TTS.
-
-        Extracts the script/hook text and converts to speech.
-        Uses Google Cloud Text-to-Speech (free tier available).
-
-        Args:
-            script_data: Script from script_writer agent
-            duration: Target duration
-            product: Product name for filename
-
-        Returns:
-            Path to voiceover audio file
-        """
-
-        print("\n   🎤 Generating voiceover with Google TTS...")
-
-        # Extract narration text from script
-        scenes = script_data.get("scenes", [])
-
-        # For 15s viral video, use first scene + hook
-        narration_parts = []
-        for scene in scenes[:2]:  # First 2 scenes for 15s
-            narration = scene.get("narration", "")
-            if narration and narration != "[Background music only]":
-                narration_parts.append(narration)
-
-        narration_text = " ".join(narration_parts)
-
-        if not narration_text:
-            print("   ⚠️  No narration found - using product name as voiceover")
-            narration_text = f"Discover {product}. Experience the difference."
-
-        print(f"   📝 Narration: {narration_text[:100]}...")
-
-        # TODO: Uncomment when ready to generate
-        # return await self._google_tts_generate(narration_text, product)
-
-        # Placeholder - Google TTS not implemented yet
-        print(
-            "   ⏸️  Google TTS DISABLED - consider using ASSEMBLER_USE_ELEVENLABS=true"
-        )
-        return None
-
-    async def _generate_elevenlabs_voiceover(
-        self,
-        script_data: dict,
-        duration: int,
-        product: str,
-    ) -> Optional[str]:
-        """
-        Generate voiceover using ElevenLabs API (already integrated).
-
-        Reuses the existing voiceover_agent logic for consistency.
-        """
-        import requests
-
-        api_key = os.getenv("ELEVENLABS_API_KEY")
-        if not api_key:
-            print("   ⚠️  ELEVENLABS_API_KEY not set - skipping voiceover")
-            return None
-
-        print("\n   🎤 Generating voiceover with ElevenLabs...")
-
-        # Extract narration text from script
-        scenes = script_data.get("scenes", [])
-
-        # Use voiceover_text if available, otherwise build from scenes
-        narration_text = script_data.get("voiceover_text", "")
-
-        if not narration_text:
-            narration_parts = []
-            for scene in scenes:
-                voiceover = scene.get("voiceover", "") or scene.get("narration", "")
-                if voiceover and voiceover not in [
-                    "[Background music only]",
-                    "[Music only]",
-                ]:
-                    narration_parts.append(voiceover)
-            narration_text = " ".join(narration_parts)
-
-        if not narration_text:
-            print("   ⚠️  No narration found - using default text")
-            narration_text = f"Discover {product}. Experience the difference today."
-
-        # Truncate if too long
-        if len(narration_text) > 1500:
-            narration_text = narration_text[:1500]
-            print(f"   📝 Truncated to 1500 chars")
-
-        print(f"   📝 Narration: {narration_text[:80]}...")
-
-        try:
-            # Use Rachel voice (natural female) - same as voiceover_agent
-            voice_id = "21m00Tcm4TlvDq8ikWAM"
-
-            response = requests.post(
-                f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}",
-                headers={"xi-api-key": api_key, "Content-Type": "application/json"},
-                json={
-                    "text": narration_text,
-                    "model_id": "eleven_turbo_v2_5",
-                    "voice_settings": {
-                        "stability": 0.4,
-                        "similarity_boost": 0.75,
-                        "style": 0.5,
-                        "use_speaker_boost": True,
-                    },
-                },
-                timeout=60,
-            )
-
-            if response.status_code != 200:
-                print(f"   ❌ ElevenLabs error: {response.status_code}")
-                return None
-
-            # Save audio
-            safe_product = product.replace(" ", "_")[:20]
-            output_path = self.output_dir / f"{safe_product}_voiceover.mp3"
-
-            with open(output_path, "wb") as f:
-                f.write(response.content)
-
-            print(f"   ✅ Voiceover saved: {output_path}")
-            return str(output_path)
-
-        except Exception as e:
-            print(f"   ❌ ElevenLabs voiceover failed: {e}")
-            return None
-
     def _prepare_ssml(self, text: str, tone: str) -> str:
         """
         Convert plain text to SSML for more natural speech.
@@ -391,16 +236,16 @@ class ViralVideoAssembler:
         # Add emphasis to questions
         text = re.sub(r"\?(\s+)", r'?<break time="250ms"/>\1', text)
 
-        # Wrap in SSML with prosody adjustments based on tone
+        # Wrap in SSML with prosody (rate only - Studio voices don't support pitch)
         prosody_settings = {
-            "professional": 'rate="95%" pitch="-1st"',
-            "friendly": 'rate="100%" pitch="+1st"',
-            "energetic": 'rate="105%" pitch="+2st"',
-            "calm": 'rate="90%" pitch="-2st"',
-            "funny": 'rate="102%" pitch="+1st"',
+            "professional": 'rate="95%"',
+            "friendly": 'rate="100%"',
+            "energetic": 'rate="105%"',
+            "calm": 'rate="90%"',
+            "funny": 'rate="102%"',
         }
 
-        prosody = prosody_settings.get(tone.lower(), 'rate="97%" pitch="0st"')
+        prosody = prosody_settings.get(tone.lower(), 'rate="97%"')
 
         ssml = f"<speak><prosody {prosody}>{text}</prosody></speak>"
         return ssml

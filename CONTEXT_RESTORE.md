@@ -19,6 +19,7 @@
 | **Marky Workflow** | `orchestrator/workflow.py` | Research sub-agent orchestration |
 | **Map Generator** | `utils/map_generator.py` | Competitor map with legend/border |
 | **Flowchart** | `docs/AGENT_FLOWCHART.md` | Agent orchestration diagram (Mermaid) |
+| **Orchestration ref** | `docs/AGENT_ORCHESTRATION.md` | Full data-flow: inputs, outputs, order |
 
 ### Run Commands
 | Command | Purpose |
@@ -81,7 +82,7 @@ User (ASI:One / Agentverse chat)
 | MOCK_MODE | `true` | Instant mock data, no pipeline |
 
 ### Default Output Type
-User says "video" or "storyboard video" → `storyboard_video` pipeline.
+**full_campaign** (all three deliverables): storyboard video, viral video, PDF. User says "video", "full", or "viral" → full_campaign.
 
 ---
 
@@ -89,12 +90,12 @@ User says "video" or "storyboard video" → `storyboard_video` pipeline.
 
 | Pipeline | Use Case |
 |----------|----------|
-| **storyboard_video** | **DEFAULT** — research → script → images → video → cost → social → PDF |
+| **full_campaign** | **DEFAULT** — storyboard (with TTS+music) + viral (VEO 3 with TTS+music) + PDF |
+| storyboard_video | Storyboard + PDF only (no viral video) |
 | script | Script only |
 | storyboard | Script + images, no video |
 | pdf | PDF package (no video) |
-| full | Everything (voiceover, music, PDF) |
-| viral_video | VEO 3 + Lyria + TTS (placeholder/mock) |
+| viral_video | VEO 3 + Lyria + TTS only |
 | viral_video_test | Viral pipeline without research |
 | quick_test | Dummy research → script → images → video → PDF (no Marky, faster) |
 | audio_package | Voiceover + music, no video |
@@ -118,13 +119,13 @@ Sent after each step: research, location_scout, trend_analyzer, script_writer, i
 | Script Writer | `script_writer.py` | Ad script for storyboard + viral (Gemini) |
 | Image Generator | `image_generator.py` | Imagen 3 storyboard frames (30s delay between calls) |
 | Video Assembly | `video_assembly_agent.py` | Ken Burns from frames (FFmpeg) |
-| Voiceover | `voiceover_agent.py` | ElevenLabs |
+| Voiceover | `voiceover_agent.py` | Google Cloud TTS |
 | Music | `music_agent.py` | Background music (Gemini) |
 | Audio Mixer | `audio_mixer.py` | Mix voiceover + music |
 | Cost Estimator | `cost_estimator.py` | Budget breakdown (Gemini) |
 | Social Media | `social_media_agent.py` | Hashtags, captions (Gemini) |
-| PDF Builder | `pdf_builder.py` | Campaign PDF with map, script, budget, hiring guide |
-| VEO 3 | `veo3_agent.py` | Photorealistic video (placeholder) |
+| PDF Builder | `pdf_builder.py` | Campaign PDF with map, script, budget, hiring guide (uses static `docs/pipeline_diagram.png`) |
+| VEO 3 | `veo3_agent.py` | Photorealistic video — real API via google-genai (VEO_USE_PLACEHOLDER=false) |
 | Lyria | `lyria_agent.py` | AI music (mock) |
 | Viral Assembler | `viral_video_assembler.py` | Video + music + Google TTS |
 
@@ -138,19 +139,22 @@ Sent after each step: research, location_scout, trend_analyzer, script_writer, i
 - **extract_video_thumbnail()** — Tries frames 0, 1, 2, 3, ~1s; skips black frames (brightness < 15); uses OpenCV
 - **upload_to_agentverse_storage()** — Uploads thumbnail to Agentverse External Storage
 - **create_preview_response()** — ChatMessage with ResourceContent (thumbnail) + TextContent (links)
+- **Fallback preview** — If thumbnail extraction fails or video path missing, uses first storyboard frame from `image_generator.frames`
+- **video_path fix** — `format_results` now always captures `final_video_path` before the upload branch, so thumbnail extraction gets a valid path even when `video_url` is already set
 
 ### Competitor Map
 - **utils/map_generator.py** — Google Static Maps API; Pillow post-process adds title bar, legend, border
 - **competitor_map_path** in research → passed to pdf_builder
 - **CompetitorInsight.address** — Workflow passes address from local_intel for map markers
+- **Static Maps error handling** — Detects error images (small response, "error" in content); prints guidance to enable Maps Static API, billing, key restrictions
 
 ### Image Generation Rate Limits
 - **IMAGE_DELAY_SECONDS** — 30s between each Imagen call (configurable via `IMAGEN_DELAY_SECONDS` in .env)
 - Prevents quota/rate-limit failures
 
 ### format_results
-- Returns `{text, video_url, pdf_url, video_path}` (minimal text; details in PDF)
-- Links: "View Full Video Here", "View Full Analysis PDF", "View Viral Video Here" (when present)
+- Returns `{text, video_url, viral_url, pdf_url, video_path}`
+- Links: "View Storyboard Video Here", "View Viral Video Here", "View Full Analysis PDF"
 
 ---
 
@@ -189,8 +193,10 @@ Brown/
 │   └── models.py                # CompetitorInsight has address
 ├── utils/
 │   ├── gdrive_upload.py
-│   └── map_generator.py         # Title, legend, border
+│   ├── map_generator.py         # Title, legend, border
+│   └── generate_pipeline_diagram.py  # Creates docs/pipeline_diagram.png for PDFs
 ├── docs/
+│   ├── pipeline_diagram.png     # Static diagram embedded in PDFs
 │   ├── AGENT_FLOWCHART.md
 │   ├── agent_flowchart.mmd
 │   ├── MCP_AGENT.md
@@ -230,11 +236,24 @@ GDRIVE_DEFAULT_FOLDER_ID=your_folder_id
 IMAGEN_DELAY_SECONDS=30   # Seconds between Imagen API calls (default 30)
 ```
 
+### VEO 3 (Viral Video)
+```bash
+VEO_USE_PLACEHOLDER=true  # Set false for real VEO 3 (~$1.50/video)
+VEO_GCS_OUTPUT_URI=       # Optional: gs://bucket/prefix for large outputs
+```
+
+### Storyboard from Sample (no Imagen)
+```bash
+STORYBOARD_VIDEO_PATH=/path/to/nice/video.mp4   # Use this as storyboard instead of image gen
+# Or VEO_PLACEHOLDER_PATH - same video used for storyboard when both set
+# When set: skips image_generator, uses sample for storyboard; viral uses VEO (real or placeholder)
+```
+
 ### Research
 SERPAPI_KEY, YOUTUBE_API_KEY, GOOGLE_PLACES_API_KEY (or GOOGLE_MAPS_API_KEY)
 
 ### Optional
-ELEVENLABS_API_KEY, GROQ_API_KEY, REPLICATE_API_TOKEN, TOGETHER_API_KEY
+GROQ_API_KEY, REPLICATE_API_TOKEN, TOGETHER_API_KEY
 
 ---
 
@@ -268,6 +287,7 @@ ELEVENLABS_API_KEY, GROQ_API_KEY, REPLICATE_API_TOKEN, TOGETHER_API_KEY
 - 30s delay between Imagen calls (IMAGEN_DELAY_SECONDS)
 - Pipeline progress_callback for check-in messages
 - Agent flowchart (docs/AGENT_FLOWCHART.md)
+- Static pipeline diagram in PDFs (`docs/pipeline_diagram.png`) via `utils/generate_pipeline_diagram.py` — replaces inline ReportLab PipelineDiagram with a cleaner visual
 
 ---
 

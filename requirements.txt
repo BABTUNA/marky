@@ -11,11 +11,14 @@ groq>=0.4.0
 # Image Generation - Google Vertex AI Imagen
 google-cloud-aiplatform>=1.38.0
 
+# Video Generation - Google VEO 3 (via Vertex AI)
+google-genai>=1.0.0
+
 # Image Generation - Replicate (backup)
 replicate>=0.25.0
 
-# Text-to-Speech - ElevenLabs
-elevenlabs>=1.0.0
+# Text-to-Speech - Google Cloud TTS
+google-cloud-texttospeech>=2.16.0
 
 # HTTP Requests
 requests>=2.31.0

@@ -5,14 +5,16 @@ AdBoard AI - Interactive Runner
 Usage:
     python run_example.py                    # Interactive mode - enter your prompt
     python run_example.py "your prompt"      # Direct mode - pass prompt as argument
+    python run_example.py --quick "prompt"   # Skip research (dummy data) - faster testing
 
 Examples:
     python run_example.py "Create an ad campaign for my taco truck in Austin"
     python run_example.py "I need ads for my coffee shop in Providence"
-    python run_example.py "Make a viral video and storyboard for my gym in Boston"
+    python run_example.py --quick "Create ad for my coffee shop"   # Fast test (no research)
 """
 
 import asyncio
+import os
 import sys
 
 from core.intent_extractor import extract_intent
@@ -62,7 +64,7 @@ def display_intent(intent: dict):
     print(f"  Location:    {intent.get('city', 'Not specified')}")
     print(f"  Duration:    {intent.get('duration', 30)} seconds")
     print(f"  Tone:        {intent.get('tone', 'professional')}")
-    print(f"  Output Type: {intent.get('output_type', 'storyboard_video')}")
+    print(f"  Output Type: {intent.get('output_type', 'full_campaign')}")
     print("-" * 40)
 
     if not intent.get("ready"):
@@ -74,10 +76,15 @@ def display_intent(intent: dict):
 
 
 async def main():
+    # Check for --quick flag (skip research, use dummy data)
+    use_quick = "--quick" in sys.argv or os.getenv("QUICK_FULL", "").lower() == "true"
+    if "--quick" in sys.argv:
+        sys.argv.remove("--quick")
+
     # Get prompt from command line arg or interactive input
     if len(sys.argv) > 1:
         user_prompt = " ".join(sys.argv[1:])
-        print(f"\n🎬 AdBoard AI")
+        print(f"\n🎬 AdBoard AI" + (" [QUICK MODE - no research]" if use_quick else ""))
         print(f"Prompt: {user_prompt}\n")
     else:
         user_prompt = get_user_input()
@@ -104,11 +111,12 @@ async def main():
 
     print("\n🚀 Starting pipeline...\n")
 
-    # Run the pipeline
+    # Run the pipeline (override to quick_full if --quick)
+    output_type = "quick_full" if use_quick else intent.get("output_type", "full_campaign")
     result = await run_pipeline(
         product=intent.get("product", "business"),
         industry=intent.get("industry", "general"),
-        output_type=intent.get("output_type", "storyboard_video"),
+        output_type=output_type,
         duration=intent.get("duration", 30),
         tone=intent.get("tone", "professional"),
         city=intent.get("city", ""),
@@ -178,6 +186,11 @@ async def main():
             vo_path = voiceover_result.get('audio_path', 'N/A')
             print(f"  Voiceover: {vo_path.split('/')[-1] if '/' in vo_path else vo_path}")
 
+        # Lyria music (viral pipeline)
+        lyria_result = result["results"].get("lyria_music", {})
+        if lyria_result and lyria_result.get("audio_path"):
+            print(f"  Lyria Music: {lyria_result['audio_path'].split('/')[-1]}")
+
         # Audio mixer (shows if music was included)
         audio_mixer_result = result["results"].get("audio_mixer", {})
         if audio_mixer_result and not audio_mixer_result.get("error"):
@@ -188,14 +201,16 @@ async def main():
                 mixed_path = audio_mixer_result.get('mixed_audio_path', 'N/A')
                 print(f"  Audio: {mixed_path.split('/')[-1]}")
 
-        # Video
+        # Storyboard video
         video_result = result["results"].get("video_assembly", {})
         if video_result and not video_result.get("error"):
             video_path = video_result.get('final_video_path') or video_result.get('video_path', 'N/A')
-            size = video_result.get('file_size', 'N/A')
-            print(f"  Final Video: {video_path.split('/')[-1] if isinstance(video_path, str) else 'N/A'}")
-            if isinstance(size, (int, float)):
-                print(f"    Size: {size/1024/1024:.1f}MB")
+            print(f"  Storyboard Video: {video_path.split('/')[-1] if isinstance(video_path, str) else 'N/A'}")
+
+        # Viral video (when quick_full or full_campaign)
+        viral_result = result["results"].get("viral_video_assembler", {})
+        if viral_result and viral_result.get("final_video_path"):
+            print(f"  Viral Video: {viral_result['final_video_path'].split('/')[-1]}")
 
         # PDF
         pdf_result = result["results"].get("pdf_builder", {})
@@ -208,15 +223,21 @@ async def main():
         print("-" * 40)
         try:
             from agents.orchestrator import upload_file
-            import os
             uploaded = []
             if video_result and not video_result.get("error"):
                 vpath = video_result.get("final_video_path") or video_result.get("video_path")
                 if vpath and os.path.exists(vpath):
                     url = upload_file(vpath)
                     if url:
-                        print(f"  🎬 Video: {url}")
-                        uploaded.append("video")
+                        print(f"  🎬 Storyboard Video: {url}")
+                        uploaded.append("storyboard")
+            if viral_result and viral_result.get("final_video_path"):
+                vpath = viral_result["final_video_path"]
+                if os.path.exists(vpath):
+                    url = upload_file(vpath)
+                    if url:
+                        print(f"  🎬 Viral Video: {url}")
+                        uploaded.append("viral")
             if pdf_result and not pdf_result.get("error"):
                 ppath = pdf_result.get("pdf_path")
                 if ppath and os.path.exists(ppath):

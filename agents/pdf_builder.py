@@ -270,6 +270,31 @@ class PDFBuilderAgent:
             story.append(Paragraph("EXECUTIVE SUMMARY", title_style))
             story.append(Spacer(1, 0.15 * inch))
 
+            # Your three deliverables (when viral video is present)
+            viral_data = previous_results.get("viral_video_assembler", {})
+            has_viral = bool(viral_data.get("final_video_path"))
+            if has_viral:
+                story.append(Paragraph("<b>Your Campaign Deliverables:</b>", subheading_style))
+                story.append(
+                    Paragraph(
+                        "1. <b>Storyboard Video</b> — Silent concept video for development and pitching to clients or crew.",
+                        body_style,
+                    )
+                )
+                story.append(
+                    Paragraph(
+                        "2. <b>Viral Video</b> — Ready-to-post short-form video with music and voiceover for TikTok and Reels.",
+                        body_style,
+                    )
+                )
+                story.append(
+                    Paragraph(
+                        "3. <b>Campaign PDF</b> — This document with research, script, budget, locations, and hiring guide.",
+                        body_style,
+                    )
+                )
+                story.append(Spacer(1, 0.15 * inch))
+
             story.append(Paragraph("<b>Project Overview:</b>", subheading_style))
             story.append(
                 Paragraph(
@@ -310,7 +335,12 @@ class PDFBuilderAgent:
                     Paragraph(f"Script Structure: {len(scenes)} scenes", body_style)
                 )
 
-            insights = research.get("insights", [])
+            raw_insights = research.get("insights", [])
+            insights = (
+                raw_insights.get("recommended_hooks", [])
+                if isinstance(raw_insights, dict)
+                else (list(raw_insights) if raw_insights else [])
+            )
             if insights:
                 story.append(Spacer(1, 0.15 * inch))
                 story.append(
@@ -341,19 +371,20 @@ class PDFBuilderAgent:
             )
             story.append(Spacer(1, 0.15 * inch))
 
-            # Use static pipeline diagram image (generated once, reused for all PDFs)
-            # Shows research agents running concurrently, then production pipeline
-            static_diagram_path = Path(__file__).parent.parent / "docs" / "pipeline_diagram.png"
-            if static_diagram_path.exists():
+            # Agent orchestration diagram: prefer agent_architecture_diagram, fallback to pipeline_diagram
+            arch_path = Path(__file__).parent.parent / "docs" / "agent_architecture_diagram.png"
+            pipeline_path = Path(__file__).parent.parent / "docs" / "pipeline_diagram.png"
+            diagram_path = arch_path if arch_path.exists() else pipeline_path
+            if diagram_path.exists():
                 try:
                     diagram_img = RLImage(
-                        str(static_diagram_path),
+                        str(diagram_path),
                         width=7.2 * inch,
                         height=4.0 * inch,
                     )
                     story.append(diagram_img)
                 except Exception as e:
-                    print(f"  ⚠️ Could not load pipeline diagram: {e}")
+                    print(f"  ⚠️ Could not load orchestration diagram: {e}")
             story.append(Spacer(1, 0.2 * inch))
 
             # Pipeline step descriptions (compact list)

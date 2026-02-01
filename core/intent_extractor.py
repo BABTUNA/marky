@@ -41,14 +41,14 @@ def extract_intent(user_input: str) -> dict:
 
 Message: "{user_input}"
 
-We create two things: (1) a storyboard package for development (script, costs, locations, hiring guide) and (2) a ready-to-post viral video. The default is to create both.
+We create three deliverables: (1) storyboard video (silent, for development), (2) viral video (ready-to-post with audio), and (3) campaign PDF. The default is to create all three (full_campaign).
 
 Return a JSON object with these exact fields:
 {{
     "is_ad_request": true/false,
     "product": "string or null",
     "industry": "string or null (food/fitness/tech/retail/services/construction/beauty/automotive/general)",
-    "output_type": "script/storyboard/storyboard_video/video/pdf/full (default: storyboard_video)",
+    "output_type": "script/storyboard/storyboard_video/full_campaign/video/pdf/full (default: full_campaign)",
     "duration": 30/45/60 (default: 45),
     "tone": "professional/funny/emotional/energetic (default: professional)",
     "city": "string or null",
@@ -59,12 +59,13 @@ Return a JSON object with these exact fields:
 Rules:
 1. is_ad_request = true if they want any kind of ad, commercial, storyboard, viral video, marketing, or script
 2. product is REQUIRED - if not provided, add "product" to missing
-3. output_type defaults to "storyboard_video" (storyboard + PDF package + optionally viral video)
-4. "full" or "full package" or "everything" means output_type = "full"
+3. output_type defaults to "full_campaign" (storyboard video + viral video + PDF — all three)
+4. "full" or "full package" or "everything" or "viral" means output_type = "full_campaign"
 5. "pdf" or "production package" or "budget" means output_type = "pdf"
-6. "video" or "storyboard video" or "animated" means output_type = "storyboard_video"
+6. "video" or "storyboard video" or "animated" means output_type = "full_campaign" (all three)
 7. "script only" or "just script" means output_type = "script"
 8. "storyboard" without "video" means output_type = "storyboard" (images only, no video)
+9. "storyboard only" or "no viral" means output_type = "storyboard_video" (storyboard + PDF, no viral)
 9. duration defaults to 30 if not specified
 10. tone defaults to "professional" if not specified
 11. ready = true only if we have at least the product
@@ -91,15 +92,13 @@ Return ONLY valid JSON, no other text or explanation."""
         return json.loads(result_text)
 
     except json.JSONDecodeError as e:
-        print(f"JSON parse error: {e}")
-        return {
-            "is_ad_request": False,
-            "ready": False,
-            "error": "Failed to parse response",
-        }
+        print(f"JSON parse error: {e}, falling back to rule-based intent")
+        return extract_intent_simple(user_input)
     except Exception as e:
-        print(f"Intent extraction error: {e}")
-        return {"is_ad_request": False, "ready": False, "error": str(e)}
+        print(f"Intent extraction error: {e}, falling back to rule-based intent")
+        simple = extract_intent_simple(user_input)
+        simple["_fallback"] = True
+        return simple
 
 
 def extract_intent_simple(user_input: str) -> dict:
@@ -115,7 +114,7 @@ def extract_intent_simple(user_input: str) -> dict:
         "is_ad_request": False,
         "product": None,
         "industry": "general",
-        "output_type": "storyboard",
+        "output_type": "full_campaign",
         "duration": 45,
         "tone": "professional",
         "city": None,
@@ -139,8 +138,10 @@ def extract_intent_simple(user_input: str) -> dict:
         result["is_ad_request"] = True
 
     # Output type detection
-    if "full package" in user_lower or "everything" in user_lower:
-        result["output_type"] = "full"
+    if "full package" in user_lower or "everything" in user_lower or "viral" in user_lower:
+        result["output_type"] = "full_campaign"
+    elif "storyboard only" in user_lower or "no viral" in user_lower:
+        result["output_type"] = "storyboard_video"
     elif (
         "pdf" in user_lower
         or "budget" in user_lower
@@ -148,7 +149,7 @@ def extract_intent_simple(user_input: str) -> dict:
     ):
         result["output_type"] = "pdf"
     elif "video" in user_lower:
-        result["output_type"] = "video"
+        result["output_type"] = "full_campaign"
     elif "script" in user_lower and "storyboard" not in user_lower:
         result["output_type"] = "script"
 

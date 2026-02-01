@@ -1,0 +1,69 @@
+flowchart TB
+    subgraph Entry[" "]
+        A[User / ASI:One]
+        B[Orchestrator]
+        C[Intent Extractor]
+    end
+
+    subgraph Research["Research Layer - Parallel Execution"]
+        direction TB
+        RSTART[Research]
+        RSTART --> LI[Local Intel]
+        RSTART --> RI[Review Intel]
+        RSTART --> YI[Yelp Intel]
+        RSTART --> GI[Google Trends]
+        RSTART --> RQ[Related Questions]
+        LI --> RSYNTH
+        RI --> RSYNTH
+        YI --> RSYNTH
+        GI --> RSYNTH
+        RQ --> RSYNTH
+        RSYNTH[Research Synthesis<br/>+ Competitor Map]
+    end
+
+    subgraph Content["Content Creation"]
+        L[Location Scout]
+        T[Trend Analyzer]
+        S[Script Writer]
+    end
+
+    subgraph Storyboard["Storyboard Package"]
+        I[Image Generator]
+        VA[Video Assembly]
+    end
+
+    subgraph ViralPkg["Viral Video Package"]
+        VEO[VEO 3]
+        LYR[Lyria]
+        VIRAL_ASM[Viral Assembler]
+    end
+
+    subgraph Assembly["Campaign Assembly"]
+        COST[Cost Estimator]
+        SOC[Social Media]
+        PDF[PDF Builder]
+    end
+
+    subgraph Output[" "]
+        U[Upload]
+        RES[Thumbnail + Links]
+    end
+
+    A --> B
+    B --> C
+    C --> RSTART
+    RSYNTH --> L
+    L --> T
+    T --> S
+    S --> I
+    S --> VEO
+    I --> VA
+    VEO --> LYR
+    LYR --> VIRAL_ASM
+    VA --> COST
+    VIRAL_ASM --> COST
+    COST --> SOC
+    SOC --> PDF
+    PDF --> U
+    U --> RES
+    RES --> A

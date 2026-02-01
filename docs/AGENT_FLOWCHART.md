@@ -1,81 +1,83 @@
-# AdBoard AI — Agent Orchestration Flowchart
+# AdVantage — Agent Orchestration Flowchart
 
-Orchestration flow for the **confirmed storyboard_video pipeline**.
+Orchestration flow for the full AdVantage pipeline with **parallel research** and dual output (storyboard + viral).
 
-> Run `npx -y @mermaid-js/mermaid-cli mmdc -i docs/agent_flowchart.mmd -o docs/agent_flowchart.png` to generate the diagram image.
+> **To generate the PNG:** Paste the Mermaid block below into [mermaid.live](https://mermaid.live) and export as PNG. Save as `docs/agent_orchestration.png`.
 
 ---
 
-## Main Pipeline (storyboard_video)
+## Full Orchestration Chain (with Parallel Research)
 
 ```mermaid
 flowchart TB
-    subgraph Entry
-        A[User / ASI:One Chat]
+    subgraph Entry[" "]
+        A[User / ASI:One]
         B[Orchestrator]
         C[Intent Extractor]
     end
 
-    subgraph Pipeline["AdBoard Pipeline (Sequential)"]
-        R[1. Research<br/>Marky: LocalIntel, Reviews, Trends]
-        L[2. Location Scout<br/>Google Places]
-        T[3. Trend Analyzer<br/>Viral patterns, hooks]
-        S[4. Script Writer<br/>Scene breakdown]
-        I[5. Image Generator<br/>Imagen 3 storyboard frames]
-        V[6. Video Assembly<br/>Ken Burns animation]
-        C2[7. Cost Estimator<br/>Budget breakdown]
-        SM[8. Social Media<br/>Hashtags, captions]
-        P[9. PDF Builder<br/>Campaign package + map]
+    subgraph Research["Research Layer - Parallel Execution"]
+        direction TB
+        RSTART[Research]
+        RSTART --> LI[Local Intel]
+        RSTART --> RI[Review Intel]
+        RSTART --> YI[Yelp Intel]
+        RSTART --> GI[Google Trends]
+        RSTART --> RQ[Related Questions]
+        LI --> RSYNTH
+        RI --> RSYNTH
+        YI --> RSYNTH
+        GI --> RSYNTH
+        RQ --> RSYNTH
+        RSYNTH[Research Synthesis + Competitor Map]
     end
 
-    subgraph Output
-        U[Upload: Drive / tmpfiles]
-        F[Format Results]
-        RES[Response: Thumbnail + Links]
+    subgraph Content["Content Creation"]
+        L[Location Scout]
+        T[Trend Analyzer]
+        S[Script Writer]
+    end
+
+    subgraph Storyboard["Storyboard Package"]
+        I[Image Generator]
+        VA[Video Assembly]
+    end
+
+    subgraph ViralPkg["Viral Video Package"]
+        VEO[VEO 3]
+        LYR[Lyria]
+        VIRAL_ASM[Viral Assembler]
+    end
+
+    subgraph Assembly["Campaign Assembly"]
+        COST[Cost Estimator]
+        SOC[Social Media]
+        PDF[PDF Builder]
+    end
+
+    subgraph Output[" "]
+        U[Upload]
+        RES[Thumbnail + Links]
     end
 
     A --> B
     B --> C
-    C --> R
-    R --> L
+    C --> RSTART
+    RSYNTH --> L
     L --> T
     T --> S
     S --> I
-    I --> V
-    V --> C2
-    C2 --> SM
-    SM --> P
-    P --> U
-    U --> F
-    F --> RES
+    S --> VEO
+    I --> VA
+    VEO --> LYR
+    LYR --> VIRAL_ASM
+    VA --> COST
+    VIRAL_ASM --> COST
+    COST --> SOC
+    SOC --> PDF
+    PDF --> U
+    U --> RES
     RES --> A
-```
-
----
-
-## Research Sub-Flow (Marky)
-
-```mermaid
-flowchart LR
-    subgraph Marky["Research Agent (Marky Workflow)"]
-        LI[Local Intel<br/>SerpAPI, competitor discovery]
-        RI[Review Intel<br/>Google Reviews]
-        YI[Yelp Intel<br/>Yelp reviews]
-        GI[Google Trends<br/>Keyword trends]
-        RQ[Related Questions<br/>People also ask]
-    end
-
-    subgraph Output2["Research Output"]
-        MAP[Competitor Map<br/>Google Static Maps]
-        DATA[Unified research data]
-    end
-
-    LI --> DATA
-    RI --> DATA
-    YI --> DATA
-    GI --> DATA
-    RQ --> DATA
-    DATA --> MAP
 ```
 
 ---
@@ -85,6 +87,7 @@ flowchart LR
 | Pipeline           | Agents                                                                 |
 |--------------------|------------------------------------------------------------------------|
 | **storyboard_video** (default) | research → location_scout → trend_analyzer → script_writer → image_generator → video_assembly → cost_estimator → social_media → pdf_builder |
+| **viral_video**    | research → trend_analyzer → script_writer → veo3_generator → lyria_music → viral_video_assembler |
 | script             | research → location_scout → trend_analyzer → script_writer             |
 | storyboard         | research → location_scout → trend_analyzer → script_writer → image_generator |
 | pdf                | research → trend_analyzer → script_writer → image_generator → cost_estimator → location_scout → pdf_builder |
@@ -92,12 +95,11 @@ flowchart LR
 
 ---
 
-## Rendered Diagram
+## Files
 
-If you have Node.js, generate the PNG:
+| File | Purpose |
+|------|---------|
+| `docs/agent_orchestration.mmd` | Mermaid source (parallel research + dual output) |
+| `docs/agent_flowchart.mmd` | Legacy sequential flowchart |
 
-```bash
-npx -y @mermaid-js/mermaid-cli mmdc -i docs/agent_flowchart.mmd -o docs/agent_flowchart.png
-```
-
-Otherwise, paste the Mermaid block from above into [mermaid.live](https://mermaid.live) and export as PNG/SVG.
+**Generate PNG:** Paste Mermaid into [mermaid.live](https://mermaid.live) → Export → PNG

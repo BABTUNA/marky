@@ -89,13 +89,15 @@ README = """# AdBoard AI - Full Ad Campaign Generator for Small Businesses
 ![tag:innovationlab](https://img.shields.io/badge/innovationlab-3D8BD3)
 ![tag:hackathon](https://img.shields.io/badge/hackathon-5F43F1)
 
-I create two things for you:
+I create three deliverables for you:
 
-1. **Storyboard package** — A concept video and full production brief so you can hire a crew and film the real ad. Includes pencil-sketch storyboard frames, script, cost estimates, filming locations, and everything you need to brief actors and producers.
+1. **Storyboard video** — A silent concept video for development and pitching. Shows the visual flow so you can hire a crew and film the real ad.
 
-2. **Ready-to-post viral video** — A short clip optimized for TikTok and Reels that you can post immediately while you develop the full production.
+2. **Viral video** — A ready-to-post short clip with music and voiceover, optimized for TikTok and Reels. Post it while you develop the full production.
 
-Tell me about your business and I'll research your competitors, write the script, generate the visuals, and deliver both packages.
+3. **Campaign PDF** — Full production brief with research, script, cost estimates, filming locations, and everything you need to brief actors and producers.
+
+Tell me about your business and I'll research your competitors, write the script, generate both videos, and deliver the complete package.
 
 ## How to Use
 
@@ -248,11 +250,10 @@ async def handle_message(ctx: Context, sender: str, msg: ChatMessage):
             await ctx.send(
                 sender,
                 create_response(
-                    "I create full ad campaigns for small businesses. I'll give you two things: "
-                    "a storyboard package with everything you need to hire a crew and produce the real ad "
-                    "(script, costs, locations), plus a ready-to-post viral video for TikTok and Reels. "
-                    "Just tell me about your business—like 'Create an ad for my taco truck' or "
-                    "'I need ads for my coffee shop in Boston.'"
+                    "I create full ad campaigns for small businesses. You get three deliverables: "
+                    "a storyboard video for development, a viral video for TikTok and Reels, and a campaign PDF "
+                    "with research, costs, and hiring guide. Just tell me about your business—like "
+                    "'Create an ad for my taco truck' or 'I need ads for my coffee shop in Boston.'"
                 ),
             )
             return
@@ -270,11 +271,17 @@ async def handle_message(ctx: Context, sender: str, msg: ChatMessage):
             return
 
         # We have everything - run the pipeline
-        output_type = intent.get("output_type", "storyboard_video")
+        output_type = intent.get("output_type", "full_campaign")
 
-        # Normalize output type - "video" should be "storyboard_video"
-        if output_type == "video":
-            output_type = "storyboard_video"
+        # Quick mode: skip research for faster testing (via "quick test" or QUICK_FULL env)
+        if os.getenv("QUICK_FULL", "").lower() == "true":
+            output_type = "quick_full"
+        elif "quick test" in user_text.lower() or "test without research" in user_text.lower():
+            output_type = "quick_full"
+
+        # Normalize output type
+        if output_type in ("video", "full"):
+            output_type = "full_campaign"
 
         product = intent.get("product", "product")
         duration = intent.get("duration", 30)
@@ -282,14 +289,19 @@ async def handle_message(ctx: Context, sender: str, msg: ChatMessage):
 
         # Natural-language kick-off (no emojis)
         city_part = f" in {intent.get('city')}" if intent.get("city") else ""
-        await ctx.send(
-            sender,
-            create_response(
-                f"Got it. I'm putting together your ad campaign for {product}{city_part}—a storyboard package "
-                "with everything you need to hire and produce the real ad, plus a viral video you can post. "
-                "This takes a few minutes. I'll check in as I go."
-            ),
-        )
+        has_viral = output_type == "full_campaign"
+        if has_viral:
+            kickoff = (
+                f"Got it. I'm putting together your ad campaign for {product}{city_part}—"
+                "a silent storyboard video for development, a ready-to-post viral video, and the full campaign PDF. "
+                "This takes several minutes. I'll check in as I go."
+            )
+        else:
+            kickoff = (
+                f"Got it. I'm putting together your storyboard package for {product}{city_part}—"
+                "the concept video and campaign PDF. This takes a few minutes. I'll check in as I go."
+            )
+        await ctx.send(sender, create_response(kickoff))
 
         # Progress callback for check-in messages
         async def on_progress(step_name: str, message: str):
@@ -320,58 +332,60 @@ async def handle_message(ctx: Context, sender: str, msg: ChatMessage):
             pdf_url = formatted.get("pdf_url")
             video_path = formatted.get("video_path")
 
-            # Build ASI:One preview: thumbnail + "Watch Full Video Here" + "View Full Analysis PDF"
+            # Build ASI:One preview: thumbnail + links (critical for UX)
             thumbnail_uri = None
             ctx.logger.info(f"Preview check: video_path={video_path}, video_url={video_url is not None}, pdf_url={pdf_url is not None}")
-            
-            # Try 1: Extract thumbnail from video
+
+            thumb_bytes = None
+            # Step 1: Extract thumbnail from storyboard video
             if video_path and os.path.exists(video_path):
                 ctx.logger.info(f"Extracting thumbnail from: {video_path}")
                 thumb_bytes = extract_video_thumbnail(video_path)
                 if thumb_bytes:
-                    ctx.logger.info(f"Thumbnail extracted ({len(thumb_bytes)} bytes), uploading to Agentverse...")
-                    thumbnail_uri, _ = upload_to_agentverse_storage(
-                        thumb_bytes, "video_preview.png", "image/png", sender
-                    )
-                    if thumbnail_uri:
-                        ctx.logger.info(f"Thumbnail uploaded: {thumbnail_uri}")
-                    else:
-                        ctx.logger.warning("Thumbnail upload failed - no URI returned")
-                else:
-                    ctx.logger.warning("Thumbnail extraction returned no bytes")
+                    ctx.logger.info(f"Thumbnail extracted ({len(thumb_bytes)} bytes)")
             elif video_path:
                 ctx.logger.warning(f"Video path does not exist: {video_path}")
-            
-            # Try 2: Use first storyboard frame as fallback preview
+
+            # Step 2: Fallback to first storyboard frame if no video thumbnail
             pipeline_results = result.get("results", {})
-            if not thumbnail_uri and "image_generator" in pipeline_results:
-                img_data = pipeline_results["image_generator"]
-                frames = img_data.get("frames", [])
+            if not thumb_bytes and "image_generator" in pipeline_results:
+                frames = pipeline_results["image_generator"].get("frames", [])
                 for frame in frames:
                     frame_path = frame.get("path")
                     if frame_path and os.path.exists(frame_path):
-                        ctx.logger.info(f"Using storyboard frame as preview: {frame_path}")
                         try:
                             with open(frame_path, "rb") as f:
-                                frame_bytes = f.read()
-                            thumbnail_uri, _ = upload_to_agentverse_storage(
-                                frame_bytes, "preview_frame.png", "image/png", sender
-                            )
-                            if thumbnail_uri:
-                                ctx.logger.info(f"Frame preview uploaded: {thumbnail_uri}")
-                                break
+                                thumb_bytes = f.read()
+                            ctx.logger.info(f"Using storyboard frame as preview: {frame_path}")
+                            break
                         except Exception as e:
                             ctx.logger.warning(f"Could not read frame: {e}")
 
+            # Step 3: Upload thumbnail — Agentverse first, then Drive/tmpfiles fallback
+            if thumb_bytes:
+                thumb_bytes = compress_thumbnail(thumb_bytes)
+                ctx.logger.info(f"Thumbnail compressed to {len(thumb_bytes)} bytes")
+                thumbnail_uri, _ = upload_to_agentverse_storage(
+                    thumb_bytes, "video_preview.jpg", "image/jpeg", sender
+                )
+                if not thumbnail_uri:
+                    ctx.logger.warning("Agentverse storage failed, trying Drive/tmpfiles...")
+                    thumbnail_uri = upload_thumbnail_fallback(thumb_bytes, "preview.jpg")
+                    if thumbnail_uri:
+                        ctx.logger.info(f"Preview uploaded to fallback: {thumbnail_uri[:60]}...")
+
             ctx.logger.info(f"Sending success response ({len(response_text)} chars), thumbnail_uri={thumbnail_uri is not None}")
             try:
-                if thumbnail_uri or (video_url and "View Full Video" in response_text):
+                if thumbnail_uri or (video_url and ("View Storyboard" in response_text or "View Viral" in response_text or "View Full" in response_text)):
+                    # Use image/jpeg when fallback URL (our compressed thumb is jpeg)
+                    thumb_mime = "image/jpeg" if (thumbnail_uri and thumbnail_uri.startswith("http")) else "image/png"
                     msg = create_preview_response(
                         thumbnail_uri=thumbnail_uri,
                         video_url=video_url,
                         pdf_url=pdf_url,
                         text_summary=response_text,
                         end_session=True,
+                        thumbnail_mime=thumb_mime,
                     )
                     await ctx.send(sender, msg)
                 else:
@@ -417,6 +431,56 @@ async def handle_message(ctx: Context, sender: str, msg: ChatMessage):
 async def handle_ack(ctx: Context, sender: str, msg: ChatAcknowledgement):
     """Handle acknowledgements (required by protocol)."""
     ctx.logger.debug(f"Received ack from {sender} for {msg.acknowledged_msg_id}")
+
+
+def compress_thumbnail(thumb_bytes: bytes, max_size_kb: int = 200) -> bytes:
+    """Compress thumbnail for upload (Agentverse may reject large files).
+    Resizes to max 640px width, JPEG 85% quality.
+    """
+    try:
+        import io
+
+        import cv2
+        import numpy as np
+
+        arr = np.frombuffer(thumb_bytes, np.uint8)
+        img = cv2.imdecode(arr, cv2.IMREAD_COLOR)
+        if img is None:
+            return thumb_bytes
+        h, w = img.shape[:2]
+        if w > 640:
+            scale = 640 / w
+            new_w, new_h = 640, int(h * scale)
+            img = cv2.resize(img, (new_w, new_h), interpolation=cv2.INTER_AREA)
+        # Encode as JPEG for smaller size
+        _, jpg = cv2.imencode(".jpg", img, [cv2.IMWRITE_JPEG_QUALITY, 85])
+        out = jpg.tobytes()
+        if len(out) < len(thumb_bytes):
+            return out
+    except Exception as e:
+        print(f"  ⚠️ Thumbnail compress failed: {e}")
+    return thumb_bytes
+
+
+def upload_thumbnail_fallback(thumb_bytes: bytes, name: str = "preview.jpg") -> str | None:
+    """Upload thumbnail to Drive or tmpfiles when Agentverse fails. Returns public URL."""
+    import tempfile
+
+    try:
+        with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as f:
+            f.write(thumb_bytes)
+            tmp_path = f.name
+        try:
+            url = upload_file(tmp_path)
+            return url
+        finally:
+            try:
+                os.unlink(tmp_path)
+            except OSError:
+                pass
+    except Exception as e:
+        print(f"  ⚠️ Thumbnail fallback upload failed: {e}")
+    return None
 
 
 def extract_video_thumbnail(video_path: str) -> bytes | None:
@@ -536,18 +600,17 @@ def create_preview_response(
     pdf_url: str | None,
     text_summary: str,
     end_session: bool = True,
+    thumbnail_mime: str = "image/png",
 ) -> ChatMessage:
     """Create a ChatMessage with image preview and links.
 
     Args:
-        thumbnail_uri: Agentverse storage URI for thumbnail image
-        video_url: Public URL to watch full video
+        thumbnail_uri: URI for thumbnail (agent-storage:// or https://)
+        video_url: Public URL to storyboard video
         pdf_url: Public URL to download PDF
-        text_summary: Text content for the message
+        text_summary: Text content (includes all three links)
         end_session: Whether to end the session
-
-    Returns:
-        ChatMessage with ResourceContent for preview
+        thumbnail_mime: MIME type for thumbnail (image/png or image/jpeg)
     """
     from datetime import timezone
 
@@ -562,7 +625,7 @@ def create_preview_response(
                 resource=Resource(
                     uri=thumbnail_uri,
                     metadata={
-                        "mime_type": "image/png",
+                        "mime_type": thumbnail_mime,
                         "role": "Video Preview",
                     },
                 ),
@@ -659,24 +722,32 @@ def upload_file_to_tmpfiles(file_path: str) -> str | None:
 
 
 def format_results(result: dict, output_type: str) -> dict:
-    """Format pipeline results. Minimal output: video + PDF links only (details in PDF)."""
+    """Format pipeline results. Returns storyboard video, viral video, and PDF links."""
 
     results = result.get("results", {})
     output_lines = []
-    video_url = None
-    video_path = None
+    storyboard_url = None
+    viral_url = None
     pdf_url = None
+    video_path = None  # For thumbnail (prefer storyboard)
 
-    # === VIDEO ===
+    # === STORYBOARD VIDEO (silent concept video) ===
     if "video_assembly" in results:
         video_data = results["video_assembly"]
-        # Always capture video_path for thumbnail extraction
         video_path = video_data.get("final_video_path")
         if video_data.get("video_url"):
-            video_url = video_data["video_url"]
+            storyboard_url = video_data["video_url"]
         elif video_path and os.path.exists(video_path):
-            print("\nUploading video...")
-            video_url = upload_file(video_path)
+            print("\nUploading storyboard video...")
+            storyboard_url = upload_file(video_path)
+
+    # === VIRAL VIDEO (ready-to-post with audio) ===
+    if "viral_video_assembler" in results:
+        viral_data = results["viral_video_assembler"]
+        viral_path = viral_data.get("final_video_path")
+        if viral_path and os.path.exists(viral_path):
+            print("\nUploading viral video...")
+            viral_url = upload_file(viral_path)
 
     # === PDF ===
     pdf_data = results.get("pdf_export") or results.get("pdf_builder")
@@ -689,26 +760,20 @@ def format_results(result: dict, output_type: str) -> dict:
                 print("\nUploading PDF...")
                 pdf_url = upload_file(pdf_path)
 
-    # Minimal text: storyboard, PDF, viral (when present)
-    if video_url:
-        output_lines.append(f"View Full Video Here: {video_url}")
+    # Build response text — all three deliverables with clear labels
+    if storyboard_url:
+        output_lines.append(f"View Storyboard Video Here: {storyboard_url}")
+    if viral_url:
+        output_lines.append(f"View Viral Video Here: {viral_url}")
     if pdf_url:
         output_lines.append(f"View Full Analysis PDF: {pdf_url}")
-
-    # Viral video (ready to post)
-    if "viral_video_assembler" in results:
-        viral_data = results["viral_video_assembler"]
-        viral_path = viral_data.get("final_video_path")
-        if viral_path and os.path.exists(viral_path):
-            viral_url = upload_file(viral_path)
-            if viral_url:
-                output_lines.append(f"View Viral Video Here: {viral_url}")
 
     output_text = "\n\n".join(output_lines) if output_lines else "Your campaign package is ready. Check the output folder for files."
 
     return {
         "text": output_text,
-        "video_url": video_url,
+        "video_url": storyboard_url,
+        "viral_url": viral_url,
         "pdf_url": pdf_url,
         "video_path": str(video_path) if video_path else None,
     }
@@ -755,7 +820,7 @@ async def startup_handler(ctx: Context):
                     agent_seed_phrase=SEED_PHRASE,
                 ),
                 readme=README,
-                description="Creates full ad campaigns for small businesses: a storyboard package for development (script, costs, locations, hiring guide) plus a ready-to-post viral video for TikTok and Reels.",
+                description="Creates full ad campaigns for small businesses: (1) storyboard video for development, (2) viral video for TikTok/Reels, and (3) campaign PDF with research, costs, and hiring guide.",
             )
             ctx.logger.info("Successfully registered with Agentverse!")
 

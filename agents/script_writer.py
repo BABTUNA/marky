@@ -114,8 +114,13 @@ class ScriptWriterAgent:
         # ENHANCED: Get ALL research insights
         # =============================================
 
-        # Combined insights (already processed by EnhancedResearchAgent)
-        research_insights = research_data.get("insights", [])
+        # Combined insights (list or dict with recommended_hooks from dummy research)
+        raw_insights = research_data.get("insights", [])
+        if isinstance(raw_insights, dict):
+            research_insights = raw_insights.get("recommended_hooks", [])
+        else:
+            research_insights = list(raw_insights) if raw_insights else []
+        research_insights = [str(x) for x in research_insights]
         insights_text = (
             "\n".join(f"- {insight}" for insight in research_insights[:10])
             if research_insights

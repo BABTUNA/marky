@@ -6,6 +6,8 @@ Each agent runs after the previous one completes, passing results forward.
 """
 
 import asyncio
+import os
+from pathlib import Path
 from typing import Any, Dict, List
 
 # Human-friendly progress messages (no emojis)
@@ -13,15 +15,17 @@ PROGRESS_MESSAGES = {
     "research": "Research done. Writing your script.",
     "location_scout": "Found filming locations. Writing your script.",
     "trend_analyzer": "Analyzed what works in ads like yours. Writing the script.",
-    "script_writer": "Script is ready. Generating storyboard frames for both packages.",
-    "image_generator": "Storyboard frames are done. Assembling the concept video.",
-    "video_assembly": "Concept video is ready. Building your full campaign package.",
+    "script_writer": "Script is ready. Generating storyboard and music.",
+    "image_generator": "Storyboard frames are done. Adding voiceover and music.",
+    "lyria_music": "Music ready. Adding voiceover to storyboard.",
+    "voiceover": "Voiceover ready. Assembling storyboard video.",
+    "audio_mixer": "Audio mixed. Assembling storyboard video.",
+    "video_assembly": "Storyboard video ready. Generating viral video.",
+    "veo3_generator": "Generating viral video. Adding music next.",
+    "viral_video_assembler": "Viral video is ready. Finalizing your packages.",
     "cost_estimator": "Budget estimated. Building your PDF with hiring and cost details.",
     "social_media": "Social strategy ready. Building your campaign PDF.",
     "pdf_builder": "Almost done. Finalizing your storyboard and viral packages.",
-    "veo3_generator": "Generating viral video. Adding music next.",
-    "lyria_music": "Music added. Assembling viral clip.",
-    "viral_video_assembler": "Viral video is ready. Finalizing your packages.",
 }
 
 # Pipeline definitions - which agents to run for each output type
@@ -106,6 +110,23 @@ PIPELINES = {
         "social_media",
         "pdf_builder",  # Complete campaign PDF package
     ],
+    # FULL CAMPAIGN: Storyboard (with TTS+music) + Viral (VEO 3 with TTS+music) + PDF
+    "full_campaign": [
+        "research",
+        "location_scout",
+        "trend_analyzer",
+        "script_writer",
+        "image_generator",  # Storyboard frames (or use sample via STORYBOARD_VIDEO_PATH)
+        "lyria_music",  # Music for both storyboard and viral
+        "voiceover",  # TTS for both
+        "audio_mixer",  # Mix voiceover + music
+        "video_assembly",  # Storyboard video (concept + audio) = deliverable 1
+        "veo3_generator",  # VEO 3 viral video (photorealistic)
+        "viral_video_assembler",  # Viral video (VEO + audio) = deliverable 2
+        "cost_estimator",
+        "social_media",
+        "pdf_builder",  # PDF = deliverable 3
+    ],
     # Complete Viral Video Pipeline (VEO 3 + Lyria + TTS)
     # Now enabled for testing with placeholders!
     "viral_video": [
@@ -128,6 +149,20 @@ PIPELINES = {
         "script_writer",
         "image_generator",
         "video_assembly",
+        "cost_estimator",
+        "social_media",
+        "pdf_builder",
+    ],
+    # Quick full campaign - skips research, storyboard + viral both with audio
+    "quick_full": [
+        "script_writer",
+        "image_generator",
+        "lyria_music",
+        "voiceover",
+        "audio_mixer",
+        "video_assembly",  # Storyboard with TTS + music
+        "veo3_generator",
+        "viral_video_assembler",  # Viral with TTS + music
         "cost_estimator",
         "social_media",
         "pdf_builder",
@@ -223,20 +258,30 @@ class AdBoardPipeline:
         self._init_agents()
 
         # Get pipeline steps for this output type
-        pipeline_steps = PIPELINES.get(self.output_type, PIPELINES["storyboard"])
+        pipeline_steps = PIPELINES.get(self.output_type, PIPELINES["full_campaign"])
 
-        # Quick test: inject dummy research + trend data (skips slow Marky workflow)
-        if self.output_type == "quick_test":
+        # When using sample video for storyboard, skip image_generator (saves Imagen cost/time)
+        storyboard_sample = os.getenv("STORYBOARD_VIDEO_PATH") or os.getenv("VEO_PLACEHOLDER_PATH")
+        if storyboard_sample and Path(storyboard_sample).exists() and "image_generator" in pipeline_steps:
+            pipeline_steps = [s for s in pipeline_steps if s != "image_generator"]
+            self.results["image_generator"] = {"frames": [], "skip_reason": "using_sample_video"}
+            print("  [config] Using sample video for storyboard, skipping image generation")
+
+        # Quick pipelines: inject dummy research + trend data (skips slow Marky workflow)
+        if self.output_type in ("quick_test", "quick_full"):
             from core.dummy_research import get_dummy_research
-            self.results["research"] = get_dummy_research(
-                industry=self.industry, product=self.product
-            )
+            research = get_dummy_research(industry=self.industry, product=self.product)
+            hooks = research.get("patterns_identified", {}).get("common_hooks", [])[:5]
+            research["hooks"] = hooks
+            research["insights"] = {"recommended_hooks": hooks[:3]}
+            research["research_summary"] = {"competitors_found": 3, "youtube_videos": 5, "keywords_analyzed": 10}
+            self.results["research"] = research
             self.results["trend_analyzer"] = {
-                "viral_patterns": self.results["research"].get("patterns_identified", {}).get("common_hooks", [])[:3],
+                "viral_patterns": hooks[:3],
                 "recommended_hooks": ["Authenticity wins", "Show the product", "Clear CTA"],
             }
             self.results["location_scout"] = {"locations": [{"name": "Downtown", "address": "Providence, RI"}]}
-            print("  [quick_test] Using dummy research (skipping Marky workflow)")
+            print(f"  [{self.output_type}] Using dummy research (skipping Marky workflow)")
 
         print(f"\n{'=' * 50}")
         print(f"AdBoard Pipeline: {self.output_type}")
