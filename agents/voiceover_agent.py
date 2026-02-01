@@ -2,27 +2,33 @@
 Voiceover Agent
 
 Generates professional voiceover audio using ElevenLabs API.
+Optimized for natural, human-sounding speech.
 """
 
 import os
+import re
 from pathlib import Path
 
 import requests
 
 
 class VoiceoverAgent:
-    """Generates voiceover audio using ElevenLabs."""
+    """Generates voiceover audio using ElevenLabs with natural speech settings."""
 
-    # Free tier voice IDs
+    # Voice IDs - prioritizing the most natural-sounding voices
+    # These voices are known for their human-like quality
     VOICES = {
         "female": {
-            "friendly": "EXAVITQu4vr4xnSDxMaL",  # Bella
-            "energetic": "AZnzlk1XvdvUeBnXmlld",  # Domi
+            "friendly": "21m00Tcm4TlvDq8ikWAM",  # Rachel - very natural, warm
+            "professional": "ThT5KcBeYPX3keUQqHPh",  # Dorothy - clear, professional
+            "energetic": "AZnzlk1XvdvUeBnXmlld",  # Domi - upbeat
+            "conversational": "21m00Tcm4TlvDq8ikWAM",  # Rachel
         },
         "male": {
-            "professional": "ErXwobaYiN019PkySvjV",  # Antoni
-            "friendly": "VR6AewLTigWG4xSOukaG",  # Arnold
-            "energetic": "pNInz6obpgDQGcFmaJgB",  # Adam
+            "professional": "29vD33N1CtxCmqQRPOHJ",  # Drew - natural, clear
+            "friendly": "ErXwobaYiN019PkySvjV",  # Antoni - warm, friendly
+            "energetic": "pNInz6obpgDQGcFmaJgB",  # Adam - dynamic
+            "conversational": "29vD33N1CtxCmqQRPOHJ",  # Drew
         },
     }
 
@@ -72,8 +78,8 @@ class VoiceoverAgent:
         if not voiceover_text:
             return {"error": "No voiceover text available"}
 
-        # Clean the text
-        voiceover_text = voiceover_text.strip()
+        # Preprocess text for more natural speech
+        voiceover_text = self._preprocess_for_natural_speech(voiceover_text, tone)
 
         # Check character limit (free tier is 10k/month)
         if len(voiceover_text) > 2000:
@@ -89,29 +95,26 @@ class VoiceoverAgent:
             voice_id = self.VOICES[voice_gender].get(
                 voice_style,
                 self.VOICES[voice_gender].get(
-                    "friendly", list(self.VOICES[voice_gender].values())[0]
+                    "conversational", list(self.VOICES[voice_gender].values())[0]
                 ),
             )
 
+            print(
+                f"  Using voice: {voice_gender}/{voice_style} (ID: {voice_id[:8]}...)"
+            )
+
+            # Get optimal voice settings based on tone
+            voice_settings = self._get_voice_settings(tone)
+
             # Make API request
-            # Using eleven_multilingual_v2 for more natural, human-like speech
-            # Voice settings tuned for conversational, natural delivery:
-            # - Lower stability (0.3) = more expressive, natural variation
-            # - Higher similarity_boost (0.8) = maintains voice character
-            # - style = 0.5 for balanced expressiveness
-            # - use_speaker_boost = True for clearer, more present voice
+            # Using eleven_turbo_v2_5 for most natural speech (or eleven_multilingual_v2)
             response = requests.post(
                 f"{self.base_url}/text-to-speech/{voice_id}",
                 headers={"xi-api-key": api_key, "Content-Type": "application/json"},
                 json={
                     "text": voiceover_text,
-                    "model_id": "eleven_multilingual_v2",  # More natural sounding model
-                    "voice_settings": {
-                        "stability": 0.3,  # Lower = more expressive/natural
-                        "similarity_boost": 0.8,  # Keep voice character
-                        "style": 0.5,  # Expressiveness
-                        "use_speaker_boost": True,  # Clearer audio
-                    },
+                    "model_id": "eleven_turbo_v2_5",  # Latest, most natural model
+                    "voice_settings": voice_settings,
                 },
                 timeout=60,
             )
@@ -214,12 +217,135 @@ class VoiceoverAgent:
     def _select_voice_style(self, tone: str) -> str:
         """Select voice style based on tone."""
 
-        if tone in ["funny", "friendly", "casual"]:
+        if tone in ["funny", "friendly", "casual", "warm"]:
             return "friendly"
         elif tone in ["energetic", "exciting", "upbeat"]:
             return "energetic"
+        elif tone in ["conversational", "natural"]:
+            return "conversational"
         else:
             return "professional"
+
+    def _preprocess_for_natural_speech(self, text: str, tone: str) -> str:
+        """
+        Preprocess text to make TTS sound more natural and human.
+
+        Techniques:
+        1. Add natural pauses with commas and ellipses
+        2. Add emphasis markers for key words
+        3. Break up long sentences
+        4. Add conversational fillers for casual tones
+        5. Use SSML-like hints that ElevenLabs understands
+        """
+        # Clean up the text first
+        text = text.strip()
+
+        # Remove any existing stage directions or brackets
+        text = re.sub(r"\[.*?\]", "", text)
+        text = re.sub(r"\(.*?\)", "", text)
+
+        # Add natural pauses after certain phrases
+        pause_after = [
+            "you know what",
+            "here's the thing",
+            "let me tell you",
+            "the truth is",
+            "believe it or not",
+            "and honestly",
+            "but wait",
+            "get this",
+        ]
+        for phrase in pause_after:
+            text = re.sub(rf"({phrase})", r"\1...", text, flags=re.IGNORECASE)
+
+        # Break up very long sentences (over 20 words) with natural pauses
+        sentences = text.split(". ")
+        processed_sentences = []
+        for sentence in sentences:
+            words = sentence.split()
+            if len(words) > 25:
+                # Find a natural break point (after conjunctions, commas)
+                mid = len(words) // 2
+                # Look for a good break point near the middle
+                for i in range(mid - 3, mid + 4):
+                    if i < len(words) and words[i].lower() in [
+                        "and",
+                        "but",
+                        "or",
+                        "so",
+                        "because",
+                        "when",
+                        "while",
+                        "that",
+                    ]:
+                        words[i] = f"... {words[i]}"
+                        break
+                sentence = " ".join(words)
+            processed_sentences.append(sentence)
+        text = ". ".join(processed_sentences)
+
+        # For funny/casual tones, add slight hesitations that feel natural
+        if tone in ["funny", "casual", "friendly"]:
+            # Add subtle emphasis to questions
+            text = re.sub(r"\?", "?...", text)
+
+        # Clean up multiple spaces and periods
+        text = re.sub(r"\.{4,}", "...", text)
+        text = re.sub(r"\s+", " ", text)
+        text = re.sub(r"\s+([.,!?])", r"\1", text)
+
+        return text.strip()
+
+    def _get_voice_settings(self, tone: str) -> dict:
+        """
+        Get optimal voice settings based on tone.
+
+        Key settings for natural speech:
+        - stability: Lower (0.3-0.5) = more expressive, natural variation
+        - similarity_boost: Higher (0.7-0.9) = maintains voice character
+        - style: Controls expressiveness (0 = neutral, 1 = very expressive)
+        - use_speaker_boost: True = clearer, more present audio
+        """
+
+        # Base settings for natural speech
+        base_settings = {
+            "stability": 0.4,  # Some variation for naturalness
+            "similarity_boost": 0.75,  # Good voice character
+            "style": 0.5,  # Moderate expressiveness
+            "use_speaker_boost": True,
+        }
+
+        # Adjust based on tone
+        if tone in ["funny", "casual", "friendly"]:
+            return {
+                "stability": 0.35,  # More variation = more natural/playful
+                "similarity_boost": 0.7,
+                "style": 0.7,  # More expressive
+                "use_speaker_boost": True,
+            }
+        elif tone in ["energetic", "exciting", "upbeat"]:
+            return {
+                "stability": 0.3,  # High variation for energy
+                "similarity_boost": 0.65,
+                "style": 0.85,  # Very expressive
+                "use_speaker_boost": True,
+            }
+        elif tone in ["professional", "serious"]:
+            return {
+                "stability": 0.5,  # More stable for authority
+                "similarity_boost": 0.8,
+                "style": 0.3,  # Less expressive, more measured
+                "use_speaker_boost": True,
+            }
+        elif tone in ["emotional", "heartfelt", "warm"]:
+            return {
+                "stability": 0.4,
+                "similarity_boost": 0.75,
+                "style": 0.6,  # Expressive but not over the top
+                "use_speaker_boost": True,
+            }
+        else:
+            return base_settings
 
 
 class MockVoiceoverAgent:

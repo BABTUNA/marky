@@ -122,7 +122,7 @@ class ScriptWriterAgent:
             else "- Focus on clear value proposition"
         )
 
-        # Competitor hooks from Google Ads
+        # Competitor hooks and insights from Google Ads
         competitor_ads = research_data.get("competitor_ads", {})
         competitor_hooks = ""
         if competitor_ads:
@@ -131,6 +131,20 @@ class ScriptWriterAgent:
                 competitor_hooks = (
                     "\n\nCOMPETITOR HOOKS (differentiate from these):\n"
                     + "\n".join(f"- {hook}" for hook in hooks)
+                )
+
+            # Add top competitor insights
+            what_top_do = competitor_ads.get("what_top_competitors_do", [])[:3]
+            if what_top_do:
+                competitor_hooks += "\n\nLEARN FROM TOP COMPETITORS:\n"
+                competitor_hooks += "\n".join(f"✓ {tip}" for tip in what_top_do)
+
+            # Add what to avoid
+            what_to_avoid = competitor_ads.get("what_to_avoid", [])[:3]
+            if what_to_avoid:
+                competitor_hooks += "\n\nAVOID THESE MISTAKES:\n"
+                competitor_hooks += "\n".join(
+                    f"✗ {mistake}" for mistake in what_to_avoid
                 )
 
         # =============================================
@@ -253,12 +267,23 @@ Voiceover: "[Words]"
 
 Requirements:
 1. The {tone} tone must come through clearly
-2. Voiceover should be natural and conversational - use phrases real customers use
-3. Visual descriptions must be specific enough for a storyboard artist
-4. Total voiceover should fit within {duration} seconds (about {duration * 2.5} words max)
-5. Include at least one moment that creates emotional connection
-6. End with a clear, memorable call-to-action
-7. If location data is provided, incorporate that setting naturally into the visuals
+2. Visual descriptions must be specific enough for a storyboard artist
+3. Total voiceover should fit within {duration} seconds (about {duration * 2.5} words max)
+4. Include at least one moment that creates emotional connection
+5. End with a clear, memorable call-to-action
+6. If location data is provided, incorporate that setting naturally into the visuals
+
+CRITICAL - VOICEOVER MUST SOUND NATURAL AND HUMAN:
+- Write like people actually talk, not like a commercial script
+- Use contractions (don't, we're, you'll, it's) - NEVER use formal "do not", "we are"
+- Include natural pauses with "..." or commas where someone would breathe
+- Vary sentence length - mix short punchy lines with longer flowing ones
+- Use conversational phrases like "you know what?", "here's the thing", "honestly"
+- For funny tones: add playful exaggeration and unexpected twists
+- Avoid clichés like "but wait, there's more" or "call now"
+- Read it out loud in your head - if it sounds stilted, rewrite it
+- Example GOOD: "Look, we get it... finding a good pizza place? It's basically impossible."
+- Example BAD: "Are you searching for a quality pizza restaurant in your area?"
 
 Write the complete script now:"""
 

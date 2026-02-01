@@ -1,13 +1,12 @@
 """
 Enhanced Research Agent - Full "Marky" Research Suite
 
-Combines ALL research sources:
-1. YouTube viral ad analysis (what works in viral content)
-2. Google Ads competitor intelligence (what competitors are doing)
-3. Google Reviews analysis (customer voice - complaints & praises)
-4. Yelp reviews analysis (customer language & expectations)
-5. Keyword trends (search volume, CPC, competition)
-6. Website scraping (competitor messaging & positioning)
+Uses the proper Marky agents from teammate's implementation:
+1. LocalIntelAgent - Competitor discovery, website scraping, success/failure analysis
+2. ReviewIntelAgent - Google Reviews via place_ids
+3. YelpIntelAgent - Yelp reviews with pain/praise extraction
+4. TrendsIntelAgent - DataForSEO keyword trends
+5. YouTube Research - Viral ad analysis (our addition)
 """
 
 import os
@@ -15,48 +14,36 @@ from typing import Dict, List, Optional
 
 from dotenv import load_dotenv
 
-from ad_intel_no.agent import AdIntelAgent
-from ad_intel_no.review_intel import ReviewIntelAgent
-from ad_intel_no.trends_intel import TrendsIntelAgent
-from ad_intel_no.website_intel import WebsiteIntelAgent
-from ad_intel_no.yelp_intel import YelpIntelAgent
-from agents.research_agent import ResearchAgent as YouTubeResearch
-
 load_dotenv()
+
+# Import teammate's Marky agents
+# Our YouTube research (complements the Marky suite)
+from agents.research_agent import ResearchAgent as YouTubeResearch
+from local_intel.agent import LocalIntelAgent
+from review_intel.agent import ReviewIntelAgent
+from trends_intel.agent import TrendsIntelAgent
+from yelp_intel.agent import YelpIntelAgent
 
 
 class EnhancedResearchAgent:
     """
     Full "Marky" research suite that combines:
-    1. YouTube viral ad analysis
-    2. Google Ads competitor intelligence
-    3. Google Reviews (customer pain points & praises)
-    4. Yelp reviews (customer voice)
-    5. Keyword trends (DataForSEO)
-    6. Website scraping (competitor messaging)
+    1. Local Intel - Competitor discovery, websites, success/failure patterns
+    2. Review Intel - Google Reviews (customer voice)
+    3. Yelp Intel - Yelp reviews (pain points & praises)
+    4. Trends Intel - Keyword trends and seasonal timing
+    5. YouTube Research - Viral ad patterns (our addition)
     """
 
     def __init__(self):
+        # YouTube research (our addition)
         self.youtube_research = YouTubeResearch()
 
-        # All research agents (optional - require API keys)
-        self.serpapi_key = os.getenv("SERPAPI_KEY")
-
-        # Initialize agents that need SERPAPI
-        if self.serpapi_key:
-            self.ad_intel = AdIntelAgent(api_key=self.serpapi_key)
-            self.review_intel = ReviewIntelAgent(api_key=self.serpapi_key)
-            self.yelp_intel = YelpIntelAgent(api_key=self.serpapi_key)
-        else:
-            self.ad_intel = None
-            self.review_intel = None
-            self.yelp_intel = None
-
-        # Trends agent (uses DataForSEO)
+        # Marky agents from teammate
+        self.local_intel = LocalIntelAgent()
+        self.review_intel = ReviewIntelAgent()
+        self.yelp_intel = YelpIntelAgent()
         self.trends_intel = TrendsIntelAgent()
-
-        # Website scraper (uses Firecrawl/Jina)
-        self.website_intel = WebsiteIntelAgent()
 
     async def run(
         self,
@@ -68,7 +55,7 @@ class EnhancedResearchAgent:
         previous_results: dict,
     ) -> dict:
         """
-        Perform comprehensive research using ALL available sources.
+        Perform comprehensive research using ALL Marky agents.
 
         Returns:
             Combined research insights from all agents
@@ -83,16 +70,15 @@ class EnhancedResearchAgent:
 
         # Initialize result containers
         youtube_data = {}
-        google_ads_data = None
+        local_intel_data = None
         review_data = None
         yelp_data = None
         trends_data = None
-        website_data = None
 
         # ============================================
-        # Part 1: YouTube Viral Research
+        # Part 1: YouTube Viral Research (our addition)
         # ============================================
-        print("\n[1/6] YouTube Viral Ad Analysis...")
+        print("\n[1/5] YouTube Viral Ad Analysis...")
         try:
             youtube_data = await self.youtube_research.run(
                 product=product,
@@ -107,146 +93,219 @@ class EnhancedResearchAgent:
             print(f"  ⚠️ YouTube research failed: {e}")
 
         # ============================================
-        # Part 2: Google Ads Competitor Intelligence
+        # Part 2: Local Intel - Competitor Discovery & Analysis
         # ============================================
-        print("\n[2/6] Google Ads Competitor Intelligence...")
-        if self.ad_intel and city:
-            try:
-                analysis = self.ad_intel.analyze_market(
-                    business_type=business_type, location=city, max_ads=20
+        print("\n[2/5] Local Competitor Intelligence...")
+        competitors_for_reviews = []
+        try:
+            local_report = self.local_intel.analyze(
+                business_type=business_type,
+                location=city or "United States",
+                radius_miles=10.0,
+                top_count=5,
+                worst_count=3,
+                include_worst_rated=True,
+            )
+
+            # Extract data for downstream use
+            local_intel_data = {
+                "competitors_found": len(local_report.competitors),
+                "top_competitors": [
+                    c.name for c in getattr(local_report, "_top_competitors", [])[:5]
+                ],
+                "worst_competitors": [
+                    c.name for c in getattr(local_report, "_worst_competitors", [])[:3]
+                ],
+                "headline_suggestions": local_report.headline_suggestions[:10],
+                "trust_signals": local_report.trust_signals_to_use[:10],
+                "differentiators": [
+                    {
+                        "angle": d.angle_name,
+                        "hook": d.hook,
+                        "best_for": d.best_for,
+                    }
+                    for d in local_report.differentiators[:5]
+                ],
+            }
+
+            # Get Claude analysis if available
+            if (
+                hasattr(local_report, "_claude_analysis")
+                and local_report._claude_analysis
+            ):
+                claude = local_report._claude_analysis
+                local_intel_data["what_top_competitors_do"] = claude.get(
+                    "success_factors", []
+                )[:5]
+                local_intel_data["what_to_avoid"] = claude.get("failure_patterns", [])[
+                    :5
+                ]
+                local_intel_data["recommendations"] = claude.get("recommendations", [])[
+                    :5
+                ]
+
+            # Extract competitors with place_ids for review_intel
+            competitors_for_reviews = [
+                {"name": c.name, "place_id": c.place_id, "rating": c.rating}
+                for c in local_report.competitors
+                if c.place_id
+            ]
+
+            print(f"  ✅ Found {len(local_report.competitors)} competitors")
+            if local_intel_data.get("top_competitors"):
+                print(
+                    f"      Top rated: {', '.join(local_intel_data['top_competitors'][:3])}"
+                )
+            if local_intel_data.get("worst_competitors"):
+                print(
+                    f"      Worst rated: {', '.join(local_intel_data['worst_competitors'][:2])}"
                 )
 
-                google_ads_data = {
-                    "competitors_found": analysis.competitors_found,
-                    "total_ads_analyzed": analysis.total_ads_analyzed,
-                    "hook_suggestions": analysis.hook_suggestions,
-                    "headline_suggestions": analysis.headline_suggestions,
-                    "cta_suggestions": analysis.cta_suggestions,
-                    "creative_suggestions": analysis.creative_suggestions,
-                    "messaging_gaps": analysis.messaging_gaps,
-                    "patterns": analysis.patterns.to_dict()
-                    if analysis.patterns
-                    else None,
-                }
+        except Exception as e:
+            print(f"  ⚠️ Local Intel failed: {e}")
+            import traceback
 
-                print(f"  ✅ Analyzed {analysis.total_ads_analyzed} competitor ads")
-
-            except Exception as e:
-                print(f"  ⚠️ Google Ads analysis failed: {e}")
-        else:
-            print("  ⚠️ Skipped - no SERPAPI_KEY or city")
+            traceback.print_exc()
 
         # ============================================
-        # Part 3: Google Reviews Analysis
+        # Part 3: Google Reviews Analysis (uses place_ids from Local Intel)
         # ============================================
-        print("\n[3/6] Google Reviews Analysis...")
-        if self.review_intel and city:
+        print("\n[3/5] Google Reviews Analysis...")
+        if competitors_for_reviews:
             try:
-                review_analysis = self.review_intel.analyze_market_reviews(
+                review_analysis = self.review_intel.analyze_competitors(
+                    competitors=competitors_for_reviews[:5],
                     business_type=business_type,
-                    location=city,
-                    max_businesses=5,
-                    reviews_per_business=10,
+                    location=city or "United States",
+                    reviews_per_competitor=10,
                 )
 
+                # Extract voice of customer
+                voc = review_analysis.voice_of_customer
                 review_data = {
-                    "total_reviews": review_analysis.total_reviews,
-                    "avg_rating": review_analysis.average_rating,
-                    "common_complaints": review_analysis.common_complaints,
-                    "common_praises": review_analysis.common_praises,
-                    "customer_language": review_analysis.customer_language,
-                    "opportunities": review_analysis.opportunities,
+                    "total_reviews": review_analysis.total_reviews_analyzed,
+                    "pain_points": [
+                        p.get("point", p) if isinstance(p, dict) else p
+                        for p in (voc.pain_points if voc else [])[:8]
+                    ],
+                    "desires": [
+                        d.get("desire", d) if isinstance(d, dict) else d
+                        for d in (voc.desires if voc else [])[:8]
+                    ],
+                    "praise_quotes": voc.praise_quotes[:5] if voc else [],
+                    "complaint_quotes": voc.complaint_quotes[:5] if voc else [],
+                    "ad_hooks": review_analysis.ad_hooks[:5],
+                    "headline_suggestions": review_analysis.headline_suggestions[:5],
                 }
 
-                print(f"  ✅ Analyzed {review_analysis.total_reviews} reviews")
+                print(
+                    f"  ✅ Analyzed {review_analysis.total_reviews_analyzed} Google Reviews"
+                )
 
             except Exception as e:
-                print(f"  ⚠️ Reviews analysis failed: {e}")
+                print(f"  ⚠️ Review Intel failed: {e}")
         else:
-            print("  ⚠️ Skipped - no SERPAPI_KEY or city")
+            print("  ⚠️ Skipped - no competitors with place_ids from Local Intel")
 
         # ============================================
         # Part 4: Yelp Reviews Analysis
         # ============================================
-        print("\n[4/6] Yelp Reviews Analysis...")
-        if self.yelp_intel and city:
-            try:
-                yelp_analysis = self.yelp_intel.analyze_market(
-                    business_type=business_type, location=city, max_businesses=10
-                )
+        print("\n[4/5] Yelp Reviews Analysis...")
+        try:
+            yelp_analysis = self.yelp_intel.analyze_market(
+                business_type=business_type,
+                location=city or "United States",
+                max_businesses=5,
+                reviews_per_business=15,
+            )
 
-                yelp_data = {
-                    "businesses_analyzed": yelp_analysis.businesses_analyzed,
-                    "avg_market_rating": yelp_analysis.avg_market_rating,
-                    "what_customers_love": yelp_analysis.what_customers_love,
-                    "what_customers_hate": yelp_analysis.what_customers_hate,
-                    "customer_phrases": yelp_analysis.customer_phrases,
-                    "top_rated_traits": yelp_analysis.top_rated_traits,
-                }
+            insights = yelp_analysis.insights
+            yelp_data = {
+                "total_reviews": yelp_analysis.total_reviews_analyzed,
+                "businesses_analyzed": len(yelp_analysis.businesses),
+                "pain_points": insights.pain_points[:10] if insights else [],
+                "praise_points": insights.praise_points[:10] if insights else [],
+                "pain_quotes": insights.pain_point_quotes[:5] if insights else [],
+                "praise_quotes": insights.praise_quotes[:5] if insights else [],
+                "themes": insights.themes[:10] if insights else [],
+            }
 
-                print(
-                    f"  ✅ Analyzed {yelp_analysis.businesses_analyzed} Yelp listings"
-                )
+            # Get ad suggestions
+            if yelp_analysis.ad_suggestions:
+                yelp_data["hooks"] = yelp_analysis.ad_suggestions.hooks[:5]
+                yelp_data["headlines"] = yelp_analysis.ad_suggestions.headlines[:5]
 
-            except Exception as e:
-                print(f"  ⚠️ Yelp analysis failed: {e}")
-        else:
-            print("  ⚠️ Skipped - no SERPAPI_KEY or city")
+            print(
+                f"  ✅ Analyzed {yelp_analysis.total_reviews_analyzed} Yelp reviews from {len(yelp_analysis.businesses)} businesses"
+            )
+
+        except Exception as e:
+            print(f"  ⚠️ Yelp Intel failed: {e}")
 
         # ============================================
         # Part 5: Keyword Trends Analysis
         # ============================================
-        print("\n[5/6] Keyword Trends Analysis...")
+        print("\n[5/5] Keyword Trends Analysis...")
         try:
-            trends_analysis = self.trends_intel.analyze_keywords(
-                business_type=business_type, location=city or "United States"
+            # Build keywords from business type
+            keywords = [
+                business_type,
+                f"{business_type} near me",
+                f"best {business_type}",
+            ]
+
+            trends_analysis = self.trends_intel.analyze(
+                keywords=keywords,
+                location="United States",
+                include_related=True,
             )
 
+            # Extract timing recommendations
+            timing_recs = []
+            for s in trends_analysis.seasonal_insights[:3]:
+                if s.peak_months:
+                    month_names = {
+                        1: "Jan",
+                        2: "Feb",
+                        3: "Mar",
+                        4: "Apr",
+                        5: "May",
+                        6: "Jun",
+                        7: "Jul",
+                        8: "Aug",
+                        9: "Sep",
+                        10: "Oct",
+                        11: "Nov",
+                        12: "Dec",
+                    }
+                    peaks = [month_names.get(m, str(m)) for m in s.peak_months[:3]]
+                    timing_recs.append(
+                        f"Peak months for '{s.keyword}': {', '.join(peaks)}"
+                    )
+
             trends_data = {
-                "high_volume_keywords": trends_analysis.high_volume_keywords,
-                "low_competition_keywords": trends_analysis.low_competition_keywords,
-                "best_keywords_for_ads": trends_analysis.best_keywords_for_ads,
-                "seasonal_insights": trends_analysis.seasonal_insights,
+                "keywords_analyzed": len(trends_analysis.keyword_data),
+                "keyword_data": [
+                    {
+                        "keyword": kw.keyword,
+                        "search_volume": kw.search_volume,
+                        "cpc": kw.cpc,
+                    }
+                    for kw in trends_analysis.keyword_data[:5]
+                ],
+                "timing_recommendations": timing_recs,
+                "ad_recommendations": getattr(
+                    trends_analysis, "ad_recommendations", []
+                )[:5]
+                if hasattr(trends_analysis, "ad_recommendations")
+                and getattr(trends_analysis, "ad_recommendations", None)
+                else [],
             }
 
-            print(f"  ✅ Analyzed {len(trends_analysis.keywords)} keywords")
+            print(f"  ✅ Analyzed {len(trends_analysis.keyword_data)} keywords")
 
         except Exception as e:
-            print(f"  ⚠️ Trends analysis failed: {e}")
-
-        # ============================================
-        # Part 6: Website Intelligence (if we have competitor URLs)
-        # ============================================
-        print("\n[6/6] Website Intelligence...")
-        competitor_urls = []
-
-        # Extract URLs from Google Ads results
-        if google_ads_data and google_ads_data.get("patterns"):
-            patterns = google_ads_data.get("patterns", {})
-            # URLs would be in competitor ads - but we'd need to store them
-
-        if competitor_urls:
-            try:
-                website_analysis = self.website_intel.analyze_competitor_websites(
-                    urls=competitor_urls,
-                    business_type=business_type,
-                    location=city or "",
-                )
-
-                website_data = {
-                    "websites_analyzed": website_analysis.websites_analyzed,
-                    "common_headlines": website_analysis.common_headlines,
-                    "common_offers": website_analysis.common_offers,
-                    "common_trust_signals": website_analysis.common_trust_signals,
-                    "differentiation_opportunities": website_analysis.differentiation_opportunities,
-                }
-
-                print(f"  ✅ Analyzed {website_analysis.websites_analyzed} websites")
-
-            except Exception as e:
-                print(f"  ⚠️ Website analysis failed: {e}")
-        else:
-            print("  ⚠️ Skipped - no competitor URLs found")
+            print(f"  ⚠️ Trends Intel failed: {e}")
 
         # ============================================
         # Combine All Insights
@@ -257,11 +316,10 @@ class EnhancedResearchAgent:
 
         combined_insights = self._combine_all_insights(
             youtube_data=youtube_data,
-            google_ads_data=google_ads_data,
+            local_intel_data=local_intel_data,
             review_data=review_data,
             yelp_data=yelp_data,
             trends_data=trends_data,
-            website_data=website_data,
         )
 
         return {
@@ -272,31 +330,28 @@ class EnhancedResearchAgent:
             "viral_videos": youtube_data.get("top_videos", []),
             "viral_patterns": youtube_data.get("patterns_identified", {}),
             "youtube_source": youtube_data.get("source", "none"),
-            # Google Ads data
-            "competitor_ads": google_ads_data,
-            # NEW: Reviews data
+            # Local Intel data (replaces old google_ads)
+            "competitor_ads": local_intel_data,  # Keep this key for backward compat
+            "local_intel": local_intel_data,
+            # Reviews data
             "google_reviews": review_data,
             "yelp_reviews": yelp_data,
-            # NEW: Trends data
+            # Trends data
             "keyword_trends": trends_data,
-            # NEW: Website data
-            "competitor_websites": website_data,
             # Combined insights for script writer
             "insights": combined_insights,
             "videos_analyzed": len(youtube_data.get("top_videos", [])),
             # Summary stats
             "research_summary": {
                 "youtube_videos": len(youtube_data.get("top_videos", [])),
-                "google_ads": google_ads_data.get("total_ads_analyzed", 0)
-                if google_ads_data
+                "competitors_found": local_intel_data.get("competitors_found", 0)
+                if local_intel_data
                 else 0,
-                "reviews_analyzed": (
-                    review_data.get("total_reviews", 0) if review_data else 0
-                ),
-                "yelp_businesses": (
-                    yelp_data.get("businesses_analyzed", 0) if yelp_data else 0
-                ),
-                "keywords_analyzed": len(trends_data.get("high_volume_keywords", []))
+                "google_reviews": review_data.get("total_reviews", 0)
+                if review_data
+                else 0,
+                "yelp_reviews": yelp_data.get("total_reviews", 0) if yelp_data else 0,
+                "keywords_analyzed": trends_data.get("keywords_analyzed", 0)
                 if trends_data
                 else 0,
             },
@@ -305,11 +360,10 @@ class EnhancedResearchAgent:
     def _combine_all_insights(
         self,
         youtube_data: dict,
-        google_ads_data: Optional[dict],
+        local_intel_data: Optional[dict],
         review_data: Optional[dict],
         yelp_data: Optional[dict],
         trends_data: Optional[dict],
-        website_data: Optional[dict],
     ) -> List[str]:
         """Combine ALL research into actionable insights for the script writer."""
         insights = []
@@ -319,47 +373,46 @@ class EnhancedResearchAgent:
         if viral_patterns:
             hooks = viral_patterns.get("common_hooks", [])
             for hook in hooks[:2]:
-                insights.append(f"🎬 Viral hook: {hook}")
+                insights.append(f"🎬 Viral hook pattern: {hook}")
 
-        # From Google Ads competitor analysis
-        if google_ads_data:
-            for hook in google_ads_data.get("hook_suggestions", [])[:2]:
-                insights.append(f"📢 Competitor hook: {hook}")
-            for gap in google_ads_data.get("messaging_gaps", [])[:1]:
-                insights.append(f"💡 Opportunity: {gap}")
+        # From Local Intel - competitor analysis
+        if local_intel_data:
+            # Success factors from Claude analysis
+            for tip in local_intel_data.get("what_top_competitors_do", [])[:2]:
+                insights.append(f"✅ Top competitors: {tip}")
 
-        # From Google Reviews - CUSTOMER VOICE
-        if review_data:
-            # Pain points to address
-            for complaint in review_data.get("common_complaints", [])[:2]:
+            # Failure patterns to avoid
+            for avoid in local_intel_data.get("what_to_avoid", [])[:2]:
+                insights.append(f"❌ Avoid: {avoid}")
+
+            # Differentiators
+            for diff in local_intel_data.get("differentiators", [])[:2]:
                 insights.append(
-                    f"😤 Customers complain about: {complaint} - ADDRESS THIS"
+                    f"💡 Angle: {diff.get('angle', '')} - {diff.get('hook', '')}"
                 )
-            # What they love
-            for praise in review_data.get("common_praises", [])[:2]:
-                insights.append(f"😊 Customers love: {praise} - HIGHLIGHT THIS")
-            # Customer language
-            for phrase in review_data.get("customer_language", [])[:1]:
-                insights.append(f"💬 Use customer language: '{phrase}'")
 
-        # From Yelp
+        # From Google Reviews - Customer voice
+        if review_data:
+            for pain in review_data.get("pain_points", [])[:2]:
+                insights.append(f"😤 Customer pain point: {pain} - ADDRESS THIS")
+            for desire in review_data.get("desires", [])[:2]:
+                insights.append(f"💭 Customers want: {desire}")
+            for hook in review_data.get("ad_hooks", [])[:1]:
+                insights.append(f"📢 Hook from reviews: {hook}")
+
+        # From Yelp - Pain/praise
         if yelp_data:
-            for love in yelp_data.get("what_customers_love", [])[:1]:
-                insights.append(f"⭐ Yelp customers value: {love}")
-            for trait in yelp_data.get("top_rated_traits", [])[:1]:
-                insights.append(f"🏆 Top-rated businesses have: {trait}")
+            for pain in yelp_data.get("pain_points", [])[:2]:
+                insights.append(f"⭐ Yelp complaint: {pain}")
+            for praise in yelp_data.get("praise_points", [])[:2]:
+                insights.append(f"🏆 Yelp praise: {praise}")
 
-        # From Trends
+        # From Trends - Timing
         if trends_data:
-            for kw in trends_data.get("best_keywords_for_ads", [])[:1]:
-                insights.append(f"🔍 Target keyword: {kw}")
-            for seasonal in trends_data.get("seasonal_insights", [])[:1]:
-                insights.append(f"📅 Seasonal: {seasonal}")
-
-        # From Website analysis
-        if website_data:
-            for opp in website_data.get("differentiation_opportunities", [])[:1]:
-                insights.append(f"🎯 Differentiation: {opp}")
+            for timing in trends_data.get("timing_recommendations", [])[:1]:
+                insights.append(f"📅 {timing}")
+            for rec in trends_data.get("ad_recommendations", [])[:1]:
+                insights.append(f"🎯 {rec}")
 
         if not insights:
             insights = ["Focus on clear value proposition and customer trust signals"]

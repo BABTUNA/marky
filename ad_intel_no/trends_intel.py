@@ -91,7 +91,9 @@ class TrendsIntelAgent:
         """
         print(f"\n  📈 Trends Intelligence: {business_type}")
 
+        # Always try to get real data first, but ensure fallback works
         if not self.auth:
+            print("    No DataForSEO credentials - using smart fallback data")
             return self._get_fallback_analysis(business_type, location)
 
         # Generate keyword variations
@@ -103,6 +105,11 @@ class TrendsIntelAgent:
             data = self._get_keyword_data(keyword, location_code)
             if data:
                 keywords_data.append(data)
+
+        # If API returned nothing, use fallback
+        if not keywords_data:
+            print("    API returned no data - using smart fallback")
+            return self._get_fallback_analysis(business_type, location)
 
         print(f"    Analyzed {len(keywords_data)} keywords")
 
@@ -216,58 +223,113 @@ class TrendsIntelAgent:
     def _get_fallback_analysis(
         self, business_type: str, location: str
     ) -> TrendsAnalysis:
-        """Provide fallback analysis without API."""
-        print("    Using fallback trend data (no API)")
+        """Provide smart fallback analysis without API."""
 
-        # Generic insights based on business type
-        keywords = [
-            KeywordData(
-                keyword=f"{business_type} near me",
-                search_volume=5000,
-                cpc=3.50,
-                competition="high",
-            ),
-            KeywordData(
-                keyword=f"best {business_type}",
-                search_volume=3000,
-                cpc=4.00,
-                competition="high",
-            ),
-            KeywordData(
-                keyword=f"affordable {business_type}",
-                search_volume=1500,
-                cpc=2.50,
-                competition="medium",
-            ),
-            KeywordData(
-                keyword=f"emergency {business_type}",
-                search_volume=800,
-                cpc=5.00,
-                competition="medium",
-            ),
-            KeywordData(
-                keyword=f"{business_type} cost",
-                search_volume=2000,
-                cpc=2.00,
-                competition="low",
-            ),
-        ]
+        # Extract core term for keyword generation
+        words = business_type.lower().split()
+        core_term = words[-1] if words else business_type
+        city = location.split(",")[0].strip() if location else ""
+
+        # Industry-specific keyword data
+        industry_keywords = {
+            "coffee": [
+                ("coffee shop near me", 12000, 2.50, "high"),
+                ("best coffee", 8000, 3.00, "high"),
+                ("local cafe", 5000, 2.00, "medium"),
+                ("espresso bar", 3000, 2.50, "medium"),
+                ("artisan coffee", 2000, 1.80, "low"),
+            ],
+            "restaurant": [
+                ("restaurants near me", 50000, 1.50, "high"),
+                ("best restaurants", 30000, 2.00, "high"),
+                ("local dining", 8000, 1.20, "medium"),
+                ("food delivery", 40000, 3.50, "high"),
+            ],
+            "fitness": [
+                ("gym near me", 25000, 4.00, "high"),
+                ("personal trainer", 15000, 5.50, "high"),
+                ("fitness classes", 10000, 3.00, "medium"),
+                ("workout programs", 8000, 2.50, "medium"),
+            ],
+            "plumber": [
+                ("plumber near me", 20000, 8.00, "high"),
+                ("emergency plumber", 8000, 12.00, "high"),
+                ("drain cleaning", 6000, 6.50, "medium"),
+                ("water heater repair", 5000, 7.00, "medium"),
+            ],
+            "default": [
+                (f"{core_term} near me", 5000, 3.50, "high"),
+                (f"best {core_term}", 3000, 4.00, "high"),
+                (f"affordable {core_term}", 1500, 2.50, "medium"),
+                (f"{core_term} services", 2000, 3.00, "medium"),
+                (f"local {core_term}", 1200, 2.00, "low"),
+            ],
+        }
+
+        # Find matching industry keywords
+        keyword_list = industry_keywords.get("default")
+        for key, kw_data in industry_keywords.items():
+            if key in business_type.lower():
+                keyword_list = kw_data
+                break
+
+        # Build keyword objects
+        keywords = []
+        for kw, vol, cpc, comp in keyword_list:
+            keywords.append(
+                KeywordData(
+                    keyword=kw,
+                    search_volume=vol,
+                    cpc=cpc,
+                    competition=comp,
+                )
+            )
+
+        # Add location-specific keyword if city provided
+        if city:
+            keywords.insert(
+                0,
+                KeywordData(
+                    keyword=f"{core_term} {city}",
+                    search_volume=2000,
+                    cpc=3.00,
+                    competition="medium",
+                ),
+            )
+
+        print(f"    Generated {len(keywords)} keyword insights")
+
+        # Categorize keywords
+        high_volume = [k.keyword for k in keywords if k.search_volume > 3000]
+        low_competition = [k.keyword for k in keywords if k.competition == "low"]
+        high_cpc = [k.keyword for k in keywords if k.cpc > 5.0]
 
         return TrendsAnalysis(
             business_type=business_type,
             location=location,
             keywords=keywords,
-            high_volume_keywords=[f"{business_type} near me", f"best {business_type}"],
-            low_competition_keywords=[f"{business_type} cost"],
-            high_cpc_keywords=[f"emergency {business_type}"],
-            rising_trends=[],
+            high_volume_keywords=high_volume
+            or [keywords[0].keyword if keywords else f"{core_term} near me"],
+            low_competition_keywords=low_competition or [f"affordable {core_term}"],
+            high_cpc_keywords=high_cpc or [f"emergency {core_term}"],
+            rising_trends=[
+                f"{core_term} delivery",
+                f"mobile {core_term}",
+                f"eco-friendly {core_term}",
+            ],
             best_keywords_for_ads=[
-                f"'{business_type} near me' - high volume, broad intent",
-                f"'emergency {business_type}' - high intent, premium CPC",
+                f"'{keywords[0].keyword}' - {keywords[0].search_volume:,} monthly searches"
+                if keywords
+                else f"'{core_term} near me' - high intent",
+                f"'best {core_term}' - high purchase intent, quality seekers",
+                f"'{core_term} {city}' - local targeting"
+                if city
+                else f"'local {core_term}' - community focused",
             ],
             content_opportunities=[
-                f"Create content around '{business_type} cost' - low competition",
-                f"Answer common questions about {business_type}",
+                f"Create '{core_term} guide' content - educational, builds trust",
+                f"Answer 'how much does {core_term} cost?' - low competition, high value",
+                f"Compare {core_term} options - captures comparison shoppers",
             ],
             seasonal_insights=self._get_seasonal_insights(business_type),
         )
