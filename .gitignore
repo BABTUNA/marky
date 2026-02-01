@@ -37,7 +37,10 @@ env/
 agent1*_data.json
 *.json.bak
 
-# Output files (videos, images, audio)
+# Output (generated reports, PDFs, maps, media)
+output/*.json
+output/pdfs/
+output/maps/
 output/frames/*.png
 output/frames/*.jpg
 output/voiceovers/*.mp3
