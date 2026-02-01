@@ -80,11 +80,15 @@ class WebsiteScraper:
             if p.success and p.content
         ])
         
+        # Fetch raw HTML of frontend (homepage) for downstream use
+        homepage_html = self._fetch_raw_html(website_url)
+        
         return WebsiteData(
             competitor_name=competitor.name,
             website_url=website_url,
             pages_scraped=pages,
             full_text=full_text,
+            homepage_html=homepage_html,
         )
     
     def scrape_competitors(
@@ -244,6 +248,20 @@ class WebsiteScraper:
                 success=False,
                 error=str(e),
             )
+    
+    def _fetch_raw_html(self, url: str) -> Optional[str]:
+        """Fetch raw HTML of a URL (no Firecrawl/Jina). One simple GET."""
+        try:
+            r = requests.get(
+                url,
+                headers={"User-Agent": "LocalIntelAgent/1.0"},
+                timeout=15,
+            )
+            if r.status_code == 200:
+                return r.text
+        except Exception:
+            pass
+        return None
     
     def _normalize_url(self, url: str) -> str:
         """Ensure URL has scheme and is properly formatted."""
