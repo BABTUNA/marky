@@ -266,13 +266,13 @@ pipeline.py (Runs agent sequence)
        ↓
 Results formatted & returned
        ↓
-Files uploaded to tmpfiles.org (1hr expiry)
+Files uploaded to Google Drive (or tmpfiles.org fallback)
 ```
 
 ### Orchestrator Modes
 | Mode | Env Variable | Behavior |
 |------|--------------|----------|
-| **Production** | (default) | Full pipeline, uploads to tmpfiles.org |
+| **Production** | (default) | Full pipeline, uploads to Google Drive (or tmpfiles.org if not configured) |
 | **Test Mode** | `TEST_MODE=true` | Quick echo response, no pipeline |
 | **Mock Mode** | `MOCK_MODE=true` | Returns realistic mock data instantly |
 
@@ -287,18 +287,18 @@ Files uploaded to tmpfiles.org (1hr expiry)
 | "storyboard" | `storyboard` | Images only, no video |
 
 ### File Upload System
-The orchestrator uploads final files to **tmpfiles.org** (free, 1hr expiry):
-- Videos (MP4)
-- PDFs
-- Uses `curl` subprocess for reliability
-- Converts URLs to direct download format
+The orchestrator uploads final files to **Google Drive** (when `GDRIVE_DEFAULT_FOLDER_ID` is set) or **tmpfiles.org** (fallback, 1hr expiry):
+- Videos (MP4) and PDFs
+- Uses `utils/gdrive_upload.py` for Drive (permanent links)
+- Falls back to tmpfiles.org via curl if Drive not configured
+- See `docs/MCP_AGENT.md` for Drive setup
 
 ---
 
 ## 9. Stretch Goals (From Discord)
 
 ### Priority Tasks
-1. **Integrate MCP Google Drive Upload** - Upload final videos/PDFs to Google Drive
+1. **Integrate MCP Google Drive Upload** - Upload final videos/PDFs to Google Drive ✅ DONE
 2. **Ensure Research → Script Context** - Research agent must know it's generating for storyboard + viral video + PDF ✅ DONE
 3. **Test with Actual VEO 3** - Full pipeline with real video generation, music, TTS overlay, then Drive upload
 
@@ -467,9 +467,9 @@ All agents must accept these parameters (even if unused):
 async def run(self, product, industry, duration, tone, city, previous_results, **kwargs)
 ```
 
-### tmpfiles.org Upload
-- Files expire after ~1 hour
-- Use direct download URL format: `tmpfiles.org/dl/ID/file` (not `tmpfiles.org/ID/file`)
+### File Upload (Google Drive / tmpfiles.org)
+- **Google Drive**: Set `GDRIVE_DEFAULT_FOLDER_ID` + OAuth (see docs/MCP_AGENT.md). Permanent links.
+- **tmpfiles.org fallback**: Files expire after ~1 hour. Use direct URL: `tmpfiles.org/dl/ID/file`
 - May fail silently - check return value
 
 ---

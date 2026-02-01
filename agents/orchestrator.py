@@ -367,7 +367,33 @@ async def handle_ack(ctx: Context, sender: str, msg: ChatAcknowledgement):
     ctx.logger.debug(f"Received ack from {sender} for {msg.acknowledged_msg_id}")
 
 
-def upload_file_to_tmpfiles(file_path: str) -> str:
+def upload_file(file_path: str) -> str | None:
+    """Upload file to Google Drive (preferred) or tmpfiles.org fallback.
+    
+    Uses Google Drive when GDRIVE_DEFAULT_FOLDER_ID is set and OAuth is complete.
+    Otherwise falls back to tmpfiles.org (1hr expiry).
+    
+    Args:
+        file_path: Local path to file (video, PDF, etc.)
+        
+    Returns:
+        Public URL to file, or None if upload failed
+    """
+    # Try Google Drive first (permanent hosting)
+    if os.getenv("GDRIVE_DEFAULT_FOLDER_ID"):
+        try:
+            from utils.gdrive_upload import upload_file_to_drive
+            url = upload_file_to_drive(file_path)
+            if url:
+                return url
+        except Exception as e:
+            print(f"⚠️ Drive upload failed, falling back to tmpfiles: {e}")
+    
+    # Fallback to tmpfiles.org
+    return upload_file_to_tmpfiles(file_path)
+
+
+def upload_file_to_tmpfiles(file_path: str) -> str | None:
     """Upload any file to tmpfiles.org and return public URL.
     
     tmpfiles.org is a free temporary file hosting service.
@@ -466,7 +492,7 @@ def format_results(result: dict, output_type: str) -> str:
             output_lines.append("🎬 FINAL VIDEO")
             output_lines.append("-" * 50)
             output_lines.append(f"🔗 WATCH NOW: {video_url}")
-            output_lines.append(f"   (Mock link - in production, this uploads to tmpfiles.org)")
+            output_lines.append(f"   (Mock link - in production, this uploads to Google Drive)")
             output_lines.append(f"   • Duration: {video_data.get('duration', 30)}s")
             output_lines.append(f"   • Resolution: {video_data.get('resolution', '1920x1080')}")
             output_lines.append(f"   • Frames: {video_data.get('frames_used', 5)} with Ken Burns effects")
@@ -478,11 +504,11 @@ def format_results(result: dict, output_type: str) -> str:
                 output_lines.append("🎬 FINAL VIDEO")
                 output_lines.append("-" * 50)
                 # Upload video
-                print(f"\n📤 Uploading video to tmpfiles.org...")
-                video_url = upload_file_to_tmpfiles(video_path)
+                print(f"\n📤 Uploading video...")
+                video_url = upload_file(video_path)
                 if video_url:
                     output_lines.append(f"🔗 WATCH NOW: {video_url}")
-                    output_lines.append(f"   (Link valid for ~1 hour)")
+                    output_lines.append(f"   (Click link above to view)")
                 output_lines.append(f"   • Duration: {video_data.get('duration', 30)}s")
                 output_lines.append(f"   • Resolution: {video_data.get('resolution', '1920x1080')}")
                 output_lines.append(f"   • Frames: {video_data.get('frames_used', 5)} with Ken Burns effects")
@@ -498,8 +524,8 @@ def format_results(result: dict, output_type: str) -> str:
         output_lines.append("-" * 50)
         
         if viral_path and os.path.exists(viral_path):
-            print(f"\n📤 Uploading viral video to tmpfiles.org...")
-            viral_video_url = upload_file_to_tmpfiles(viral_path)
+            print(f"\n📤 Uploading viral video...")
+            viral_video_url = upload_file(viral_path)
             
             if viral_video_url:
                 output_lines.append(f"🔗 WATCH NOW: {viral_video_url}")
@@ -513,8 +539,8 @@ def format_results(result: dict, output_type: str) -> str:
 
     # === PDF PACKAGE ===
     pdf_url = None
-    if "pdf_export" in results:
-        pdf_data = results["pdf_export"]
+    pdf_data = results.get("pdf_export") or results.get("pdf_builder")
+    if pdf_data:
         
         # Check if mock URL already provided (for MOCK_MODE)
         if pdf_data.get("pdf_url"):
@@ -522,7 +548,7 @@ def format_results(result: dict, output_type: str) -> str:
             output_lines.append("📄 COMPLETE AD PACKAGE (PDF)")
             output_lines.append("-" * 50)
             output_lines.append(f"🔗 DOWNLOAD PDF: {pdf_url}")
-            output_lines.append(f"   (Mock link - in production, this uploads to tmpfiles.org)")
+            output_lines.append(f"   (Mock link - in production, this uploads to Google Drive)")
             output_lines.append(f"   • Pages: {pdf_data.get('pages', 8)}")
             includes = pdf_data.get('includes', [])
             if includes:
@@ -534,11 +560,11 @@ def format_results(result: dict, output_type: str) -> str:
             if pdf_path and os.path.exists(pdf_path):
                 output_lines.append("📄 COMPLETE AD PACKAGE (PDF)")
                 output_lines.append("-" * 50)
-                print(f"\n📤 Uploading PDF to tmpfiles.org...")
-                pdf_url = upload_file_to_tmpfiles(pdf_path)
+                print(f"\n📤 Uploading PDF...")
+                pdf_url = upload_file(pdf_path)
                 if pdf_url:
                     output_lines.append(f"🔗 DOWNLOAD PDF: {pdf_url}")
-                    output_lines.append(f"   (Link valid for ~1 hour)")
+                    output_lines.append(f"   (Click link above to view)")
                 output_lines.append(f"   • Pages: {pdf_data.get('pages', 8)}")
                 includes = pdf_data.get('includes', [])
                 if includes:

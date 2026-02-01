@@ -191,15 +191,43 @@ async def main():
         # Video
         video_result = result["results"].get("video_assembly", {})
         if video_result and not video_result.get("error"):
-            video_path = video_result.get('video_path', 'N/A')
+            video_path = video_result.get('final_video_path') or video_result.get('video_path', 'N/A')
             size = video_result.get('file_size', 'N/A')
-            print(f"  Final Video: {video_path.split('/')[-1]}")
-            print(f"    Size: {size if isinstance(size, str) else f'{size/1024/1024:.1f}MB'}")
+            print(f"  Final Video: {video_path.split('/')[-1] if isinstance(video_path, str) else 'N/A'}")
+            if isinstance(size, (int, float)):
+                print(f"    Size: {size/1024/1024:.1f}MB")
 
         # PDF
         pdf_result = result["results"].get("pdf_builder", {})
         if pdf_result and not pdf_result.get("error"):
             print(f"  PDF Package: {pdf_result.get('pdf_path', 'N/A')}")
+
+        # Upload to Google Drive (or tmpfiles.org) if configured
+        print("\n" + "-" * 40)
+        print("📤 UPLOADING TO CLOUD...")
+        print("-" * 40)
+        try:
+            from agents.orchestrator import upload_file
+            import os
+            uploaded = []
+            if video_result and not video_result.get("error"):
+                vpath = video_result.get("final_video_path") or video_result.get("video_path")
+                if vpath and os.path.exists(vpath):
+                    url = upload_file(vpath)
+                    if url:
+                        print(f"  🎬 Video: {url}")
+                        uploaded.append("video")
+            if pdf_result and not pdf_result.get("error"):
+                ppath = pdf_result.get("pdf_path")
+                if ppath and os.path.exists(ppath):
+                    url = upload_file(ppath)
+                    if url:
+                        print(f"  📄 PDF: {url}")
+                        uploaded.append("pdf")
+            if not uploaded:
+                print("  (No files to upload or upload skipped - check GDRIVE_DEFAULT_FOLDER_ID)")
+        except Exception as e:
+            print(f"  ⚠️ Upload failed: {e}")
 
         print("\n" + "=" * 60)
 

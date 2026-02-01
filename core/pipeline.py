@@ -78,7 +78,7 @@ PIPELINES = {
         "cost_estimator",
         "social_media",
     ],
-    # NEW: Storyboard video - sketch frames + Ken Burns (SILENT - no audio)
+    # NEW: Storyboard video - sketch frames + Ken Burns (SILENT - no audio) + PDF package
     "storyboard_video": [
         "research",
         "location_scout",
@@ -88,6 +88,7 @@ PIPELINES = {
         "video_assembly",  # Create silent video from images
         "cost_estimator",
         "social_media",
+        "pdf_builder",  # Complete campaign PDF package
     ],
     # Complete Viral Video Pipeline (VEO 3 + Lyria + TTS)
     # Now enabled for testing with placeholders!
@@ -105,6 +106,15 @@ PIPELINES = {
         "veo3_generator",
         "lyria_music",
         "viral_video_assembler",
+    ],
+    # Quick E2E test - skips research, produces video + PDF (no VEO 3)
+    "quick_test": [
+        "script_writer",
+        "image_generator",
+        "video_assembly",
+        "cost_estimator",
+        "social_media",
+        "pdf_builder",
     ],
 }
 
@@ -195,6 +205,19 @@ class AdBoardPipeline:
 
         # Get pipeline steps for this output type
         pipeline_steps = PIPELINES.get(self.output_type, PIPELINES["storyboard"])
+
+        # Quick test: inject dummy research + trend data (skips slow Marky workflow)
+        if self.output_type == "quick_test":
+            from core.dummy_research import get_dummy_research
+            self.results["research"] = get_dummy_research(
+                industry=self.industry, product=self.product
+            )
+            self.results["trend_analyzer"] = {
+                "viral_patterns": self.results["research"].get("patterns_identified", {}).get("common_hooks", [])[:3],
+                "recommended_hooks": ["Authenticity wins", "Show the product", "Clear CTA"],
+            }
+            self.results["location_scout"] = {"locations": [{"name": "Downtown", "address": "Providence, RI"}]}
+            print("  [quick_test] Using dummy research (skipping Marky workflow)")
 
         print(f"\n{'=' * 50}")
         print(f"AdBoard Pipeline: {self.output_type}")
