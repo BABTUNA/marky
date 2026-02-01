@@ -265,17 +265,15 @@ Optimized for background music that doesn't overpower narration"""
         duration: int,
     ) -> Optional[str]:
         """
-        Use mock/placeholder music for testing the pipeline.
+        Download royalty-free music from Pixabay for the pipeline.
 
-        This allows testing the full viral video pipeline without Lyria API access.
-        Uses royalty-free music samples or generates silence as placeholder.
+        Pixabay offers free music for commercial use (no attribution required).
 
         Returns:
-            Path to mock audio file
+            Path to downloaded audio file
         """
         try:
             # Check for existing MUSIC files in the output directory
-            # Only use files that are explicitly named as music (not voiceovers)
             existing_music = [
                 f
                 for f in (
@@ -288,14 +286,69 @@ Optimized for background music that doesn't overpower narration"""
                 print(f"   🎵 Using existing music file: {existing_music[0].name}")
                 return str(existing_music[0])
 
-            # Generate silent audio file as placeholder
-            # This is better than using voiceovers which would overlap with TTS
-            print("   🎵 Generating silent music placeholder...")
+            # Download royalty-free music from Pixabay based on tone
+            print(f"   🎵 Downloading royalty-free music for tone: {tone}...")
+
+            # Curated Pixabay tracks (direct download URLs) - all royalty-free
+            # These are popular tracks that work well for ads
+            tone_tracks = {
+                "energetic": {
+                    "url": "https://cdn.pixabay.com/download/audio/2022/10/25/audio_946b0939c8.mp3",
+                    "name": "energetic_upbeat_music.mp3",
+                },
+                "professional": {
+                    "url": "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3",
+                    "name": "corporate_professional_music.mp3",
+                },
+                "friendly": {
+                    "url": "https://cdn.pixabay.com/download/audio/2023/07/17/audio_6d0c5c5f9a.mp3",
+                    "name": "friendly_uplifting_music.mp3",
+                },
+                "calm": {
+                    "url": "https://cdn.pixabay.com/download/audio/2022/02/22/audio_d1718ab41b.mp3",
+                    "name": "calm_ambient_music.mp3",
+                },
+                "playful": {
+                    "url": "https://cdn.pixabay.com/download/audio/2024/11/04/audio_4956b4edd1.mp3",
+                    "name": "playful_fun_music.mp3",
+                },
+                "inspiring": {
+                    "url": "https://cdn.pixabay.com/download/audio/2023/09/27/audio_3eebc83054.mp3",
+                    "name": "inspiring_motivational_music.mp3",
+                },
+            }
+
+            # Get track for tone, default to professional
+            track = tone_tracks.get(tone.lower(), tone_tracks["professional"])
+
+            safe_product = product.replace(" ", "_").replace("/", "_")[:20]
+            output_path = self.output_dir / f"{safe_product}_music_{duration}s.mp3"
+
+            # Download the track using curl (more reliable than urllib with SSL)
+            print(f"   📥 Downloading: {track['name']}")
+            import subprocess
+
+            result = subprocess.run(
+                ["curl", "-L", "-s", "-o", str(output_path), track["url"]],
+                capture_output=True,
+                timeout=60,
+            )
+
+            if result.returncode == 0 and output_path.exists():
+                print(f"   ✅ Music downloaded: {output_path}")
+                return str(output_path)
+            else:
+                raise Exception(f"curl failed: {result.stderr.decode()}")
+
+        except Exception as e:
+            print(f"   ⚠️ Music download failed: {e}")
+            print(f"   🎵 Falling back to silent placeholder...")
+
+            # Fallback to silent audio
             silent_path = (
                 self.output_dir / f"{product.replace(' ', '_')}_silent_{duration}s.wav"
             )
 
-            # Create a simple silent WAV file using wave module
             import struct
             import wave
 
@@ -303,20 +356,13 @@ Optimized for background music that doesn't overpower narration"""
             num_samples = sample_rate * duration
 
             with wave.open(str(silent_path), "w") as wav_file:
-                wav_file.setnchannels(2)  # Stereo
-                wav_file.setsampwidth(2)  # 16-bit
+                wav_file.setnchannels(2)
+                wav_file.setsampwidth(2)
                 wav_file.setframerate(sample_rate)
-
-                # Write silent samples (zeros)
                 for _ in range(num_samples):
                     wav_file.writeframes(struct.pack("<hh", 0, 0))
 
-            print(f"   🎵 Created silent placeholder: {silent_path}")
             return str(silent_path)
-
-        except Exception as e:
-            print(f"   ❌ Mock music generation failed: {e}")
-            return None
 
     async def _generate_music(
         self,

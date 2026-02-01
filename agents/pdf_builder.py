@@ -274,7 +274,9 @@ class PDFBuilderAgent:
             viral_data = previous_results.get("viral_video_assembler", {})
             has_viral = bool(viral_data.get("final_video_path"))
             if has_viral:
-                story.append(Paragraph("<b>Your Campaign Deliverables:</b>", subheading_style))
+                story.append(
+                    Paragraph("<b>Your Campaign Deliverables:</b>", subheading_style)
+                )
                 story.append(
                     Paragraph(
                         "1. <b>Storyboard Video</b> — Silent concept video for development and pitching to clients or crew.",
@@ -371,10 +373,8 @@ class PDFBuilderAgent:
             )
             story.append(Spacer(1, 0.15 * inch))
 
-            # Agent orchestration diagram: prefer agent_architecture_diagram, fallback to pipeline_diagram
-            arch_path = Path(__file__).parent.parent / "docs" / "agent_architecture_diagram.png"
-            pipeline_path = Path(__file__).parent.parent / "docs" / "pipeline_diagram.png"
-            diagram_path = arch_path if arch_path.exists() else pipeline_path
+            # Agent orchestration diagram: use pipeline.png (most up-to-date)
+            diagram_path = Path(__file__).parent.parent / "docs" / "pipeline.png"
             if diagram_path.exists():
                 try:
                     diagram_img = RLImage(
@@ -556,18 +556,15 @@ class PDFBuilderAgent:
                 kw_data = trends.get("keyword_data", [])
                 if kw_data:
                     story.append(Paragraph("Target Keywords for Ad:", subheading_style))
-                    table_data = [["Keyword", "Search Volume", "CPC ($)"]]
+                    table_data = [["Keyword", "Search Volume"]]
                     for kw in kw_data[:10]:
                         table_data.append(
                             [
                                 kw.get("keyword", ""),
                                 f"{kw.get('search_volume', 0):,}",
-                                f"${kw.get('cpc', 0):.2f}",
                             ]
                         )
-                    table = Table(
-                        table_data, colWidths=[3 * inch, 1.5 * inch, 1 * inch]
-                    )
+                    table = Table(table_data, colWidths=[3.5 * inch, 2 * inch])
                     table.setStyle(
                         TableStyle(
                             [

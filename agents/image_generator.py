@@ -26,7 +26,7 @@ GCP_LOCATION = os.getenv("GCP_LOCATION", "us-central1")
 IMAGEN_MODEL = "imagen-3.0-generate-001"  # Stable model
 
 # Seconds to wait between each Imagen API call (rate limit)
-IMAGE_DELAY_SECONDS = int(os.getenv("IMAGEN_DELAY_SECONDS", "30"))
+IMAGE_DELAY_SECONDS = int(os.getenv("IMAGEN_DELAY_SECONDS", "45"))
 
 
 class ImageGeneratorAgent:
@@ -113,7 +113,6 @@ class ImageGeneratorAgent:
                 await asyncio.sleep(delay_sec)
 
             print(f"  Generating frame {i + 1}/{len(scenes)} via Imagen...")
-
 
             # Build image prompt from scene
             prompt = self._build_image_prompt(

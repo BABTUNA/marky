@@ -54,8 +54,12 @@ class VEO3Agent:
         self.output_dir = Path("output/veo3_videos")
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
-        self.project_id = os.getenv("GCP_PROJECT_ID") or os.getenv("GOOGLE_CLOUD_PROJECT")
-        self.location = os.getenv("GCP_REGION") or os.getenv("GOOGLE_CLOUD_REGION", "us-central1")
+        self.project_id = os.getenv("GCP_PROJECT_ID") or os.getenv(
+            "GOOGLE_CLOUD_PROJECT"
+        )
+        self.location = os.getenv("GCP_REGION") or os.getenv(
+            "GOOGLE_CLOUD_REGION", "us-central1"
+        )
 
         # VEO 3 supports 4, 6, or 8 seconds
         self.veo_duration = 8
@@ -135,29 +139,26 @@ class VEO3Agent:
                 }
             print("\n⚠️ No placeholder video found")
 
-        # REAL VEO 3
-        video_path = await self._generate_video(veo_prompt, product)
-        if video_path:
-            return {
-                "status": "generated",
-                "enabled": True,
-                "video_path": video_path,
-                "duration": self.veo_duration,
-                "format": "9:16 vertical",
-                "resolution": self.default_resolution,
-                "cost_estimate": 1.50,
-                "note": "VEO 3 generated",
-                "prompt": veo_prompt,
-            }
-
-        return {
-            "status": "failed",
-            "enabled": False,
-            "video_path": None,
-            "duration": self.veo_duration,
-            "error": "VEO 3 generation failed",
-            "prompt": veo_prompt,
-        }
+        # REAL VEO 3 - keep retrying until it works
+        attempt = 0
+        while True:
+            attempt += 1
+            print(f"\n🎬 VEO 3 generation attempt {attempt}...")
+            video_path = await self._generate_video(veo_prompt, product)
+            if video_path:
+                return {
+                    "status": "generated",
+                    "enabled": True,
+                    "video_path": video_path,
+                    "duration": self.veo_duration,
+                    "format": "9:16 vertical",
+                    "resolution": self.default_resolution,
+                    "cost_estimate": 1.50,
+                    "note": f"VEO 3 generated (attempt {attempt})",
+                    "prompt": veo_prompt,
+                }
+            print(f"   ⚠️ VEO 3 attempt {attempt} failed, retrying...")
+            await asyncio.sleep(5)  # Wait before retry
 
     def _build_veo_prompt(
         self,
@@ -171,10 +172,23 @@ class VEO3Agent:
         scenes = script_data.get("scenes", [])
         first_scene = scenes[0] if scenes else {}
         hook_visual = first_scene.get("visual", f"{product} showcase")
-        hooks = research_data.get("insights", {}).get("recommended_hooks", []) or research_data.get("hooks", [])
+
+        # Get hooks from research data - insights may be a list or dict
+        hooks = []
+        insights = research_data.get("insights", [])
+        if isinstance(insights, dict):
+            hooks = insights.get("recommended_hooks", [])
+        elif isinstance(insights, list):
+            # insights is a list of strings - extract any that mention "hook"
+            hooks = [i for i in insights if "hook" in i.lower()][:3]
+
+        # Fallback to other hook sources
+        if not hooks:
+            hooks = research_data.get("hooks", []) or research_data.get("ad_hooks", [])
+
         top_hook = hooks[0] if hooks else f"Experience {product}"
 
-        return f"""8-second vertical video (9:16) for {product} - {industry}
+        return f"""Short vertical video (9:16) for {product} - {industry}
 
 Opening Hook: {top_hook}
 Visual: {hook_visual}
@@ -185,29 +199,47 @@ Mood: {tone}, engaging, scroll-stopping
 Camera: Dynamic movement - slow zoom, smooth pan, professional gimbal feel
 Lighting: Bright, vibrant, optimized for mobile viewing
 
-Key elements: Show product/service in action, vibrant colors, clear focal point.
-Reference: High-performing TikTok/Reels ads - authentic, engaging."""
+IMPORTANT: Do NOT include any written text, titles, captions, or words on screen. AI-generated text looks bad.
+Key elements: Show product/service in action, vibrant colors, clear focal point, complete scene.
+Reference: High-performing TikTok/Reels ads - authentic, engaging, no on-screen text."""
 
-    async def _use_placeholder_video(self, product: str, duration: int) -> Optional[str]:
+    async def _use_placeholder_video(
+        self, product: str, duration: int
+    ) -> Optional[str]:
         # 1) Explicit placeholder path (user-provided)
         if PLACEHOLDER_VIDEO_PATH and Path(PLACEHOLDER_VIDEO_PATH).exists():
-            dest = self.output_dir / f"{product.replace(' ', '_')}_placeholder_{duration}s.mp4"
+            dest = (
+                self.output_dir
+                / f"{product.replace(' ', '_')}_placeholder_{duration}s.mp4"
+            )
             shutil.copy(PLACEHOLDER_VIDEO_PATH, dest)
             return str(dest)
 
         # 2) Project default (video_testing sample) — do NOT use output/final (that's the storyboard)
-        default_path = Path(__file__).resolve().parent.parent / "video_testing" / "YTDowncom_YouTube_3-Second-Video_Media_1O0yazhqaxs_001_1080p.mp4"
+        default_path = (
+            Path(__file__).resolve().parent.parent
+            / "video_testing"
+            / "YTDowncom_YouTube_3-Second-Video_Media_1O0yazhqaxs_001_1080p.mp4"
+        )
         if default_path.exists():
-            dest = self.output_dir / f"{product.replace(' ', '_')}_placeholder_{duration}s.mp4"
+            dest = (
+                self.output_dir
+                / f"{product.replace(' ', '_')}_placeholder_{duration}s.mp4"
+            )
             shutil.copy(default_path, dest)
             return str(dest)
 
         # 3) Existing placeholder in veo3 output from a prior run (not from current storyboard)
         if self.output_dir.exists():
-            videos = [p for p in self.output_dir.glob("*.mp4") if "_placeholder_" in p.name]
+            videos = [
+                p for p in self.output_dir.glob("*.mp4") if "_placeholder_" in p.name
+            ]
             if videos:
                 videos.sort(key=lambda x: x.stat().st_mtime, reverse=True)
-                dest = self.output_dir / f"{product.replace(' ', '_')}_placeholder_{duration}s.mp4"
+                dest = (
+                    self.output_dir
+                    / f"{product.replace(' ', '_')}_placeholder_{duration}s.mp4"
+                )
                 shutil.copy(videos[0], dest)
                 return str(dest)
 
@@ -224,7 +256,7 @@ Reference: High-performing TikTok/Reels ads - authentic, engaging."""
             config_kw = {
                 "aspect_ratio": self.default_aspect_ratio,
                 "number_of_videos": 1,
-                "duration_seconds": self.veo_duration,
+                "duration_seconds": 8,  # Max length to avoid cutting off
                 "resolution": self.default_resolution,
                 "person_generation": "allow_adult",
                 "enhance_prompt": True,
@@ -244,8 +276,20 @@ Reference: High-performing TikTok/Reels ads - authentic, engaging."""
                 operation = client.operations.get(operation)
                 print("   ⏳ VEO 3 generating...")
 
-            result = getattr(operation, "result", None) or getattr(operation, "response", None)
-            if not result or not getattr(result, "generated_videos", None):
+            # Check for errors first
+            error = getattr(operation, "error", None)
+            if error:
+                print(f"   ❌ VEO 3 operation error: {error}")
+                return None
+
+            result = getattr(operation, "result", None) or getattr(
+                operation, "response", None
+            )
+            if not result:
+                print(f"   ❌ VEO 3 returned no result. Operation: {operation}")
+                return None
+            if not getattr(result, "generated_videos", None):
+                print(f"   ❌ VEO 3 returned no videos. Result: {result}")
                 return None
             gen = result.generated_videos[0]
             video = getattr(gen, "video", None)
@@ -253,7 +297,10 @@ Reference: High-performing TikTok/Reels ads - authentic, engaging."""
                 return None
             video_bytes = getattr(video, "video_bytes", None)
             if video_bytes:
-                out_path = self.output_dir / f"{product.replace(' ', '_')}_viral_{self.veo_duration}s.mp4"
+                out_path = (
+                    self.output_dir
+                    / f"{product.replace(' ', '_')}_viral_{self.veo_duration}s.mp4"
+                )
                 with open(out_path, "wb") as f:
                     f.write(video_bytes)
                 return str(out_path)

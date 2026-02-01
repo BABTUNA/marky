@@ -46,7 +46,9 @@ class AudioMixerAgent:
         try:
             # Get voiceover data
             voiceover_data = previous_results.get("voiceover", {})
-            music_data = previous_results.get("music", {}) or previous_results.get("lyria_music", {})
+            music_data = previous_results.get("music", {}) or previous_results.get(
+                "lyria_music", {}
+            )
 
             voiceover_path = voiceover_data.get("audio_path")
             if not voiceover_path or not os.path.exists(voiceover_path):
@@ -93,10 +95,12 @@ class AudioMixerAgent:
                 ),
             }
 
-    def _voiceover_only(self, voiceover_path: str, product: str, target_duration: int) -> Path:
+    def _voiceover_only(
+        self, voiceover_path: str, product: str, target_duration: int
+    ) -> Path:
         """Process voiceover with fade effects, no music."""
 
-        voiceover = AudioSegment.from_mp3(voiceover_path)
+        voiceover = AudioSegment.from_file(voiceover_path)
         voiceover_duration = len(voiceover)
         target_duration_ms = target_duration * 1000
 
@@ -129,8 +133,8 @@ class AudioMixerAgent:
     ) -> Path:
         """Mix voiceover with background music."""
 
-        voiceover = AudioSegment.from_mp3(voiceover_path)
-        music = AudioSegment.from_mp3(music_path)
+        voiceover = AudioSegment.from_file(voiceover_path)
+        music = AudioSegment.from_file(music_path)
 
         voiceover_duration = len(voiceover)
         target_duration_ms = target_duration * 1000

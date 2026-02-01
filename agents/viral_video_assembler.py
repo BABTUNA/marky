@@ -207,6 +207,22 @@ class ViralVideoAssembler:
         if not narration_text:
             narration_text = f"Discover {product}. Experience the difference today."
 
+        # Clean up text for TTS
+        import re
+
+        narration_text = re.sub(
+            r"\[.*?\]", "", narration_text
+        )  # Remove [stage directions]
+        narration_text = re.sub(
+            r"\(.*?\)", "", narration_text
+        )  # Remove (parentheticals)
+        narration_text = re.sub(
+            r"\*+", "", narration_text
+        )  # Remove asterisks (TTS reads them)
+        narration_text = re.sub(
+            r"\s+", " ", narration_text
+        ).strip()  # Normalize whitespace
+
         # Truncate if too long (Google TTS has limits)
         if len(narration_text) > 5000:
             narration_text = narration_text[:5000]

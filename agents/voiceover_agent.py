@@ -96,11 +96,12 @@ class VoiceoverAgent:
             return {"error": str(e)}
 
     def _preprocess_text(self, text: str) -> str:
-        """Clean text for TTS - remove stage directions, normalize whitespace."""
+        """Clean text for TTS - remove stage directions, asterisks, normalize whitespace."""
         text = text.strip()
-        text = re.sub(r"\[.*?\]", "", text)
-        text = re.sub(r"\(.*?\)", "", text)
-        text = re.sub(r"\s+", " ", text)
+        text = re.sub(r"\[.*?\]", "", text)  # Remove [stage directions]
+        text = re.sub(r"\(.*?\)", "", text)  # Remove (parentheticals)
+        text = re.sub(r"\*+", "", text)  # Remove asterisks (TTS reads them aloud)
+        text = re.sub(r"\s+", " ", text)  # Normalize whitespace
         return text.strip()
 
     def _prepare_ssml(self, text: str, tone: str) -> str:
@@ -155,7 +156,9 @@ class VoiceoverAgent:
                 input=synthesis_input, voice=voice, audio_config=audio_config
             )
 
-            safe_product = re.sub(r"[^\w\s-]", "", product).strip().replace(" ", "_")[:20]
+            safe_product = (
+                re.sub(r"[^\w\s-]", "", product).strip().replace(" ", "_")[:20]
+            )
             filepath = self.output_dir / f"voiceover_{safe_product}.mp3"
             with open(filepath, "wb") as f:
                 f.write(response.audio_content)

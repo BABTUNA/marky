@@ -276,7 +276,10 @@ async def handle_message(ctx: Context, sender: str, msg: ChatMessage):
         # Quick mode: skip research for faster testing (via "quick test" or QUICK_FULL env)
         if os.getenv("QUICK_FULL", "").lower() == "true":
             output_type = "quick_full"
-        elif "quick test" in user_text.lower() or "test without research" in user_text.lower():
+        elif (
+            "quick test" in user_text.lower()
+            or "test without research" in user_text.lower()
+        ):
             output_type = "quick_full"
 
         # Normalize output type
@@ -334,7 +337,9 @@ async def handle_message(ctx: Context, sender: str, msg: ChatMessage):
 
             # Build ASI:One preview: thumbnail + links (critical for UX)
             thumbnail_uri = None
-            ctx.logger.info(f"Preview check: video_path={video_path}, video_url={video_url is not None}, pdf_url={pdf_url is not None}")
+            ctx.logger.info(
+                f"Preview check: video_path={video_path}, video_url={video_url is not None}, pdf_url={pdf_url is not None}"
+            )
 
             thumb_bytes = None
             # Step 1: Extract thumbnail from storyboard video
@@ -356,7 +361,9 @@ async def handle_message(ctx: Context, sender: str, msg: ChatMessage):
                         try:
                             with open(frame_path, "rb") as f:
                                 thumb_bytes = f.read()
-                            ctx.logger.info(f"Using storyboard frame as preview: {frame_path}")
+                            ctx.logger.info(
+                                f"Using storyboard frame as preview: {frame_path}"
+                            )
                             break
                         except Exception as e:
                             ctx.logger.warning(f"Could not read frame: {e}")
@@ -369,16 +376,35 @@ async def handle_message(ctx: Context, sender: str, msg: ChatMessage):
                     thumb_bytes, "video_preview.jpg", "image/jpeg", sender
                 )
                 if not thumbnail_uri:
-                    ctx.logger.warning("Agentverse storage failed, trying Drive/tmpfiles...")
-                    thumbnail_uri = upload_thumbnail_fallback(thumb_bytes, "preview.jpg")
+                    ctx.logger.warning(
+                        "Agentverse storage failed, trying Drive/tmpfiles..."
+                    )
+                    thumbnail_uri = upload_thumbnail_fallback(
+                        thumb_bytes, "preview.jpg"
+                    )
                     if thumbnail_uri:
-                        ctx.logger.info(f"Preview uploaded to fallback: {thumbnail_uri[:60]}...")
+                        ctx.logger.info(
+                            f"Preview uploaded to fallback: {thumbnail_uri[:60]}..."
+                        )
 
-            ctx.logger.info(f"Sending success response ({len(response_text)} chars), thumbnail_uri={thumbnail_uri is not None}")
+            ctx.logger.info(
+                f"Sending success response ({len(response_text)} chars), thumbnail_uri={thumbnail_uri is not None}"
+            )
             try:
-                if thumbnail_uri or (video_url and ("View Storyboard" in response_text or "View Viral" in response_text or "View Full" in response_text)):
+                if thumbnail_uri or (
+                    video_url
+                    and (
+                        "View Storyboard" in response_text
+                        or "View Viral" in response_text
+                        or "View Full" in response_text
+                    )
+                ):
                     # Use image/jpeg when fallback URL (our compressed thumb is jpeg)
-                    thumb_mime = "image/jpeg" if (thumbnail_uri and thumbnail_uri.startswith("http")) else "image/png"
+                    thumb_mime = (
+                        "image/jpeg"
+                        if (thumbnail_uri and thumbnail_uri.startswith("http"))
+                        else "image/png"
+                    )
                     msg = create_preview_response(
                         thumbnail_uri=thumbnail_uri,
                         video_url=video_url,
@@ -389,7 +415,9 @@ async def handle_message(ctx: Context, sender: str, msg: ChatMessage):
                     )
                     await ctx.send(sender, msg)
                 else:
-                    await ctx.send(sender, create_response(response_text, end_session=True))
+                    await ctx.send(
+                        sender, create_response(response_text, end_session=True)
+                    )
                 ctx.logger.info("Response sent successfully!")
             except Exception as send_err:
                 ctx.logger.error(f"Failed to send response: {send_err}")
@@ -433,13 +461,11 @@ async def handle_ack(ctx: Context, sender: str, msg: ChatAcknowledgement):
     ctx.logger.debug(f"Received ack from {sender} for {msg.acknowledged_msg_id}")
 
 
-def compress_thumbnail(thumb_bytes: bytes, max_size_kb: int = 200) -> bytes:
-    """Compress thumbnail for upload (Agentverse may reject large files).
-    Resizes to max 640px width, JPEG 85% quality.
+def compress_thumbnail(thumb_bytes: bytes, max_bytes: int = 500_000) -> bytes:
+    """Compress thumbnail for Agentverse upload.
+    Target: under 500 KB (500,000 bytes) by default.
     """
     try:
-        import io
-
         import cv2
         import numpy as np
 
@@ -447,22 +473,50 @@ def compress_thumbnail(thumb_bytes: bytes, max_size_kb: int = 200) -> bytes:
         img = cv2.imdecode(arr, cv2.IMREAD_COLOR)
         if img is None:
             return thumb_bytes
+
         h, w = img.shape[:2]
-        if w > 640:
-            scale = 640 / w
-            new_w, new_h = 640, int(h * scale)
-            img = cv2.resize(img, (new_w, new_h), interpolation=cv2.INTER_AREA)
-        # Encode as JPEG for smaller size
-        _, jpg = cv2.imencode(".jpg", img, [cv2.IMWRITE_JPEG_QUALITY, 85])
+
+        # Progressively reduce size and quality until under max_bytes
+        # Start with reasonable dimensions for a thumbnail
+        target_widths = [640, 480, 320, 240, 160]
+        qualities = [85, 70, 50, 30, 20]
+
+        for target_w in target_widths:
+            if w > target_w:
+                scale = target_w / w
+                new_w = int(w * scale)
+                new_h = int(h * scale)
+                resized = cv2.resize(img, (new_w, new_h), interpolation=cv2.INTER_AREA)
+            else:
+                resized = img
+
+            for quality in qualities:
+                _, jpg = cv2.imencode(
+                    ".jpg", resized, [cv2.IMWRITE_JPEG_QUALITY, quality]
+                )
+                out = jpg.tobytes()
+                if len(out) < max_bytes:
+                    print(
+                        f"  Thumbnail: {resized.shape[1]}x{resized.shape[0]} q{quality} = {len(out)} bytes ({len(out) / 1000:.1f} KB)"
+                    )
+                    return out
+
+        # Last resort: very small
+        resized = cv2.resize(img, (160, int(160 * h / w)), interpolation=cv2.INTER_AREA)
+        _, jpg = cv2.imencode(".jpg", resized, [cv2.IMWRITE_JPEG_QUALITY, 10])
         out = jpg.tobytes()
-        if len(out) < len(thumb_bytes):
-            return out
+        print(
+            f"  Thumbnail: {resized.shape[1]}x{resized.shape[0]} q10 = {len(out)} bytes ({len(out) / 1000:.1f} KB)"
+        )
+        return out
     except Exception as e:
         print(f"  ⚠️ Thumbnail compress failed: {e}")
     return thumb_bytes
 
 
-def upload_thumbnail_fallback(thumb_bytes: bytes, name: str = "preview.jpg") -> str | None:
+def upload_thumbnail_fallback(
+    thumb_bytes: bytes, name: str = "preview.jpg"
+) -> str | None:
     """Upload thumbnail to Drive or tmpfiles when Agentverse fails. Returns public URL."""
     import tempfile
 
@@ -506,7 +560,13 @@ def extract_video_thumbnail(video_path: str) -> bytes | None:
 
         fps = cap.get(cv2.CAP_PROP_FPS) or 24
         total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT) or 1)
-        frame_indices = [0, 1, 2, 3, max(1, int(fps))]  # Try frame 0, 1, 2, 3, ~1 sec in
+        frame_indices = [
+            0,
+            1,
+            2,
+            3,
+            max(1, int(fps)),
+        ]  # Try frame 0, 1, 2, 3, ~1 sec in
 
         best_frame = None
         best_brightness = 0
@@ -563,7 +623,7 @@ def init_external_storage():
 def upload_to_agentverse_storage(
     content: bytes, name: str, mime_type: str, sender: str
 ) -> tuple[str | None, str | None]:
-    """Upload content to Agentverse External Storage.
+    """Upload content to Agentverse External Storage (max 10 attempts).
 
     Args:
         content: File bytes
@@ -574,24 +634,30 @@ def upload_to_agentverse_storage(
     Returns:
         Tuple of (asset_uri, watch_url) or (None, None) if failed
     """
+    import time
+
     storage = init_external_storage()
     if storage is None:
         return None, None
 
-    try:
-        asset_id = storage.create_asset(
-            name=name,
-            content=content,
-            mime_type=mime_type,
-        )
-        storage.set_permissions(asset_id=asset_id, agent_address=sender)
-        asset_uri = f"agent-storage://{STORAGE_URL}/{asset_id}"
-        watch_url = f"{AGENTVERSE_URL}/v1/storage/assets/{asset_id}"
-        print(f"✅ Uploaded to Agentverse storage: {asset_id}")
-        return asset_uri, watch_url
-    except Exception as e:
-        print(f"⚠️ Agentverse storage upload failed: {e}")
-        return None, None
+    for attempt in range(1, 11):
+        try:
+            time.sleep(4)
+            asset_id = storage.create_asset(
+                name=name,
+                content=content,
+                mime_type=mime_type,
+            )
+            storage.set_permissions(asset_id=asset_id, agent_address=sender)
+            asset_uri = f"agent-storage://{STORAGE_URL}/{asset_id}"
+            watch_url = f"{AGENTVERSE_URL}/v1/storage/assets/{asset_id}"
+            print(f"✅ Uploaded to Agentverse storage: {asset_id} (attempt {attempt})")
+            return asset_uri, watch_url
+        except Exception as e:
+            print(f"⚠️ Agentverse upload attempt {attempt}/10 failed, retrying...")
+
+    print("⚠️ Agentverse storage failed after 10 attempts, falling back to Google Drive")
+    return None, None
 
 
 def create_preview_response(
@@ -768,7 +834,11 @@ def format_results(result: dict, output_type: str) -> dict:
     if pdf_url:
         output_lines.append(f"View Full Analysis PDF: {pdf_url}")
 
-    output_text = "\n\n".join(output_lines) if output_lines else "Your campaign package is ready. Check the output folder for files."
+    output_text = (
+        "\n\n".join(output_lines)
+        if output_lines
+        else "Your campaign package is ready. Check the output folder for files."
+    )
 
     return {
         "text": output_text,
