@@ -40,13 +40,14 @@ This document describes the architecture of the Marky ad research system—a sin
                                           │
                                           ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                         WORKFLOW PIPELINE (5 Stages)                         │
+│                         WORKFLOW PIPELINE (6 Stages)                         │
 │                                                                              │
-│  Stage 1: Local Intel      → Competitors, websites, differentiators          │
-│  Stage 2: Review Intel     → Google Reviews voice-of-customer (needs place_ids)
-│  Stage 3: Yelp Intel       → Yelp reviews, pain/praise, ad suggestions       │
-│  Stage 4: Trends Intel     → Keywords, CPC, seasonal timing                  │
-│  Stage 5: Output           → Raw data combined (no filtering)                 │
+│  Stage 1: Local Intel         → Competitors, websites, differentiators        │
+│  Stage 2: Review Intel        → Google Reviews voice-of-customer (place_ids)   │
+│  Stage 3: Yelp Intel          → Yelp reviews, pain/praise, ad suggestions     │
+│  Stage 4: Trends Intel        → Keywords, CPC, seasonal timing                │
+│  Stage 5: Related Questions   → People also ask (content/intent)              │
+│  Stage 6: Output              → Raw data combined (no filtering)              │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -101,14 +102,15 @@ python test_marky_client.py -q "electrician in Providence, RI"
 
 ### workflow.py – MarkyWorkflow
 
-The workflow instantiates all four agents and runs them **sequentially**:
+The workflow instantiates all five agents and runs them **sequentially**:
 
 ```
 MarkyWorkflow.__init__()
-  ├── self.local_intel   = LocalIntelAgent()
-  ├── self.review_intel  = ReviewIntelAgent()
-  ├── self.yelp_intel    = YelpIntelAgent()
-  └── self.trends_intel  = TrendsIntelAgent()
+  ├── self.local_intel            = LocalIntelAgent()
+  ├── self.review_intel           = ReviewIntelAgent()
+  ├── self.yelp_intel             = YelpIntelAgent()
+  ├── self.trends_intel           = TrendsIntelAgent()
+  └── self.related_questions_intel = RelatedQuestionsIntelAgent()
 ```
 
 **Dependencies between stages:**
@@ -119,7 +121,8 @@ MarkyWorkflow.__init__()
 | 2. Review Intel | Local Intel (place_ids) | Synthesis (customer_voice) |
 | 3. Yelp Intel | — | Synthesis (merged with Review Intel) |
 | 4. Trends Intel | — | Synthesis (timing) |
-| 5. Synthesis | All above | Final report |
+| 5. Related Questions Intel | — | Synthesis (related_questions) |
+| 6. Output | All above | Final report |
 
 ---
 
@@ -209,6 +212,7 @@ After all four agents run, the workflow **combines** results without any filteri
 | Headlines | Local Intel + Review Intel + Yelp Intel | Raw (no dedup) |
 | Trust signals | Local Intel + Yelp Intel | Raw (no normalization) |
 | Seasonal timing | Trends Intel | Raw peak months, CPC, volume |
+| Related questions | Related Questions Intel | Raw list (People also ask) |
 
 **No quality passes applied.** Output is intended for downstream agents (filter agent, ad generator) to process.
 
@@ -292,6 +296,11 @@ hackbrown_testing/
 │   ├── scraper.py            # DataForSEO
 │   └── models.py             # TrendsAnalysis, SeasonalInsight
 │
+├── related_questions_intel/
+│   ├── agent.py              # RelatedQuestionsIntelAgent
+│   ├── scraper.py            # SerpAPI Google (related_questions)
+│   └── models.py             # RelatedQuestionsAnalysis, QueryQuestions
+│
 ├── output/                   # Generated reports (local_intel_*.json, etc.)
 ├── ARCHITECTURE.md           # This file
 ├── AGENTS.md                 # Agent reference (standalone commands)
@@ -323,6 +332,7 @@ python run_local_intel.py -b "electrician" -l "Providence, RI" --max-competitors
 python run_review_intel.py --from-local-intel latest
 python run_yelp_intel.py -b "electrician" -l "Providence, RI" -m 5
 python run_trends_intel.py -k "electrician" "electrician near me"
+python run_related_questions_intel.py -b "electrician" -l "Providence, RI"
 ```
 
 See `AGENTS.md` for full agent reference and outputs.

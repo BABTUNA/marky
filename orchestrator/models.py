@@ -79,7 +79,10 @@ class AdResearchResult:
     
     # Seasonal timing
     timing: List[SeasonalTiming] = field(default_factory=list)
-    
+
+    # Related questions (People also ask)
+    related_questions: List[str] = field(default_factory=list)
+
     # Generated ad strategies
     differentiators: List[AdDifferentiator] = field(default_factory=list)
     headline_suggestions: List[str] = field(default_factory=list)
@@ -133,6 +136,7 @@ class AdResearchResult:
                 }
                 for t in self.timing
             ],
+            "related_questions": self.related_questions,
             "differentiators": [
                 {
                     "angle_name": d.angle_name,
@@ -229,7 +233,14 @@ class AdResearchResponse:
             for t in r.timing:
                 lines.append(f"- **{t.keyword}**: Peak {', '.join(t.peak_months)} | CPC ${t.avg_cpc:.2f} | {t.monthly_volume:,}/mo")
             lines.append("")
-        
+
+        # Related Questions (raw)
+        if r.related_questions:
+            lines.append("## ❓ Related Questions (raw)")
+            for q in r.related_questions:
+                lines.append(f"- {q}")
+            lines.append("")
+
         # Ad Hooks (raw)
         if r.recommended_hooks:
             lines.append("## 🎯 Ad Hooks (raw)")

@@ -32,6 +32,7 @@ from local_intel.agent import LocalIntelAgent
 from review_intel.agent import ReviewIntelAgent
 from yelp_intel.agent import YelpIntelAgent
 from trends_intel.agent import TrendsIntelAgent
+from related_questions_intel.agent import RelatedQuestionsIntelAgent
 
 
 class MarkyWorkflow:
@@ -43,15 +44,17 @@ class MarkyWorkflow:
     2. Review Intel - Google Reviews from competitors (needs place_ids from Local)
     3. Yelp Intel - Extract customer voice from Yelp reviews
     4. Trends Intel - Get seasonal timing data
-    5. Output - All collected data combined, unfiltered
+    5. Related Questions Intel - People also ask (content/intent)
+    6. Output - All collected data combined, unfiltered
     """
-    
+
     def __init__(self):
         """Initialize the workflow with agent instances."""
         self.local_intel = LocalIntelAgent()
         self.review_intel = ReviewIntelAgent()
         self.yelp_intel = YelpIntelAgent()
         self.trends_intel = TrendsIntelAgent()
+        self.related_questions_intel = RelatedQuestionsIntelAgent()
         
     def run(
         self,
@@ -84,7 +87,7 @@ class MarkyWorkflow:
             # ================================================================
             # Stage 1: Local Intelligence
             # ================================================================
-            log("🔍 Stage 1/5: Running Local Intelligence...")
+            log("🔍 Stage 1/6: Running Local Intelligence...")
             
             local_report = None
             try:
@@ -149,7 +152,7 @@ class MarkyWorkflow:
             # ================================================================
             # Stage 2: Review Intelligence (Google Reviews - needs place_ids)
             # ================================================================
-            log("📋 Stage 2/5: Running Review Intelligence (Google Reviews)...")
+            log("📋 Stage 2/6: Running Review Intelligence (Google Reviews)...")
             
             try:
                 if local_report and local_report.competitors:
@@ -197,7 +200,7 @@ class MarkyWorkflow:
             # ================================================================
             # Stage 3: Yelp Intelligence
             # ================================================================
-            log("🗣️ Stage 3/5: Running Yelp Intelligence...")
+            log("🗣️ Stage 3/6: Running Yelp Intelligence...")
             
             try:
                 yelp_analysis = self.yelp_intel.analyze_market(
@@ -241,10 +244,10 @@ class MarkyWorkflow:
                 log(f"  ⚠ Yelp Intel error: {e}")
             
             # ================================================================
-            # Stage 3: Trends Intelligence
+            # Stage 4: Trends Intelligence
             # ================================================================
             if request.include_trends:
-                log("📈 Stage 4/5: Running Trends Intelligence...")
+                log("📈 Stage 4/6: Running Trends Intelligence...")
                 
                 try:
                     # Build keywords from business type
@@ -297,12 +300,30 @@ class MarkyWorkflow:
                     result.errors.append(f"trends_intel: {str(e)}")
                     log(f"  ⚠ Trends Intel error: {e}")
             else:
-                log("📈 Stage 4/5: Trends Intelligence (skipped)")
-            
+                log("📈 Stage 4/6: Trends Intelligence (skipped)")
+
             # ================================================================
-            # Stage 5: Data Collection Complete (no filtering)
+            # Stage 5: Related Questions Intelligence
             # ================================================================
-            log("📦 Stage 5/5: Raw data collection complete...")
+            log("❓ Stage 5/6: Running Related Questions Intelligence...")
+            try:
+                rq_analysis = self.related_questions_intel.analyze(
+                    business_type=request.business_type,
+                    location=request.location,
+                    seed_queries=None,
+                    max_questions_per_query=15,
+                )
+                result.agents_used.append("related_questions_intel")
+                result.related_questions = rq_analysis.all_questions()
+                log(f"  ✓ Collected {len(result.related_questions)} related questions")
+            except Exception as e:
+                result.errors.append(f"related_questions_intel: {str(e)}")
+                log(f"  ⚠ Related Questions Intel error: {e}")
+
+            # ================================================================
+            # Stage 6: Data Collection Complete (no filtering)
+            # ================================================================
+            log("📦 Stage 6/6: Raw data collection complete...")
             log("  ✓ All data collected (unfiltered)")
             
             # ================================================================

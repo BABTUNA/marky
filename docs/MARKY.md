@@ -1,6 +1,6 @@
 # Marky (Orchestrator Agent)
 
-Single-entry-point **uAgent** that collects raw data from four intelligence agents and outputs an unfiltered report. Compatible with Fetch.ai Agentverse and ASI:One.
+Single-entry-point **uAgent** that collects raw data from five intelligence agents and outputs an unfiltered report. Compatible with Fetch.ai Agentverse and ASI:One.
 
 ---
 
@@ -84,8 +84,13 @@ _Unfiltered data from all agents. No synthesis or filtering applied._
 - Same-Day Service Available
 - Background-Checked Technicians
 
+## Related Questions (raw)
+- How much does an electrician cost per hour?
+- What do electricians charge for?
+- How do I find a good electrician?
+
 ---
-*Agents used: local_intel, review_intel, yelp_intel, trends_intel*
+*Agents used: local_intel, review_intel, yelp_intel, trends_intel, related_questions_intel*
 *Analysis time: 200.1s*
 ```
 
@@ -94,7 +99,7 @@ _Unfiltered data from all agents. No synthesis or filtering applied._
 ## Purpose
 
 - **Entry point:** Chat protocol for natural-language requests (e.g., "electrician in Providence, RI")
-- **Orchestration:** Runs Local Intel → Review Intel → Yelp Intel → Trends Intel sequentially
+- **Orchestration:** Runs Local Intel → Review Intel → Yelp Intel → Trends Intel → Related Questions Intel sequentially
 - **Output:** Raw, unfiltered data (no synthesis, no filtering) for downstream agents (filter agent, ad generator)
 
 ---
@@ -142,7 +147,7 @@ chat_proto = Protocol(spec=chat_protocol_spec)
 
 **Code:** `orchestrator/workflow.py` → `MarkyWorkflow`
 
-**Pipeline (5 stages):**
+**Pipeline (6 stages):**
 
 | Stage | Agent | Output |
 |-------|-------|--------|
@@ -150,7 +155,8 @@ chat_proto = Protocol(spec=chat_protocol_spec)
 | 2 | Review Intel | Voice of customer (pain_points, desires, quotes), ad_hooks, headlines |
 | 3 | Yelp Intel | Merged customer voice, ad_hooks, headlines (raw merge, no dedup) |
 | 4 | Trends Intel | Seasonal timing, CPC, volume, related/rising queries |
-| 5 | Output | Raw data combined (no synthesis) |
+| 5 | Related Questions Intel | People also ask (related_questions for content/intent) |
+| 6 | Output | Raw data combined (no synthesis) |
 
 **Reference:** `workflow.py:MarkyWorkflow.run()` (lines 55–350)
 
@@ -164,7 +170,9 @@ chat_proto = Protocol(spec=chat_protocol_spec)
 
 **Stage 4 is independent:** Trends Intel uses keywords derived from `business_type` (e.g., "electrician", "electrician near me", "best electrician").
 
-**Reference:** `workflow.py` lines 85–310
+**Stage 5 is independent:** Related Questions Intel uses seed queries from business_type + location (e.g., "electrician Providence RI", "best electrician Providence RI", "electrician near me"); output is a flat list of unique questions.
+
+**Reference:** `workflow.py` lines 85–330
 
 ---
 
@@ -172,7 +180,7 @@ chat_proto = Protocol(spec=chat_protocol_spec)
 
 **Code:** `orchestrator/models.py` → `AdResearchResponse.to_markdown()`
 
-- **Format:** Markdown with sections: Competitors (raw), Customer Voice (raw), Differentiators (raw), Seasonal Timing (raw), Ad Hooks (raw), Headlines (raw), Trust Signals (raw), Market Summary (raw)
+- **Format:** Markdown with sections: Competitors (raw), Customer Voice (raw), Differentiators (raw), Seasonal Timing (raw), Related Questions (raw), Ad Hooks (raw), Headlines (raw), Trust Signals (raw), Market Summary (raw)
 - **No synthesis:** No executive summary, key insights, or emotional angles
 - **Full data:** No truncation or limits on displayed items
 
@@ -231,3 +239,4 @@ python test_marky_client.py -q "electrician in Providence, RI"
 | Review Intel | Google Reviews voice | customer_voice, ad_hooks, headlines |
 | Yelp Intel | Yelp voice | Merged into customer_voice; ad_hooks, headlines |
 | Trends Intel | Keywords, CPC, seasonality | timing (peak months, CPC, volume) |
+| Related Questions Intel | People also ask | related_questions (content/FAQ intent) |
