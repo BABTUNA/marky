@@ -187,33 +187,67 @@ class YelpIntelAgent:
             avg_rating=round(avg_rating, 2),
         )
     
+    def _extract_sentence_containing(self, text: str, keyword: str, max_len: int = 200) -> Optional[str]:
+        """Extract the sentence (or clause) containing the keyword. Returns full phrase, not just the keyword."""
+        if keyword not in text.lower():
+            return None
+        # Split on sentence boundaries
+        sentences = re.split(r'[.!?]\s+', text)
+        for sent in sentences:
+            if keyword.lower() in sent.lower():
+                phrase = sent.strip()
+                if 15 < len(phrase) < max_len:  # Avoid fragments and overly long
+                    return phrase
+        # Fallback: extract window around keyword
+        idx = text.lower().find(keyword.lower())
+        if idx >= 0:
+            start = max(0, idx - 80)
+            end = min(len(text), idx + len(keyword) + 80)
+            phrase = text[start:end].strip()
+            # Clean: take to nearest sentence boundary
+            if start > 0 and not phrase[0].isupper():
+                phrase = "..." + phrase
+            if end < len(text) and not phrase.endswith(('.', '!', '?')):
+                phrase = phrase + "..."
+            if 15 < len(phrase) < max_len:
+                return phrase
+        return None
+    
     def _analyze_reviews(self, reviews: List[YelpReview]) -> CustomerInsights:
         """Analyze reviews to extract insights."""
         insights = CustomerInsights()
         
-        pain_counter: Counter = Counter()
-        praise_counter: Counter = Counter()
+        pain_phrases: List[str] = []  # Full phrases from negative reviews
+        praise_phrases: List[str] = []  # Full phrases from positive reviews
+        pain_keyword_counts: Counter = Counter()  # For ranking
+        praise_keyword_counts: Counter = Counter()
         theme_counter: Counter = Counter()
         phrase_counter: Counter = Counter()
         
         for review in reviews:
             text = review.text.lower()
             
-            # Extract pain points from negative reviews
+            # Extract pain points from negative reviews - store full phrase, not just keyword
             if review.rating <= 2:
                 for keyword in self.PAIN_KEYWORDS:
                     if keyword in text:
-                        pain_counter[keyword] += 1
+                        pain_keyword_counts[keyword] += 1
+                        phrase = self._extract_sentence_containing(review.text, keyword)
+                        if phrase and phrase not in pain_phrases:
+                            pain_phrases.append(phrase)
                 
                 # Add as quote if it's a good example
                 if len(review.text) > 50 and len(review.text) < 500:
                     insights.pain_point_quotes.append(review.text[:200])
             
-            # Extract praise from positive reviews
+            # Extract praise from positive reviews - store full phrase, not just keyword
             if review.rating >= 4:
                 for keyword in self.PRAISE_KEYWORDS:
                     if keyword in text:
-                        praise_counter[keyword] += 1
+                        praise_keyword_counts[keyword] += 1
+                        phrase = self._extract_sentence_containing(review.text, keyword)
+                        if phrase and phrase not in praise_phrases:
+                            praise_phrases.append(phrase)
                 
                 # Add as quote
                 if len(review.text) > 50 and len(review.text) < 500:
@@ -244,9 +278,9 @@ class YelpIntelAgent:
                         if 20 < len(sent) < 150:
                             insights.price_mentions.append(sent.strip())
         
-        # Convert counters to lists
-        insights.pain_points = [item for item, _ in pain_counter.most_common(15)]
-        insights.praise_points = [item for item, _ in praise_counter.most_common(15)]
+        # Use full phrases when available; fall back to top keywords if no phrases
+        insights.pain_points = pain_phrases[:15] if pain_phrases else [k for k, _ in pain_keyword_counts.most_common(15)]
+        insights.praise_points = praise_phrases[:15] if praise_phrases else [k for k, _ in praise_keyword_counts.most_common(15)]
         insights.themes = [item for item, _ in theme_counter.most_common(10)]
         insights.customer_phrases = [item for item, _ in phrase_counter.most_common(20)]
         

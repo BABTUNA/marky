@@ -152,9 +152,10 @@ Just tell me what business type and location you want to research:
 ## What I Analyze
 
 1. **Local Competitors** - Find and analyze competitor websites
-2. **Customer Reviews** - Extract pain points and desires from Yelp
-3. **Search Trends** - Seasonal timing and keyword data
-4. **Ad Strategy** - Generate hooks, headlines, and differentiators
+2. **Google Reviews** - Customer voice from competitor Google Reviews
+3. **Yelp Reviews** - Pain points and desires from Yelp
+4. **Search Trends** - Seasonal timing and keyword data
+5. **Ad Strategy** - Generate hooks, headlines, and differentiators
 
 ## Example
 
@@ -261,7 +262,7 @@ async def handle_chat_message(ctx: Context, sender: str, msg: ChatMessage):
                 # Send progress update
                 await ctx.send(sender, create_chat_message(
                     f"🔍 Starting analysis for **{request.business_type}** in **{request.location}**...\n\n"
-                    "This may take 1-2 minutes."
+                    "This may take 2-4 minutes (4 agents: Local, Google Reviews, Yelp, Trends)."
                 ))
                 
                 # Run workflow

@@ -189,6 +189,7 @@ class IntelligenceReport:
                     "website": c.website,
                     "rating": c.rating,
                     "review_count": c.review_count,
+                    "place_id": c.place_id,
                     "services": c.services,
                     "trust_signals": c.trust_signals,
                     "unique_selling_points": c.unique_selling_points,

@@ -6,7 +6,12 @@ Scrapes business listings and reviews from Yelp.
 import os
 import requests
 from typing import List, Optional, Dict, Any
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 from .models import YelpBusiness, YelpReview
+
+# SerpAPI can be slow; use longer timeout and retries
+REQUEST_TIMEOUT = 60
+MAX_RETRIES = 3
 
 
 class YelpScraper:
@@ -26,6 +31,20 @@ class YelpScraper:
             raise ValueError("SERPAPI_KEY not set. Get one at https://serpapi.com")
         
         self.base_url = "https://serpapi.com/search"
+    
+    @retry(
+        stop=stop_after_attempt(MAX_RETRIES),
+        wait=wait_exponential(multiplier=1, min=2, max=10),
+        retry=retry_if_exception_type((requests.Timeout, requests.ConnectionError)),
+        reraise=True,
+    )
+    def _request_with_retry(self, params: dict) -> dict:
+        """Make SerpAPI request with retries on timeout/connection errors."""
+        response = requests.get(
+            self.base_url, params=params, timeout=REQUEST_TIMEOUT
+        )
+        response.raise_for_status()
+        return response.json()
     
     def search_businesses(
         self,
@@ -59,9 +78,7 @@ class YelpScraper:
                 "api_key": self.api_key,
             }
             
-            response = requests.get(self.base_url, params=params, timeout=30)
-            response.raise_for_status()
-            data = response.json()
+            data = self._request_with_retry(params)
             
             # Parse organic results
             organic = data.get("organic_results", [])
@@ -116,9 +133,7 @@ class YelpScraper:
                 "api_key": self.api_key,
             }
             
-            response = requests.get(self.base_url, params=params, timeout=30)
-            response.raise_for_status()
-            data = response.json()
+            data = self._request_with_retry(params)
             
             # Parse reviews
             reviews_data = data.get("reviews", [])
@@ -155,9 +170,7 @@ class YelpScraper:
                 "api_key": self.api_key,
             }
             
-            response = requests.get(self.base_url, params=params, timeout=30)
-            response.raise_for_status()
-            data = response.json()
+            data = self._request_with_retry(params)
             
             reviews_data = data.get("reviews", [])
             
@@ -191,9 +204,7 @@ class YelpScraper:
                 "api_key": self.api_key,
             }
             
-            response = requests.get(self.base_url, params=params, timeout=30)
-            response.raise_for_status()
-            data = response.json()
+            data = self._request_with_retry(params)
             
             reviews_data = data.get("reviews", [])
             

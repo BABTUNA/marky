@@ -29,6 +29,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from local_intel.agent import LocalIntelAgent
+from review_intel.agent import ReviewIntelAgent
 from yelp_intel.agent import YelpIntelAgent
 from trends_intel.agent import TrendsIntelAgent
 
@@ -39,14 +40,16 @@ class MarkyWorkflow:
     
     Pipeline:
     1. Local Intel - Find competitors, scrape websites
-    2. Yelp Intel - Extract customer voice from reviews
-    3. Trends Intel - Get seasonal timing data
-    4. Synthesis - Combine insights into ad recommendations
+    2. Review Intel - Google Reviews from competitors (needs place_ids from Local)
+    3. Yelp Intel - Extract customer voice from Yelp reviews
+    4. Trends Intel - Get seasonal timing data
+    5. Synthesis - Combine insights into ad recommendations
     """
     
     def __init__(self):
         """Initialize the workflow with agent instances."""
         self.local_intel = LocalIntelAgent()
+        self.review_intel = ReviewIntelAgent()
         self.yelp_intel = YelpIntelAgent()
         self.trends_intel = TrendsIntelAgent()
         
@@ -81,8 +84,9 @@ class MarkyWorkflow:
             # ================================================================
             # Stage 1: Local Intelligence
             # ================================================================
-            log("🔍 Stage 1/4: Running Local Intelligence...")
+            log("🔍 Stage 1/5: Running Local Intelligence...")
             
+            local_report = None
             try:
                 local_report = self.local_intel.analyze(
                     business_type=request.business_type,
@@ -143,9 +147,57 @@ class MarkyWorkflow:
                 log(f"  ⚠ Local Intel error: {e}")
             
             # ================================================================
-            # Stage 2: Yelp Intelligence
+            # Stage 2: Review Intelligence (Google Reviews - needs place_ids)
             # ================================================================
-            log("🗣️ Stage 2/4: Running Yelp Intelligence...")
+            log("📋 Stage 2/5: Running Review Intelligence (Google Reviews)...")
+            
+            try:
+                if local_report and local_report.competitors:
+                    competitors_with_place_id = [
+                        {"name": c.name, "place_id": c.place_id, "rating": c.rating}
+                        for c in local_report.competitors[:request.max_competitors]
+                        if c.place_id
+                    ]
+                    if competitors_with_place_id:
+                        review_analysis = self.review_intel.analyze_competitors(
+                            competitors=competitors_with_place_id,
+                            business_type=request.business_type,
+                            location=request.location,
+                            reviews_per_competitor=min(request.reviews_per_competitor, 10),
+                        )
+                        result.agents_used.append("review_intel")
+                        
+                        # Add Review Intel voice-of-customer (Yelp will merge later)
+                        if review_analysis.voice_of_customer:
+                            voc = review_analysis.voice_of_customer
+                            pain_strs = [p["point"] for p in voc.pain_points[:8] if isinstance(p, dict) and p.get("point")]
+                            desire_strs = [d["desire"] for d in voc.desires[:8] if isinstance(d, dict) and d.get("desire")]
+                            
+                            result.customer_voice = CustomerVoice(
+                                pain_points=pain_strs,
+                                desires=desire_strs,
+                                praise_quotes=voc.praise_quotes[:5],
+                                complaint_quotes=voc.complaint_quotes[:5],
+                                common_themes=review_analysis.top_competitor_themes[:5],
+                            )
+                        
+                        result.recommended_hooks.extend(review_analysis.ad_hooks[:5])
+                        result.headline_suggestions.extend(review_analysis.headline_suggestions[:5])
+                        
+                        log(f"  ✓ Analyzed {review_analysis.total_reviews_analyzed} Google Reviews")
+                    else:
+                        log("  ⚠ No competitors with place_ids for Google Reviews")
+                else:
+                    log("  ⚠ Skipped (no local_intel competitors)")
+                    
+            except Exception as e:
+                result.errors.append(f"review_intel: {str(e)}")
+                log(f"  ⚠ Review Intel error: {e}")
+            
+            # ================================================================
+            # Stage 3: Yelp Intelligence
+            # ================================================================
+            log("🗣️ Stage 3/5: Running Yelp Intelligence...")
             
             try:
                 yelp_analysis = self.yelp_intel.analyze_market(
@@ -157,16 +209,31 @@ class MarkyWorkflow:
                 
                 result.agents_used.append("yelp_intel")
                 
-                # Extract customer voice
+                # Extract and merge customer voice (Review Intel may have run first)
                 if yelp_analysis.insights:
                     insights = yelp_analysis.insights
-                    result.customer_voice = CustomerVoice(
+                    yelp_voice = CustomerVoice(
                         pain_points=insights.pain_points[:10],
-                        desires=insights.praise_points[:10],  # Use praise_points as desires
+                        desires=insights.praise_points[:10],
                         praise_quotes=insights.praise_quotes[:5],
                         complaint_quotes=insights.pain_point_quotes[:5],
                         common_themes=insights.themes[:10] if insights.themes else [],
                     )
+                    # Merge with Review Intel if present
+                    if result.customer_voice:
+                        result.customer_voice.pain_points = list(dict.fromkeys(
+                            result.customer_voice.pain_points + yelp_voice.pain_points
+                        ))[:12]
+                        result.customer_voice.desires = list(dict.fromkeys(
+                            result.customer_voice.desires + yelp_voice.desires
+                        ))[:12]
+                        result.customer_voice.praise_quotes = (result.customer_voice.praise_quotes + yelp_voice.praise_quotes)[:8]
+                        result.customer_voice.complaint_quotes = (result.customer_voice.complaint_quotes + yelp_voice.complaint_quotes)[:8]
+                        result.customer_voice.common_themes = list(dict.fromkeys(
+                            result.customer_voice.common_themes + yelp_voice.common_themes
+                        ))[:10]
+                    else:
+                        result.customer_voice = yelp_voice
                     
                     # Add Yelp-generated hooks to recommendations
                     if yelp_analysis.ad_suggestions:
@@ -187,7 +254,7 @@ class MarkyWorkflow:
             # Stage 3: Trends Intelligence
             # ================================================================
             if request.include_trends:
-                log("📈 Stage 3/4: Running Trends Intelligence...")
+                log("📈 Stage 4/5: Running Trends Intelligence...")
                 
                 try:
                     # Build keywords from business type
@@ -240,22 +307,23 @@ class MarkyWorkflow:
                     result.errors.append(f"trends_intel: {str(e)}")
                     log(f"  ⚠ Trends Intel error: {e}")
             else:
-                log("📈 Stage 3/4: Trends Intelligence (skipped)")
+                log("📈 Stage 4/5: Trends Intelligence (skipped)")
             
             # ================================================================
-            # Stage 4: Synthesis
+            # Stage 5: Synthesis
             # ================================================================
-            log("🧠 Stage 4/4: Synthesizing insights...")
+            log("🧠 Stage 5/5: Synthesizing insights...")
             
             result.key_insights = self._generate_key_insights(result)
             result.executive_summary = self._generate_executive_summary(result)
             
             # Deduplicate and prioritize hooks
-            all_hooks = list(set(result.recommended_hooks))
+            all_hooks = list(dict.fromkeys(result.recommended_hooks))  # preserve order
             result.recommended_hooks = all_hooks[:10]
             
-            # Deduplicate headlines
-            result.headline_suggestions = list(set(result.headline_suggestions))[:15]
+            # Deduplicate headlines and trust signals
+            result.headline_suggestions = list(dict.fromkeys(result.headline_suggestions))[:15]
+            result.trust_signals = list(dict.fromkeys(result.trust_signals))[:10]
             
             log("  ✓ Synthesis complete")
             
@@ -296,13 +364,13 @@ class MarkyWorkflow:
         # Customer voice insights
         if result.customer_voice:
             if result.customer_voice.pain_points:
-                insights.append(
-                    f"Top customer pain point: {result.customer_voice.pain_points[0]}"
-                )
+                pt = result.customer_voice.pain_points[0]
+                pt = pt[:80] + "..." if len(pt) > 80 else pt
+                insights.append(f"Top customer pain point: {pt}")
             if result.customer_voice.desires:
-                insights.append(
-                    f"What customers want most: {result.customer_voice.desires[0]}"
-                )
+                d = result.customer_voice.desires[0]
+                d = d[:80] + "..." if len(d) > 80 else d
+                insights.append(f"What customers want most: {d}")
         
         # Timing insights
         if result.timing:
@@ -332,8 +400,9 @@ class MarkyWorkflow:
             )
         
         if result.customer_voice and result.customer_voice.pain_points:
+            pts = [p[:60] + "..." if len(p) > 60 else p for p in result.customer_voice.pain_points[:3]]
             parts.append(
-                f"Key customer pain points include: {', '.join(result.customer_voice.pain_points[:3])}."
+                f"Key customer pain points include: {'; '.join(pts)}."
             )
         
         if result.timing and result.timing[0].peak_months:

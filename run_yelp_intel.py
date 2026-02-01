@@ -41,7 +41,7 @@ def parse_args():
     )
     
     parser.add_argument(
-        "--max-businesses",
+        "-m", "--max-businesses",
         type=int,
         default=5,
         help="Maximum number of businesses to analyze (default: 5)"

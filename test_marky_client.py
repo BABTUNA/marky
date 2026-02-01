@@ -74,7 +74,7 @@ async def send_test_message(ctx: Context):
                 content=[TextContent(type="text", text=query)],
             ),
         )
-        ctx.logger.info("Message sent! Waiting for response (this may take 1-2 minutes)...")
+        ctx.logger.info("Message sent! Waiting for response (this may take 2-4 minutes with 4 agents)...")
     except Exception as e:
         ctx.logger.error(f"Failed to send message: {e}")
         ctx.logger.info("Make sure Marky is running: python run_marky.py")

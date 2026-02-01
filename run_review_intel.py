@@ -55,7 +55,7 @@ def parse_args():
     parser.add_argument(
         "--from-local-intel", "-f",
         type=str,
-        help="Use competitors from a local_intel output JSON file",
+        help="Use competitors from a local_intel output JSON file (use 'latest' for most recent)",
     )
     
     parser.add_argument(
@@ -87,13 +87,29 @@ def parse_args():
     return parser.parse_args()
 
 
+def find_latest_local_intel(output_dir: str = "output") -> str:
+    """Find the most recent local_intel JSON file."""
+    output_path = Path(output_dir)
+    if not output_path.exists():
+        return None
+    
+    files = list(output_path.glob("local_intel_*.json"))
+    if not files:
+        return None
+    
+    # Sort by modification time, most recent first
+    files.sort(key=lambda f: f.stat().st_mtime, reverse=True)
+    return str(files[0])
+
+
 def load_competitors_from_local_intel(filepath: str) -> tuple:
     """Load competitors from local_intel output."""
     with open(filepath, "r", encoding="utf-8") as f:
         data = json.load(f)
     
-    business_type = data.get("search_input", {}).get("business_type", "business")
-    location = data.get("search_input", {}).get("location", "Unknown")
+    search = data.get("search", {}) or data.get("search_input", {})
+    business_type = search.get("business_type", "business")
+    location = search.get("location", "Unknown")
     
     competitors = []
     
@@ -130,8 +146,21 @@ def main():
     location = args.location or "Unknown"
     
     if args.from_local_intel:
-        print(f"Loading competitors from: {args.from_local_intel}")
-        competitors, business_type, location = load_competitors_from_local_intel(args.from_local_intel)
+        filepath = args.from_local_intel
+        
+        # Support "latest" or auto-find if file doesn't exist
+        if filepath.lower() == "latest" or not Path(filepath).exists():
+            latest = find_latest_local_intel(args.output_dir)
+            if latest:
+                print(f"Using latest local_intel file: {latest}")
+                filepath = latest
+            else:
+                print(f"Error: No local_intel files found in {args.output_dir}/")
+                print("Run local_intel first: python run_local_intel.py -b 'plumber' -l 'Providence, RI'")
+                return 1
+        
+        print(f"Loading competitors from: {filepath}")
+        competitors, business_type, location = load_competitors_from_local_intel(filepath)
         print(f"Found {len(competitors)} competitors with place_ids")
         
     elif args.competitors:
@@ -141,7 +170,8 @@ def main():
     else:
         print("Error: Provide --from-local-intel or --competitors")
         print("\nExample usage:")
-        print("  python run_review_intel.py --from-local-intel output/local_intel_20260131_133128.json")
+        print("  python run_review_intel.py --from-local-intel latest")
+        print("  python run_review_intel.py --from-local-intel output/local_intel_20260131_194058.json")
         print("  python run_review_intel.py --competitors my_competitors.json -b plumber -l 'Providence, RI'")
         return 1
     

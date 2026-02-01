@@ -10,9 +10,10 @@ Given a **business type** and **location**, Marky:
 
 1. **Discovers local competitors** via Google Maps (SerpAPI)
 2. **Scrapes competitor websites** for services, pricing, and messaging
-3. **Extracts customer voice** from Yelp reviews (pain points, desires)
-4. **Analyzes search trends** for seasonal timing (DataForSEO)
-5. **Generates ad differentiation**:
+3. **Extracts customer voice** from Google Reviews (competitor reviews)
+4. **Extracts customer voice** from Yelp reviews (pain points, desires)
+5. **Analyzes search trends** for seasonal timing (DataForSEO)
+6. **Generates ad differentiation**:
    - Competitive insights
    - Ad hooks and headlines
    - Optimal timing recommendations
@@ -30,11 +31,16 @@ Given a **business type** and **location**, Marky:
 ┌─────────────────────────────────────────────────────────────────┐
 │                    SEQUENTIAL WORKFLOW                          │
 │                                                                 │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐          │
-│  │ Local Intel  │→ │  Yelp Intel  │→ │ Trends Intel │          │
-│  │ (SerpAPI +   │  │  (Customer   │  │ (DataForSEO) │          │
-│  │  Firecrawl)  │  │   Reviews)   │  │              │          │
-│  └──────────────┘  └──────────────┘  └──────────────┘          │
+│  Local Intel → Review Intel → Yelp Intel → Trends Intel         │
+│  (SerpAPI +    (Google       (Yelp        (DataForSEO)          │
+│   Firecrawl)    Reviews)      Reviews)                          │
+│                              │                                  │
+│                              ▼                                  │
+│                    ┌──────────────┐                            │
+│                    │  Synthesis   │                            │
+│                    │  (Combine &  │                            │
+│                    │   Report)    │                            │
+│                    └──────────────┘                            │
 │                              │                                  │
 │                              ▼                                  │
 │                    ┌──────────────┐                            │
