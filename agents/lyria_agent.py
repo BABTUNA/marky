@@ -12,55 +12,64 @@ Lyria Features:
 - WAV format
 
 Cost: Covered by Google Cloud credits (pricing TBD by Google)
+
+TESTING MODE:
+- Set LYRIA_USE_MOCK=true to use mock/royalty-free music instead
+- This allows testing the full pipeline without Lyria API access
 """
 
-import os
 import asyncio
-from typing import Optional, Dict, Any
+import os
+import urllib.request
 from pathlib import Path
+from typing import Any, Dict, Optional
 
 # Lyria will be available via Vertex AI (same as VEO/Imagen)
 try:
     import vertexai
+
     # from vertexai.preview.audio_models import MusicGenerationModel
     LYRIA_AVAILABLE = True
 except ImportError:
     LYRIA_AVAILABLE = False
 
+# TESTING: Set to True to use mock/royalty-free music
+LYRIA_USE_MOCK = os.getenv("LYRIA_USE_MOCK", "true").lower() == "true"
+
 
 class LyriaAgent:
     """
     Generates background music using Google Lyria.
-    
+
     Perfect for viral video soundtracks - creates engaging,
     professional music that matches the video mood.
     """
-    
+
     def __init__(self):
         self.output_dir = Path("output/lyria_music")
         self.output_dir.mkdir(parents=True, exist_ok=True)
-        
+
         self.project_id = os.getenv("GCP_PROJECT_ID")
         self.location = os.getenv("GCP_REGION", "us-central1")
-        
+
         # Lyria configuration
         self.model_name = "lyria-realtime"  # Google Lyria model
         self.default_duration = 30  # seconds
         self.sample_rate = 48000  # 48kHz stereo
         self.format = "wav"
-        
+
         self.model = None
-    
+
     def _initialize_lyria(self):
         """Initialize Lyria model (lazy loading)."""
         if not LYRIA_AVAILABLE:
             print("  ⚠️  Lyria not available - vertexai package required")
             return False
-            
+
         if not self.project_id:
             print("  ⚠️  GCP_PROJECT_ID not set")
             return False
-        
+
         try:
             vertexai.init(project=self.project_id, location=self.location)
             # Placeholder - actual model initialization depends on Google's API
@@ -70,7 +79,7 @@ class LyriaAgent:
         except Exception as e:
             print(f"  ❌ Lyria initialization failed: {e}")
             return False
-    
+
     async def run(
         self,
         product: str,
@@ -78,21 +87,23 @@ class LyriaAgent:
         tone: str,
         duration: int,
         previous_results: dict,
+        city: str = "",  # Accept but not used
+        **kwargs,  # Accept any other params
     ) -> Dict[str, Any]:
         """
         Generate background music using Lyria.
-        
+
         Args:
             product: Product/business name
             industry: Industry type
             tone: Music mood (energetic, calm, upbeat, etc.)
             duration: Target duration in seconds
             previous_results: Research and script data for context
-        
+
         Returns:
             Dict with audio_path, duration, format info
         """
-        
+
         print("\n🎵 Lyria Music Generation Agent")
         print("=" * 60)
         print(f"   Product: {product}")
@@ -100,11 +111,11 @@ class LyriaAgent:
         print(f"   Duration: {duration}s")
         print(f"   Format: Stereo 48kHz WAV")
         print("=" * 60)
-        
+
         # Extract context from previous results
         research_data = previous_results.get("research", {})
         script_data = previous_results.get("script_writer", {})
-        
+
         # Build Lyria music prompt
         music_prompt = self._build_music_prompt(
             product=product,
@@ -113,17 +124,39 @@ class LyriaAgent:
             duration=duration,
             research_data=research_data,
         )
-        
+
         print(f"\n🎼 Lyria Prompt:")
         print(f"   {music_prompt[:150]}...")
-        
+
+        # MOCK MODE: Use placeholder/royalty-free music for testing
+        if LYRIA_USE_MOCK:
+            audio_path = await self._use_mock_music(product, tone, duration)
+            if audio_path:
+                print(f"\n✅ Using MOCK music for testing: {audio_path}")
+                return {
+                    "status": "mock_mode",
+                    "enabled": True,
+                    "audio_path": audio_path,
+                    "duration": duration,
+                    "format": "mp3",
+                    "sample_rate": self.sample_rate,
+                    "channels": "stereo",
+                    "cost_estimate": 0.00,  # No cost for mock
+                    "note": "MOCK MODE - using placeholder music for pipeline testing",
+                    "prompt": music_prompt,
+                }
+            else:
+                print(
+                    "\n⚠️  Mock music generation failed, falling back to disabled mode"
+                )
+
         # TODO: Uncomment when ready to actually generate
         # audio_path = await self._generate_music(music_prompt, product, duration)
-        
+
         # For now, return placeholder
         print("\n⏸️  Lyria generation DISABLED (groundwork only)")
         print("   To enable: Uncomment generation code in lyria_agent.py")
-        
+
         return {
             "status": "groundwork_ready",
             "enabled": False,
@@ -136,7 +169,7 @@ class LyriaAgent:
             "note": "Lyria infrastructure ready - enable when needed",
             "prompt": music_prompt,
         }
-    
+
     def _build_music_prompt(
         self,
         product: str,
@@ -147,14 +180,14 @@ class LyriaAgent:
     ) -> str:
         """
         Build optimized prompt for Lyria music generation.
-        
+
         Lyria best practices:
         - Specify genre and mood clearly
         - Describe tempo and energy level
         - Mention target audience
         - Keep it concise (under 200 tokens)
         """
-        
+
         # Map tone to music characteristics
         music_style_map = {
             "energetic": {
@@ -188,14 +221,17 @@ class LyriaAgent:
                 "instruments": "orchestral strings, epic drums, brass",
             },
         }
-        
-        music_style = music_style_map.get(tone.lower(), {
-            "genre": "modern commercial",
-            "tempo": "moderate",
-            "energy": "engaging",
-            "instruments": "mixed instrumentation",
-        })
-        
+
+        music_style = music_style_map.get(
+            tone.lower(),
+            {
+                "genre": "modern commercial",
+                "tempo": "moderate",
+                "energy": "engaging",
+                "instruments": "mixed instrumentation",
+            },
+        )
+
         # Industry-specific adjustments
         if industry in ["restaurant", "food", "cafe"]:
             music_style["genre"] = "modern acoustic"
@@ -206,14 +242,14 @@ class LyriaAgent:
         elif industry in ["fitness", "sports", "wellness"]:
             music_style["genre"] = "energetic electronic"
             music_style["tempo"] = "fast and pumping"
-        
+
         # Build prompt
         prompt = f"""{duration}-second background music for {product} advertisement
 
-Genre: {music_style['genre']}
-Mood: {tone}, {music_style['energy']}
-Tempo: {music_style['tempo']}
-Instrumentation: {music_style['instruments']}
+Genre: {music_style["genre"]}
+Mood: {tone}, {music_style["energy"]}
+Tempo: {music_style["tempo"]}
+Instrumentation: {music_style["instruments"]}
 
 Style: Modern, professional, viral video soundtrack
 Target: Social media (TikTok/Instagram Reels)
@@ -221,7 +257,67 @@ No vocals, instrumental only
 Optimized for background music that doesn't overpower narration"""
 
         return prompt
-    
+
+    async def _use_mock_music(
+        self,
+        product: str,
+        tone: str,
+        duration: int,
+    ) -> Optional[str]:
+        """
+        Use mock/placeholder music for testing the pipeline.
+
+        This allows testing the full viral video pipeline without Lyria API access.
+        Uses royalty-free music samples or generates silence as placeholder.
+
+        Returns:
+            Path to mock audio file
+        """
+        try:
+            # Check for existing MUSIC files in the output directory
+            # Only use files that are explicitly named as music (not voiceovers)
+            existing_music = [
+                f
+                for f in (
+                    list(self.output_dir.glob("*.mp3"))
+                    + list(self.output_dir.glob("*.wav"))
+                )
+                if "music" in f.name.lower() and "voiceover" not in f.name.lower()
+            ]
+            if existing_music:
+                print(f"   🎵 Using existing music file: {existing_music[0].name}")
+                return str(existing_music[0])
+
+            # Generate silent audio file as placeholder
+            # This is better than using voiceovers which would overlap with TTS
+            print("   🎵 Generating silent music placeholder...")
+            silent_path = (
+                self.output_dir / f"{product.replace(' ', '_')}_silent_{duration}s.wav"
+            )
+
+            # Create a simple silent WAV file using wave module
+            import struct
+            import wave
+
+            sample_rate = 44100
+            num_samples = sample_rate * duration
+
+            with wave.open(str(silent_path), "w") as wav_file:
+                wav_file.setnchannels(2)  # Stereo
+                wav_file.setsampwidth(2)  # 16-bit
+                wav_file.setframerate(sample_rate)
+
+                # Write silent samples (zeros)
+                for _ in range(num_samples):
+                    wav_file.writeframes(struct.pack("<hh", 0, 0))
+
+            print(f"   🎵 Created silent placeholder: {silent_path}")
+            return str(silent_path)
+
+        except Exception as e:
+            print(f"   ❌ Mock music generation failed: {e}")
+            return None
+
     async def _generate_music(
         self,
         prompt: str,
@@ -230,26 +326,26 @@ Optimized for background music that doesn't overpower narration"""
     ) -> Optional[str]:
         """
         Generate music using Lyria (PLACEHOLDER - implement when ready).
-        
+
         This method will:
         1. Initialize Lyria model
         2. Send generation request
         3. Wait for completion (~10-30 seconds)
         4. Download audio file
         5. Save as WAV
-        
+
         Returns:
             Path to generated audio file
         """
-        
+
         # Initialize model if needed
         if not self.model and not self._initialize_lyria():
             raise Exception("Lyria not available")
-        
+
         try:
             print(f"\n   🎵 Generating {duration}s music with Lyria...")
             print(f"   ⏱️  This may take 10-30 seconds...")
-            
+
             # TODO: Replace with actual Lyria API call
             # Example structure (API not finalized):
             # response = await self.model.generate_music(
@@ -258,23 +354,23 @@ Optimized for background music that doesn't overpower narration"""
             #     sample_rate=48000,
             #     output_format="wav",
             # )
-            # 
+            #
             # audio_data = response.audio_data
-            # 
+            #
             # # Save audio
             # safe_product = product.replace(" ", "_")[:20]
             # filename = f"{safe_product}_music_{duration}s.wav"
             # audio_path = self.output_dir / filename
-            # 
+            #
             # with open(audio_path, "wb") as f:
             #     f.write(audio_data)
-            # 
+            #
             # print(f"   ✅ Music saved: {audio_path}")
             # return str(audio_path)
-            
+
             # Placeholder
             raise NotImplementedError("Lyria API calls not yet implemented")
-            
+
         except Exception as e:
             print(f"   ❌ Lyria generation failed: {e}")
             return None

@@ -12,25 +12,25 @@ Uses the Marky workflow (teammate's implementation) for comprehensive ad researc
 import os
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional, Any
-
-from ad_intel_no.google_trends_agent import GoogleTrendsAgent
+from typing import Any, Dict, List, Optional
 
 from dotenv import load_dotenv
+
+from ad_intel_no.google_trends_agent import GoogleTrendsAgent
 
 load_dotenv()
 
 # Add orchestrator to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from orchestrator.workflow import MarkyWorkflow, run_workflow
 from orchestrator.models import AdResearchRequest, AdResearchResponse
+from orchestrator.workflow import MarkyWorkflow, run_workflow
 
 
 class EnhancedResearchAgent:
     """
     Comprehensive research agent using Marky's multi-agent workflow.
-    
+
     Runs the complete Marky pipeline:
     1. Local Intel - Competitor discovery and website analysis
     2. Review Intel - Google Reviews from competitors
@@ -86,11 +86,25 @@ class EnhancedResearchAgent:
                 location=location,
                 max_competitors=8,
                 include_trends=True,
-            )
+            ),
         )
 
         # Convert Marky response to AdBoard format
-        research_data = self._convert_marky_response(response, business_type, product, industry, city)
+        research_data = self._convert_marky_response(
+            response, business_type, product, industry, city
+        )
+
+        # Generate competitor map if we have location data
+        if city and research_data.get("local_intel", {}).get("competitor_details"):
+            try:
+                from utils.map_generator import generate_competitor_map_from_research
+
+                map_path = generate_competitor_map_from_research(research_data)
+                if map_path:
+                    research_data["competitor_map_path"] = map_path
+                    print(f"  🗺️ Competitor map generated: {map_path}")
+            except Exception as e:
+                print(f"  ⚠️ Map generation skipped: {e}")
 
         return research_data
 
@@ -134,14 +148,17 @@ class EnhancedResearchAgent:
         competitors_count = len(result.competitors)
         google_reviews_count = sum(
             len(voice.praise_quotes) + len(voice.complaint_quotes)
-            for voice in [result.customer_voice] if voice
+            for voice in [result.customer_voice]
+            if voice
         )
         yelp_reviews_count = google_reviews_count  # Combined in customer_voice
         keywords_count = len(result.timing)
 
         print(f"\n✅ Research complete:")
         print(f"  • Competitors found: {competitors_count}")
-        print(f"  • Customer themes: {len(result.customer_voice.common_themes) if result.customer_voice else 0}")
+        print(
+            f"  • Customer themes: {len(result.customer_voice.common_themes) if result.customer_voice else 0}"
+        )
         print(f"  • Keywords analyzed: {keywords_count}")
         print(f"  • Ad hooks generated: {len(result.recommended_hooks)}")
         print(f"  • Headlines generated: {len(result.headline_suggestions)}")
@@ -198,11 +215,26 @@ class EnhancedResearchAgent:
             "what_top_competitors_do": [],
             "what_to_avoid": [],
             "recommendations": [],
+            # Competitor details with addresses for map generation
+            "competitor_details": [
+                {
+                    "name": c.name,
+                    "address": getattr(c, "address", ""),
+                    "rating": getattr(c, "rating", None),
+                    "review_count": getattr(c, "review_count", None),
+                    "latitude": getattr(c, "latitude", None),
+                    "longitude": getattr(c, "longitude", None),
+                }
+                for c in result.competitors[:10]
+            ],
         }
 
         # Extract what top competitors do from differentiators and market summary
         for diff in result.differentiators[:3]:
-            if "strength" in diff.angle_name.lower() or "quality" in diff.angle_name.lower():
+            if (
+                "strength" in diff.angle_name.lower()
+                or "quality" in diff.angle_name.lower()
+            ):
                 data["what_top_competitors_do"].append(f"Emphasize {diff.angle_name}")
 
         # Build market summary from differentiators
@@ -244,11 +276,13 @@ class EnhancedResearchAgent:
         ad_recommendations = []
 
         for timing in result.timing:
-            keyword_data.append({
-                "keyword": timing.keyword,
-                "search_volume": timing.monthly_volume,
-                "cpc": timing.avg_cpc,
-            })
+            keyword_data.append(
+                {
+                    "keyword": timing.keyword,
+                    "search_volume": timing.monthly_volume,
+                    "cpc": timing.avg_cpc,
+                }
+            )
             if timing.recommendation:
                 timing_recommendations.append(
                     f"Best months for '{timing.keyword}': {', '.join(timing.peak_months)}"

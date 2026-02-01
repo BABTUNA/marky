@@ -11,7 +11,13 @@ from typing import Any, Dict, List
 # Pipeline definitions - which agents to run for each output type
 PIPELINES = {
     "script": ["research", "location_scout", "trend_analyzer", "script_writer"],
-    "storyboard": ["research", "location_scout", "trend_analyzer", "script_writer", "image_generator"],
+    "storyboard": [
+        "research",
+        "location_scout",
+        "trend_analyzer",
+        "script_writer",
+        "image_generator",
+    ],
     "video": [
         "research",
         "location_scout",
@@ -83,17 +89,24 @@ PIPELINES = {
         "cost_estimator",
         "social_media",
     ],
-    # NEW: Complete Viral Video Pipeline (Enable when VEO 3/Lyria accessible)
-    # "viral_video": [
-    #     "research",
-    #     "trend_analyzer",
-    #     "script_writer",
-    #     "veo3_generator",       # Generates silent video
-    #     "lyria_music",          # Generates music (note: name mismatch fixed)
-    #     "viral_video_assembler" # Combines Video + Music + TTS
-    # ],
+    # Complete Viral Video Pipeline (VEO 3 + Lyria + TTS)
+    # Now enabled for testing with placeholders!
+    "viral_video": [
+        "research",
+        "trend_analyzer",
+        "script_writer",
+        "veo3_generator",  # Generates silent video (or uses placeholder)
+        "lyria_music",  # Generates music (or uses mock)
+        "viral_video_assembler",  # Combines Video + Music + TTS
+    ],
+    # Minimal viral video test (skip research for faster iteration)
+    "viral_video_test": [
+        "script_writer",
+        "veo3_generator",
+        "lyria_music",
+        "viral_video_assembler",
+    ],
 }
-
 
 
 class AdBoardPipeline:
@@ -132,20 +145,21 @@ class AdBoardPipeline:
 
         from agents.audio_mixer import AudioMixerAgent
         from agents.cost_estimator import CostEstimatorAgent
+        from agents.enhanced_research import (
+            ResearchAgent,  # Now includes YouTube + Google Ads
+        )
         from agents.image_generator import ImageGeneratorAgent
         from agents.location_scout import LocationScoutAgent
+        from agents.lyria_agent import LyriaAgent
         from agents.music_agent import MusicAgent
         from agents.pdf_builder import PDFBuilderAgent
         from agents.script_writer import ScriptWriterAgent
         from agents.social_media_agent import SocialMediaAgent
         from agents.trend_analyzer import TrendAnalyzerAgent
-        from agents.voiceover_agent import VoiceoverAgent
+        from agents.veo3_agent import VEO3Agent
         from agents.video_assembly_agent import VideoAssemblyAgent
-from agents.veo3_agent import VEO3Agent
-from agents.lyria_agent import LyriaAgent
-from agents.viral_video_assembler import ViralVideoAssembler
-
-        from agents.enhanced_research import ResearchAgent  # Now includes YouTube + Google Ads
+        from agents.viral_video_assembler import ViralVideoAssembler
+        from agents.voiceover_agent import VoiceoverAgent
 
         self._agents = {
             "research": ResearchAgent(),
@@ -161,11 +175,9 @@ from agents.viral_video_assembler import ViralVideoAssembler
             "veo3_generator": VEO3Agent(),
             "lyria_music": LyriaAgent(),
             "viral_video_assembler": ViralVideoAssembler(),
-
             "pdf_builder": PDFBuilderAgent(),
             "video_assembly": VideoAssemblyAgent(),
         }
-
 
     async def run(self) -> Dict[str, Any]:
         """
