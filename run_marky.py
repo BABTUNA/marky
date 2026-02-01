@@ -37,11 +37,12 @@ def check_config():
     print("="*60)
     
     configs = [
-        ("SERPAPI_KEY", "SerpAPI (local_intel, yelp_intel)", True),
+        ("SERPAPI_KEY", "SerpAPI (local_intel, yelp_intel, related_questions)", True),
         ("FIRECRAWL_API_KEY", "Firecrawl (website scraping)", False),
         ("ANTHROPIC_API_KEY", "Anthropic/Claude (AI analysis)", False),
         ("DATAFORSEO_LOGIN", "DataForSEO (trends_intel)", False),
         ("DATAFORSEO_PASSWORD", "DataForSEO (trends_intel)", False),
+        ("GDRIVE_DEFAULT_FOLDER_ID", "Google Drive folder for --drive-upload", False),
     ]
     
     all_required = True
@@ -92,6 +93,9 @@ def run_cli_mode(args):
         location=args.location,
         max_competitors=args.max_competitors,
         include_trends=not args.no_trends,
+        include_pdf_export=not args.no_pdf,
+        include_drive_upload=args.drive_upload,
+        drive_folder_id=args.drive_folder_id or None,
     )
     
     response = workflow.run(request)
@@ -142,6 +146,9 @@ Examples:
   # Run CLI analysis
   python run_marky.py --cli -b "plumber" -l "Boston, MA"
   
+  # With PDF + Google Drive upload
+  python run_marky.py --cli -b "plumber" -l "Boston" --drive-upload --drive-folder-id "YOUR_FOLDER_ID"
+  
   # Check configuration
   python run_marky.py --check-config
         """,
@@ -184,6 +191,25 @@ Examples:
         "--no-trends",
         action="store_true",
         help="Skip trends analysis (faster)",
+    )
+    
+    parser.add_argument(
+        "--drive-upload",
+        action="store_true",
+        help="Upload PDF report to Google Drive",
+    )
+    
+    parser.add_argument(
+        "--drive-folder-id",
+        type=str,
+        default=os.getenv("GDRIVE_DEFAULT_FOLDER_ID"),
+        help="Google Drive folder ID for upload (or set GDRIVE_DEFAULT_FOLDER_ID)",
+    )
+    
+    parser.add_argument(
+        "--no-pdf",
+        action="store_true",
+        help="Skip PDF export",
     )
     
     parser.add_argument(

@@ -1,0 +1,26 @@
+{
+  "business_type": "electrician",
+  "location": "Providence, RI",
+  "businesses_analyzed": 0,
+  "total_reviews_analyzed": 0,
+  "avg_rating": 0.0,
+  "rating_distribution": {},
+  "businesses": [],
+  "insights": {
+    "pain_points": [],
+    "pain_point_quotes": [],
+    "praise_points": [],
+    "praise_quotes": [],
+    "themes": [],
+    "customer_phrases": [],
+    "questions": [],
+    "price_mentions": []
+  },
+  "ad_suggestions": {
+    "hooks": [],
+    "headlines": [],
+    "pain_point_hooks": [],
+    "trust_signals": [],
+    "differentiators": []
+  }
+}

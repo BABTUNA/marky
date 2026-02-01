@@ -1,0 +1,161 @@
+{
+  "business_type": "electrician",
+  "location": "Providence, RI",
+  "businesses_analyzed": 3,
+  "total_reviews_analyzed": 25,
+  "avg_rating": 4.36,
+  "rating_distribution": {
+    "1": 4,
+    "2": 0,
+    "3": 0,
+    "4": 0,
+    "5": 21
+  },
+  "businesses": [
+    {
+      "place_id": "XDmPNn7v3fTl4tO0SJGexA",
+      "name": "ZH Electric",
+      "link": "https://www.yelp.com/biz/zh-electric-cranston?osq=electrician&amp;override_cta=Request+quote+%26+availability",
+      "rating": 4.2,
+      "review_count": 21,
+      "categories": [
+        "Electricians"
+      ],
+      "price": null,
+      "neighborhood": null,
+      "phone": null,
+      "snippet": "If I need additional electrical work, I will contact him. Thank you.",
+      "service_options": {}
+    },
+    {
+      "place_id": "3BkICiHN1idvBz3LoH94cw",
+      "name": "Naxos Electric",
+      "link": "https://www.yelp.com/biz/naxos-electric-smithfield-4?osq=electrician&amp;override_cta=Request+quote+%26+availability",
+      "rating": 5.0,
+      "review_count": 45,
+      "categories": [
+        "Electricians"
+      ],
+      "price": null,
+      "neighborhood": null,
+      "phone": null,
+      "snippet": "I have had the pleasure of hiring them to complete some needed electrical work at my property.",
+      "service_options": {}
+    },
+    {
+      "place_id": "_QEdfHMG0snis3H453AeuA",
+      "name": "Jacob King Electrician",
+      "link": "https://www.yelp.com/biz/jacob-king-electrician-somerset?osq=electrician&amp;override_cta=Request+quote+%26+availability",
+      "rating": 5.0,
+      "review_count": 1,
+      "categories": [
+        "Electricians"
+      ],
+      "price": null,
+      "neighborhood": null,
+      "phone": null,
+      "snippet": "He was reasonable. Hes very responsive and honestly does amazing quality work. Very nice and personable.",
+      "service_options": {}
+    }
+  ],
+  "insights": {
+    "pain_points": [
+      "I called them about 10 times and sent several emails asking when would work to reschedule, but they didn't get back to me",
+      "Why waste people's time as well as his to schedule an appointment, then no show",
+      "The electrician came out and assessed my situation and never sent a quote or returned a call"
+    ],
+    "pain_point_quotes": [
+      "ZH Electric gave me a quote, I accepted, and they agreed to come out to do the work.  The day of the service, they sent me an email saying they had to reschedule.  I called them about 10 times and sen",
+      "They made an appointment to come to my house to look things over and give me an estimate for how much my installation would cost.  When the time came, they were nowhere to be seen, and did not respond",
+      "no call no show. Even called on the date of the appointment, no answer no return phone call.  Why waste people's time as well as his to schedule an appointment, then no show? A lot of reviews are sayi",
+      "The electrician came out and assessed my situation and never sent a quote or returned a call. Why not just be honest if the job isn't right for you?"
+    ],
+    "praise_points": [
+      "Strongly recommended for efficiency and effective service, and all at the best prices in the market.",
+      "Zach looked at our system in detail, made recommendations and explained why, purchased the new system and installed it fast and efficiently",
+      "Zach was easy to contact, the pricing was fair, the work was performed on time, absolutely to my satisfaction",
+      "Zach is wonderful",
+      "Always shows up when expected and on time, does great work, and is pleasant and diligent doing his work",
+      "Highly recommended.",
+      "Highly recommend.",
+      "He was punctual, professional, and friendly",
+      "Straightforward and reasonable pricing.",
+      "My request was handled the next business day and Zach was personable and knowledgeable in his trade and I will be calling him again for future needs.",
+      "my experience was fast work and simple to deal with, easy to understand and at a reasonable price",
+      "Highly recommend and we will use them again.",
+      "Very fast response, great price and extreamly neat, precise work",
+      "The technician was knowledgeable and timely",
+      "He is a gentleman and neat and very professional His pricing is very fair"
+    ],
+    "praise_quotes": [
+      "Another outstanding service from this company.  Replacing an early 90s Panel to provide stabilization and to address  a problem I have been experiencing for months. Strongly recommended for efficiency",
+      "Several things went well. Zach was easy to contact, the pricing was fair, the work was performed on time, absolutely to my satisfaction. If I need additional electrical work, I will contact him. Thank",
+      "Zach is wonderful. Always shows up when expected and on time, does great work, and is pleasant and diligent doing his work. Highly recommended.",
+      "Great!  Explains situation and remedy very well.  Will definitely call him again as needed.  Highly recommend.",
+      "Zach installed a couple of lights for us with a dimmer. He was punctual, professional, and friendly. He was very communicative and made sure that everything was done correctly. Straightforward and rea",
+      "my experience was fast work and simple to deal with, easy to understand and at a reasonable price.  My request was handled the next business day and Zach was personable and knowledgeable in his trade ",
+      "They did a great job with several electrical issues in our house. Zac was very good at explaining what was needed and why.  The work was done carefully and neatly and was a good value for the price. H",
+      "Very fast response, great price and extreamly neat, precise work. Definalty will have more work done in the future.",
+      "Great service! The technician was knowledgeable and timely. He fixed the seal on outdoor cables, water proofed the entry points, fixed an outdoor outlet, and provided advice on plug upgrades. Highly r",
+      "The gentleman is very experienced and knowledgeable and was able to resolve the situation expeditiously and I will always call him . He is a gentleman and neat and very professional His pricing is ver"
+    ],
+    "themes": [
+      "quality",
+      "timeliness",
+      "communication",
+      "pricing",
+      "expertise",
+      "reliability",
+      "professionalism",
+      "cleanliness"
+    ],
+    "customer_phrases": [
+      "highly recommend",
+      "on time",
+      "highly recommended",
+      "very fast",
+      "very professional",
+      "extremely professional"
+    ],
+    "questions": [
+      "Why waste people's time as well as his to schedule an appointment, then no show?",
+      "Why not just be honest if the job isn't right for you?"
+    ],
+    "price_mentions": [
+      "my experience was fast work and simple to deal with, easy to understand and at a reasonable price",
+      "The work was done carefully and neatly and was a good value for the price",
+      "His work is of the highest quality, and his prices are unbeatable",
+      "They made an appointment to come to my house to look things over and give me an estimate for how much my installation would cost",
+      "His price was very fair in the work extremely professional",
+      "He is knowledgeable, extremely neat, and vey reasonably priced",
+      "Strongly recommended for efficiency and effective service, and all at the best prices in the market",
+      "This price was reasonable and his work quality was top notch",
+      "Very fast response, great price and extreamly neat, precise work",
+      "I then had him price the many other electrical systems jobs that I'd been putting off because I hadn't found a good electrician"
+    ]
+  },
+  "ad_suggestions": {
+    "hooks": [
+      "Fair, transparent pricing - no surprises",
+      "On time, every time - we respect your schedule",
+      "Quality work that lasts",
+      "We answer your calls and keep you informed",
+      "Professional service from start to finish"
+    ],
+    "headlines": [
+      "Top-Rated Electrician in Your Area",
+      "Your Trusted Local Electrician",
+      "Professional Electrician Services",
+      "Fast, Reliable Electrician Service",
+      "Quality Electrician Work at Fair Prices"
+    ],
+    "pain_point_hooks": [],
+    "trust_signals": [],
+    "differentiators": [
+      "Emphasize reliability - customers want dependable service",
+      "Highlight punctuality - a common pain point",
+      "Stress honesty and transparency in pricing",
+      "Promote quick response and service times"
+    ]
+  }
+}

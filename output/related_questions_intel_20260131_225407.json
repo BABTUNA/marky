@@ -1,0 +1,93 @@
+{
+  "business_type": "plumber",
+  "location": "Providence, RI",
+  "query_results": [
+    {
+      "query": "plumber Providence, RI",
+      "questions": [
+        {
+          "question": "How much do local plumbers charge per hour?",
+          "snippet": "Most plumbers charge between $45 and $150 per hour. Residential plumbing jobs often fall on the lower end, while commercial or emergency repairs push rates higher. Additional fees may apply for travel, equipment, or after-hours services. Understanding these extras can prevent surprises.",
+          "link": "https://www.toiletwhisperers.com/blog/plumber-charge-per-hour/#:~:text=Most%20plumbers%20charge%20between%20%2445,these%20extras%20can%20prevent%20surprises.",
+          "title": "How Much Should a Plumber Charge Per Hour? - Right Solution Plumbing"
+        },
+        {
+          "question": "Do plumbers expect a tip?",
+          "snippet": null,
+          "link": null,
+          "title": null
+        },
+        {
+          "question": "What are the three levels of plumbers?",
+          "snippet": null,
+          "link": null,
+          "title": null
+        },
+        {
+          "question": "Why do plumbers charge so much per hour?",
+          "snippet": null,
+          "link": null,
+          "title": null
+        }
+      ]
+    },
+    {
+      "query": "best plumber Providence, RI",
+      "questions": [
+        {
+          "question": "How to tell if a plumber is good?",
+          "snippet": null,
+          "link": null,
+          "title": null
+        },
+        {
+          "question": "How to find a quality plumber?",
+          "snippet": null,
+          "link": null,
+          "title": null
+        },
+        {
+          "question": "How to avoid getting ripped off by a plumber?",
+          "snippet": null,
+          "link": null,
+          "title": null
+        },
+        {
+          "question": "What do local plumbers charge per hour?",
+          "snippet": "Most plumbers charge between $45 and $150 per hour. Residential plumbing jobs often fall on the lower end, while commercial or emergency repairs push rates higher.",
+          "link": "https://www.toiletwhisperers.com/blog/plumber-charge-per-hour/#:~:text=Most%20plumbers%20charge%20between%20%2445,emergency%20repairs%20push%20rates%20higher.",
+          "title": "between $45 and $150 per hour"
+        }
+      ]
+    },
+    {
+      "query": "plumber near me",
+      "questions": [
+        {
+          "question": "What do local plumbers charge per hour?",
+          "snippet": "Most plumbers charge between $45 and $150 per hour. Residential plumbing jobs often fall on the lower end, while commercial or emergency repairs push rates higher.",
+          "link": "https://www.toiletwhisperers.com/blog/plumber-charge-per-hour/#:~:text=Most%20plumbers%20charge%20between%20%2445,emergency%20repairs%20push%20rates%20higher.",
+          "title": "between $45 and $150 per hour"
+        },
+        {
+          "question": "What is the average call out charge for a plumber?",
+          "snippet": null,
+          "link": null,
+          "title": null
+        },
+        {
+          "question": "How to tell if a plumber is good?",
+          "snippet": null,
+          "link": null,
+          "title": null
+        },
+        {
+          "question": "How much should plumbing work cost?",
+          "snippet": null,
+          "link": null,
+          "title": null
+        }
+      ]
+    }
+  ]
+}

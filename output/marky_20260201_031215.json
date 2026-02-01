@@ -1,0 +1,337 @@
+{
+  "business_type": "plumber",
+  "location": "Boston, MA",
+  "timestamp": "2026-02-01T03:08:04.115167",
+  "competitors": [
+    {
+      "name": "Horvitz Plumbing & Heating",
+      "rating": 5,
+      "review_count": 124,
+      "website": "http://horvitzplumbingandheatingcoma.hibuwebsites.com/",
+      "strengths": [
+        "Since 1932",
+        "Family Owned",
+        "Locally-Owned",
+        "Licensed And Insured",
+        "Warranty",
+        "Emergency Service",
+        "Same Day Service"
+      ],
+      "weaknesses": [],
+      "services": [
+        "Tankless",
+        "Service",
+        "Emergency",
+        "Maintenance",
+        "Installation",
+        "Repair",
+        "Drain Cleaning",
+        "Water Heater"
+      ]
+    },
+    {
+      "name": "All Boston Plumbing & Drain",
+      "rating": 5,
+      "review_count": 32,
+      "website": null,
+      "strengths": [],
+      "weaknesses": [],
+      "services": []
+    },
+    {
+      "name": "Avantel Plumber of Boston MA",
+      "rating": 5,
+      "review_count": 31,
+      "website": "https://bostonplumber.avantel.net/",
+      "strengths": [
+        "24/7",
+        "Same-Day Service",
+        "122 Reviews"
+      ],
+      "weaknesses": [],
+      "services": [
+        "Maintenance",
+        "Hydro Jetting",
+        "Faucet",
+        "Repiping",
+        "Water Heater",
+        "Tankless",
+        "Water Line",
+        "Backflow",
+        "Sump Pump",
+        "Garbage Disposal",
+        "Emergency Plumbing",
+        "Estimate",
+        "Installation",
+        "Drain Cleaning",
+        "Repair",
+        "Gas Line",
+        "Toilet Repair",
+        "Service",
+        "Emergency",
+        "Water Softener",
+        "Leak Detection",
+        "Inspection",
+        "Sewer Line"
+      ]
+    },
+    {
+      "name": "Precision Emergency Plumber Boston",
+      "rating": 5,
+      "review_count": 10,
+      "website": "https://precisionemergencyplumber.com/boston/",
+      "strengths": [],
+      "weaknesses": [],
+      "services": []
+    },
+    {
+      "name": "Plumbing Solutions",
+      "rating": 4.9,
+      "review_count": 1144,
+      "website": "https://www.plumbing-solutions-inc.com/",
+      "strengths": [
+        "Free Estimate",
+        "Emergency Service",
+        "Same-Day Service",
+        "On-Time"
+      ],
+      "weaknesses": [],
+      "services": [
+        "Service",
+        "Emergency",
+        "Estimate",
+        "Faucet",
+        "Installation",
+        "Repair",
+        "Drain Cleaning",
+        "Water Heater"
+      ]
+    }
+  ],
+  "market_summary": "Common services: Tankless, Service, Emergency, Maintenance, Installation, Repair, Drain Cleaning, Water Heater, Hydro Jetting, Faucet, Backflow, Sump Pump, Garbage Disposal, Emergency Plumbing, Estimate. Gaps: Repiping, Water Line, Pipe Repair, Consultation, Kitchen Plumbing, Trenchless",
+  "customer_voice": {
+    "pain_points": [
+      "Terrible at clearing drains",
+      "...g it for 20 years\". I said: Ok, give me a call tomorrow. He said he will.\n3. He never called. Good thing I realized that something is wrong with him, and called anot...",
+      "He texted me saying that he is not going to \"waste his time\", 8:45 is too late for him, and he is convinced we need a new water heater",
+      "Good thing I realized that something is wrong with him, and called another plumber",
+      "If you prefer not to become the one - AVOID problematic servicemen.",
+      "I live here but he was just a bit rude.",
+      "I can understand all the reasons for not being able make an appointment, but 3 in a row with times that the company suggested themselves is very disappointing.",
+      "(Also he never mentioned anything about a free quote and all that fake stuff he said in his response.) He just got caught trying to take me a sucker but i reviewed him",
+      "Update: after my bad review, the owner calls me 3 times like a psycho and I don't answer and I block his number",
+      "Didn't think I would need a restraining order after looking for a PLUMBER"
+    ],
+    "desires": [
+      "expertise",
+      "speed",
+      "friendly service",
+      "recommendation",
+      "cleanliness",
+      "availability",
+      "fair pricing",
+      "communication",
+      "punctuality",
+      "honesty",
+      "They were not able to do the work but recommended Someone who was able to",
+      "Drain Flow was fantastic",
+      "Definitely an expert professional And got to Dorchester quickly",
+      "He was knowledgeable, efficient, and the price was very very reasonable",
+      "Tony came out for an emergency fix of a sink and drain issuein one of my apartments, and both my tenant and I were really happy with how quickly he resolved the issue",
+      "Highly recommend--I'll definitely call them again.",
+      "He is responsive, friendly and does great work",
+      "Would highly recommend hiring him.",
+      "Anthony is an amazing plumber",
+      "Today he really shocked me in the best possible way"
+    ],
+    "praise_quotes": [
+      "Great experience! Nate was awesome.",
+      "Horvitz has taken care of our plumbing issues for a number of years, and we've always been happy with their work.",
+      "Nate and Mike were great, courtesy and professional! They were able to assess the issue with our heating system, recommend a solution and complete...",
+      "We needed service during the holiday weekend.",
+      "The Horvitz team were prompt, super thorough (ran into a snag and came back to ensure things were done perfectly), and competitively priced.",
+      "Dishwasher installation.",
+      "Had Horvitz do my annual hvac and fireplace turn up and they were professional, quick and great! Highly recommend Nate & John.",
+      "I had an issue with a condensation pump Nate came diagnosed the problem immediately and made sure it was in good working order very pleasant and...",
+      "We had an issue with the laundry faucet spraying unevenly.",
+      "Our water heater installation went smoother than expected.",
+      "We had a weak stream of hot water in the bathroom sink, but strong pressure everywhere else.",
+      "My plumber previously recommended updating old piping, so I finally called this service for copper repipe work.",
+      "The kitchen drain kept bubbling every time I washed dishes, so I reached out to Boston Plumbing Service.",
+      "A weird sulfur smell started coming from one of the sinks, so I reached out for support.",
+      "My water heater installation needed adjustments after years of shifting.",
+      "The faucet leak in the kitchen had me worried, but their crew repaired it quickly and thoroughly.",
+      "The team showed up quickly and got my leaking pipe fixed without any hassle.",
+      "Steve came and taught me everything I need to know about the plumbing in my new condo.",
+      "I appreciated how they laid out all the options and didn\u2019t push me toward the priciest fix.",
+      "Excellent service, quality results, and fair pricing\u2014one of the best plumbing experiences I\u2019ve ever had.",
+      "They were not able to do the work but recommended Someone who was able to.  We will use them in the future.",
+      "Anthony has helped us with multiple issues over the past year. He is responsive, friendly and does great work. Would highly recommend hiring him.",
+      "Woke up to a leak and needed someone to come in quickly. I was able to get in touch with Anthony who had a busy day and was able to fit me in between appointments. He's professional, knowledgeable, an",
+      "We needed an estimate on a heater and water heater replacement and Dave was fast, efficient, and responsive.  He gives competitive estimates and also follows up after to see how things are going.  Tha",
+      "Had good communication with  District   Plumbing  on doing a job  on our house . very genuine person  I can see why they are a Five star rating on yelp ...... thank you for the follow up call ..... d"
+    ],
+    "complaint_quotes": [
+      "did not complete job had to call someone else to do job correctly charged 425 dollars for a simple job",
+      "Left a message yesterday with no reply so I called again this morning.  Did not get the name of the person that answered.  I explained that I needed a new water heater.  I told him I live in Back Bay.",
+      "No call, No show.\n\nHad a scheduled appointment but no show and no call with an explanation or offer to reschedule.",
+      "They came to my house, looked at everything, seemed like they wanted the work. I asked every day for two weeks for the quote and never received it. Seems to be a disconnect between the guys and the of",
+      "Came out look at my shower for 10 mins didn't fix the problem told me what piece to go buy.. an charged 165 dollars... worse service ever would never recommend to anyone!!! I had to go to Home Depot a"
+    ],
+    "common_themes": [
+      "expertise",
+      "speed",
+      "recommendation",
+      "friendly service",
+      "cleanliness",
+      "quality",
+      "timeliness",
+      "communication",
+      "pricing",
+      "expertise",
+      "professionalism",
+      "reliability",
+      "cleanliness"
+    ]
+  },
+  "timing": [],
+  "related_questions": [
+    "How much does a plumber cost in Boston?",
+    "What is the hourly rate for a plumber in MA?",
+    "What do local plumbers charge per hour?",
+    "How much would a plumber charge for 3 hours?",
+    "How much do plumbers charge per hour in Boston?",
+    "How to find a quality plumber?",
+    "What's the going rate for a plumber in Massachusetts?",
+    "How to avoid getting ripped off by a plumber?",
+    "What is the average call out charge for a plumber?",
+    "How to tell if a plumber is good?",
+    "How much should plumbing work cost?"
+  ],
+  "differentiators": [
+    {
+      "angle_name": "Emergency Angle",
+      "hook": "Burst pipe at 2 AM? We're there in 60 minutes or less.",
+      "headline": "Burst pipe at 2 AM? We're there in 60 minutes or less.",
+      "description": "Fast response time, Available 24/7, No extra fees for emergencies",
+      "best_for": "Google Ads (search intent)",
+      "trust_signals": []
+    },
+    {
+      "angle_name": "Trust Angle",
+      "hook": "The plumber your neighbors trust. 100+ 5-star reviews.",
+      "headline": "The plumber your neighbors trust. 100+ 5-star reviews.",
+      "description": "Licensed and insured, Background-checked, Thousands of happy customers",
+      "best_for": "Facebook/Instagram (social proof)",
+      "trust_signals": []
+    },
+    {
+      "angle_name": "Pricing Angle",
+      "hook": "No hidden fees. The price we quote is the price you pay.",
+      "headline": "No hidden fees. The price we quote is the price you pay.",
+      "description": "Free estimates, No hidden fees, Price match guarantee",
+      "best_for": "Google Ads, Website",
+      "trust_signals": []
+    },
+    {
+      "angle_name": "Quality Angle",
+      "hook": "Fixed right the first time, guaranteed.",
+      "headline": "Fixed right the first time, guaranteed.",
+      "description": "Trained professionals, Premium materials, Satisfaction guaranteed",
+      "best_for": "Instagram, Website portfolio",
+      "trust_signals": []
+    },
+    {
+      "angle_name": "Speed Angle",
+      "hook": "Same-day service. Because leaks don't wait.",
+      "headline": "Same-day service. Because leaks don't wait.",
+      "description": "Same-day availability, On-time guarantee, Efficient service",
+      "best_for": "Google Ads, Google Business Profile",
+      "trust_signals": []
+    },
+    {
+      "angle_name": "Service Opportunity: Repiping",
+      "hook": "Need repiping? We're the experts.",
+      "headline": "Need repiping? We're the experts.",
+      "description": "Repiping mentioned by few competitors",
+      "best_for": "Facebook/Instagram Ads",
+      "trust_signals": []
+    },
+    {
+      "angle_name": "Service Opportunity: Water Line",
+      "hook": "Need water line? We're the experts.",
+      "headline": "Need water line? We're the experts.",
+      "description": "Water Line mentioned by few competitors",
+      "best_for": "Facebook/Instagram Ads",
+      "trust_signals": []
+    },
+    {
+      "angle_name": "Service Opportunity: Pipe Repair",
+      "hook": "Need pipe repair? We're the experts.",
+      "headline": "Need pipe repair? We're the experts.",
+      "description": "Pipe Repair mentioned by few competitors",
+      "best_for": "Facebook/Instagram Ads",
+      "trust_signals": []
+    }
+  ],
+  "headline_suggestions": [
+    "Plumbing Problems? Solved.",
+    "Same-day service. Because leaks don't wait.",
+    "The plumber your neighbors trust. 100+ 5-star reviews.",
+    "Burst pipe at 2 AM? We're there in 60 minutes or less.",
+    "Fast. Reliable. Affordable.",
+    "No hidden fees. The price we quote is the price you pay.",
+    "Fixed right the first time, guaranteed.",
+    "Your Local Plumbing Experts",
+    "Trusted experts in your area",
+    "Fast response when you need it",
+    "Friendly, respectful service",
+    "Recommended by your neighbors",
+    "We leave your home cleaner than we found it",
+    "Professional & Recommend Service",
+    "Expertise Guaranteed",
+    "Speed Guaranteed",
+    "Friendly Service Guaranteed",
+    "Top-Rated Plumber in Your Area",
+    "Your Trusted Local Plumber",
+    "Professional Plumber Services",
+    "Fast, Reliable Plumber Service",
+    "Quality Plumber Work at Fair Prices"
+  ],
+  "trust_signals": [
+    "Licensed & Insured",
+    "Satisfaction Guaranteed",
+    "Background-Checked Technicians",
+    "Upfront Pricing",
+    "Locally Owned & Operated",
+    "Family-Owned Since [Year]",
+    "Emergency Service",
+    "Same Day Service",
+    "24/7",
+    "Same-Day Service"
+  ],
+  "executive_summary": "",
+  "key_insights": [],
+  "recommended_hooks": [
+    "Expert plumber your neighbors trust",
+    "Friendly service from start to finish",
+    "\"Great experience! Nate was awesome.\"",
+    "Fair, transparent pricing - no surprises",
+    "On time, every time - we respect your schedule",
+    "Quality work that lasts",
+    "We answer your calls and keep you informed",
+    "Professional service from start to finish"
+  ],
+  "emotional_angles": [],
+  "pdf_path": null,
+  "drive_upload_result": null,
+  "agents_used": [
+    "local_intel",
+    "review_intel",
+    "yelp_intel",
+    "trends_intel",
+    "related_questions_intel"
+  ],
+  "total_time_seconds": 251.59099960327148,
+  "errors": []
+}

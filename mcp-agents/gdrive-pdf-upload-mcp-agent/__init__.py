@@ -1,1 +1,1 @@
-# Google Drive PDF/Video Upload MCP Agent
+"""Google Drive PDF Upload MCP Agent."""
