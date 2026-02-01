@@ -14,6 +14,8 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 
+from ad_intel_no.google_trends_agent import GoogleTrendsAgent
+
 from dotenv import load_dotenv
 
 load_dotenv()

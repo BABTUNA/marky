@@ -51,11 +51,13 @@ class VideoAssemblyAgent:
         image_data = previous_results.get("image_generator", {})
         voiceover_data = previous_results.get("voiceover", {})
         audio_mixer_data = previous_results.get("audio_mixer", {})
+        music_data = previous_results.get("music", {})
         
         video_clips = veo_data.get("video_clips", [])
         image_frames = image_data.get("frames", [])
         voiceover_path = voiceover_data.get("audio_path")
         mixed_audio_path = audio_mixer_data.get("mixed_audio_path")
+        music_path = music_data.get("music_path")
         
         # Determine mode: video or storyboard
         mode = None
@@ -70,32 +72,33 @@ class VideoAssemblyAgent:
                 "skipped": True,
             }
         
-        if not voiceover_path and not mixed_audio_path:
-            return {
-                "error": "No audio - need voiceover or mixed_audio",
-                "skipped": True,
-            }
+        # Determine audio source (prioritize mixed, then voiceover, then music-only)
+        audio_path = mixed_audio_path or voiceover_path or music_path
+        audio_type = "mixed" if mixed_audio_path else ("voiceover" if voiceover_path else ("music-only" if music_path else "silent"))
         
         print(f"\n🎬 Video Assembly Agent - {mode.upper()} Mode")
         print(f"   {'Video Clips' if mode == 'video' else 'Image Frames'}: {len(video_clips) if mode == 'video' else len(image_frames)}")
-        print(f"   Audio: {'Mixed (voice+music)' if mixed_audio_path else 'Voiceover only'}")
+        print(f"   Audio: {audio_type}")
         
         try:
             if mode == "storyboard":
                 # Convert images to video with Ken Burns effects
                 print(f"\n   🖼️  Step 1: Converting {len(image_frames)} images to video with Ken Burns effects...")
-                concatenated_video = await self._create_video_from_images(image_frames, product, duration)
+                video_path = await self._create_video_from_images(image_frames, product, duration)
             else:
                 # Concatenate video clips
                 print(f"\n   📹 Step 1: Concatenating {len(video_clips)} video clips...")
-                concatenated_video = await self._concatenate_videos(video_clips, product)
+                video_path = await self._concatenate_videos(video_clips, product)
             
-            # Step 2: Add audio to video
-            print(f"   🎵 Step 2: Adding audio track...")
-            audio_path = mixed_audio_path or voiceover_path
-            final_video = await self._add_audio_to_video(
-                concatenated_video, audio_path, product, duration
-            )
+            # Step 2: Add audio if available (optional for silent mode)
+            if audio_path:
+                print(f"   🎵 Step 2: Adding audio track...")
+                final_video = await self._add_audio_to_video(
+                    video_path, audio_path, product, duration
+                )
+            else:
+                print(f"   🔇 Step 2: Creating silent video (no audio)")
+                final_video = video_path
             
             print(f"\n   ✅ Final video created: {final_video}")
             
@@ -104,8 +107,8 @@ class VideoAssemblyAgent:
                 "duration": duration,
                 "mode": mode,
                 "frames_used": len(image_frames) if mode == "storyboard" else len(video_clips),
-                "audio_source": "mixed_audio" if mixed_audio_path else "voiceover_only",
-                "note": f"Complete {mode} video with audio ready for distribution",
+                "audio_source": audio_type,
+                "note": f"Complete {mode} video with {audio_type} audio ready for distribution",
             }
             
         except Exception as e:

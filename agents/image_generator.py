@@ -250,15 +250,21 @@ class ImageGeneratorAgent:
         else:
             shot = "medium shot"
 
-        # Simplified prompt - focus on the scene, minimal negative instructions
-        # The border issue comes from over-specifying "storyboard frame" styling
-        prompt = f"""{shot} pencil sketch illustration of {visual}
+        # AUTHENTIC HAND-DRAWN STORYBOARD - Simple, clean, single image
+        prompt = f"""{visual}
 
-Scene for {product} commercial. Black and white pencil drawing style, professional animation concept art, clean lines, detailed shading.
+Black and white pencil drawing. Traditional hand-drawn animation storyboard style.
 
-The illustration fills the entire canvas edge to edge with no empty space around it.
+IMPORTANT:
+- Single complete scene only (NOT a collage)
+- Fill entire image edge to edge
+- Rough pencil sketch with visible strokes
+- Hand-drawn aesthetic like Disney/Pixar pre-production art
+- NO frames, NO borders, NO panels
+- NO text, NO labels, NO annotations
+- Simple composition showing the scene clearly
 
-IMPORTANT: No text, no labels, no words, no letters in the image."""
+Drawing style: Quick animator sketch on paper, authentic hand-made marks, loose confident linework."""
 
         return prompt
 

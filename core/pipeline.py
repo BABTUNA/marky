@@ -72,20 +72,26 @@ PIPELINES = {
         "cost_estimator",
         "social_media",
     ],
-    # NEW: Storyboard video - sketch frames + Ken Burns + audio
+    # NEW: Storyboard video - sketch frames + Ken Burns (SILENT - no audio)
     "storyboard_video": [
         "research",
         "location_scout",
         "trend_analyzer",
         "script_writer",
         "image_generator",  # Generate sketch frames
-        "voiceover",
-        "music",
-        "audio_mixer",  # Mix voiceover + music
-        "video_assembly",  # Create video from images + audio
+        "video_assembly",  # Create silent video from images
         "cost_estimator",
         "social_media",
     ],
+    # NEW: Complete Viral Video Pipeline (Enable when VEO 3/Lyria accessible)
+    # "viral_video": [
+    #     "research",
+    #     "trend_analyzer",
+    #     "script_writer",
+    #     "veo3_generator",       # Generates silent video
+    #     "lyria_music",          # Generates music (note: name mismatch fixed)
+    #     "viral_video_assembler" # Combines Video + Music + TTS
+    # ],
 }
 
 
@@ -135,6 +141,9 @@ class AdBoardPipeline:
         from agents.trend_analyzer import TrendAnalyzerAgent
         from agents.voiceover_agent import VoiceoverAgent
         from agents.video_assembly_agent import VideoAssemblyAgent
+from agents.veo3_agent import VEO3Agent
+from agents.lyria_agent import LyriaAgent
+from agents.viral_video_assembler import ViralVideoAssembler
 
         from agents.enhanced_research import ResearchAgent  # Now includes YouTube + Google Ads
 
@@ -149,6 +158,10 @@ class AdBoardPipeline:
             "cost_estimator": CostEstimatorAgent(),
             "location_scout": LocationScoutAgent(),
             "social_media": SocialMediaAgent(),
+            "veo3_generator": VEO3Agent(),
+            "lyria_music": LyriaAgent(),
+            "viral_video_assembler": ViralVideoAssembler(),
+
             "pdf_builder": PDFBuilderAgent(),
             "video_assembly": VideoAssemblyAgent(),
         }

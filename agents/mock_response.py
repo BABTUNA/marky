@@ -175,9 +175,16 @@ MOCK_PIPELINE_RESULT = {
         "pdf_export": {
             "pdf_path": "output/pdfs/Ad_Package_Donut_Shop_Boston.pdf",
             "pages": 8,
-            "includes": ["Script", "Storyboard", "Research Summary", "Cost Breakdown"],
+            "includes": ["Script", "Storyboard", "Research Summary", "Cost Breakdown", "Competitor Map"],
             # Mock URL for testing (in production, this gets uploaded to tmpfiles.org)
             "pdf_url": "https://tmpfiles.org/dl/mock456/Ad_Package_Donut_Shop_Boston.pdf"
+        },
+        
+        "competitor_map": {
+            "map_path": "output/maps/competitor_map.png",
+            "competitors_shown": 5,
+            "city": "Boston, MA",
+            "map_url": None  # Gets populated if uploaded
         },
         
         "cost_estimator": {

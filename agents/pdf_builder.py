@@ -8,6 +8,7 @@ script, storyboard, budget, and production details.
 import os
 from datetime import datetime
 from pathlib import Path
+from agents.campaign_strategy_content import get_campaign_strategy_section, get_enhanced_next_steps
 
 try:
     from reportlab.lib import colors
@@ -150,7 +151,7 @@ class PDFBuilderAgent:
 
             # ==================== COVER PAGE ====================
             story.append(Spacer(1, 2 * inch))
-            story.append(Paragraph("🎬 AD PRODUCTION PACKAGE", title_style))
+            story.append(Paragraph("🎬 COMPLETE CAMPAIGN PACKAGE", title_style))
             story.append(Spacer(1, 0.3 * inch))
             story.append(Paragraph(f"<b>{product.upper()}</b>", title_style))
             story.append(Spacer(1, 0.2 * inch))
@@ -170,7 +171,7 @@ class PDFBuilderAgent:
 
             story.append(Spacer(1, 0.5 * inch))
             story.append(Paragraph(f"Generated: {datetime.now().strftime('%B %d, %Y at %I:%M %p')}", body_small))
-            story.append(Paragraph("Powered by AdBoard AI Multi-Agent System", body_small))
+            story.append(Paragraph("Powered by AdBoard AI - 12-Agent Orchestration System", body_small))
             story.append(PageBreak())
 
             # ==================== EXECUTIVE SUMMARY ====================
@@ -461,7 +462,25 @@ class PDFBuilderAgent:
 
             story.append(PageBreak())
 
-            # ==================== STORYBOARD ====================
+            
+            # ==================== CAMPAIGN STRATEGY ====================
+            story.append(Paragraph("CAMPAIGN STRATEGY & DISTRIBUTION", title_style))
+            story.append(Spacer(1, 0.15 * inch))
+            
+            campaign_sections = get_campaign_strategy_section(product, industry, city, duration, research, social)
+            for section in campaign_sections:
+                story.append(Paragraph(section["title"], heading_style))
+                story.append(Spacer(1, 0.1 * inch))
+                for line in section["content"]:
+                    if line == "":
+                        story.append(Spacer(1, 0.05 * inch))
+                    else:
+                        story.append(Paragraph(line, body_style))
+                story.append(Spacer(1, 0.15 * inch))
+            
+            story.append(PageBreak())
+
+# ==================== STORYBOARD ====================
             story.append(Paragraph("STORYBOARD & VISUAL CONCEPTS", title_style))
             story.append(Spacer(1, 0.15 * inch))
 
@@ -694,29 +713,18 @@ class PDFBuilderAgent:
             story.append(Paragraph("NEXT STEPS & ACTION ITEMS", title_style))
             story.append(Spacer(1, 0.15 * inch))
 
-            next_steps = [
-                "Review and approve the creative direction and script",
-                "Select preferred filming location(s) from recommendations",
-                "Secure necessary permits and location access",
-                "Cast and book talent (actors, voiceover artist)",
-                "Book crew (director, cinematographer, sound, etc.)",
-                "Arrange equipment rentals based on budget",
-                "Schedule shoot day(s) considering weather and availability",
-                "Execute principal photography",
-                "Complete post-production (editing, color, sound)",
-                "Review final cut and approve for distribution",
-                "Deploy to advertising platforms",
-            ]
+            # Get enhanced campaign-focused next steps
+            enhanced_steps = get_enhanced_next_steps()
+            for step in enhanced_steps:
+                story.append(Paragraph(step, body_style))
+                story.append(Spacer(1, 0.05 * inch))
 
-            for i, step in enumerate(next_steps, 1):
-                story.append(Paragraph(f"{i}. {step}", body_style))
-
-            story.append(Spacer(1, 0.3 * inch))
-            story.append(Paragraph("<b>Additional Recommendations:</b>", subheading_style))
-            story.append(Paragraph("• A/B test multiple versions of the CTA", body_style))
-            story.append(Paragraph("• Consider regional variations for different markets", body_style))
-            story.append(Paragraph("• Track performance metrics and optimize", body_style))
-            story.append(Paragraph("• Plan follow-up campaigns based on initial results", body_style))
+            story.append(Spacer(1, 0.2 * inch))
+            story.append(Paragraph("<b>⚡ Quick Wins:</b>", subheading_style))
+            story.append(Paragraph("• Start with TikTok - highest ROI for short-form video", body_style))
+            story.append(Paragraph("• Use existing customer testimonials in retargeting ads", body_style))
+            story.append(Paragraph("• Leverage competitor hashtags for discovery", body_style))
+            story.append(Paragraph("• Post organically before running paid ads to build social proof", body_style))
 
             story.append(Spacer(1, 0.5 * inch))
             story.append(Paragraph("=" * 60, body_small))
@@ -731,7 +739,8 @@ class PDFBuilderAgent:
                 "filename": filename,
                 "pages": len(story) // 3 + 5,
                 "sections": ["Cover", "Executive Summary", "Pipeline", "Market Research", 
-                           "Script", "Storyboard", "Budget", "Locations", "Strategy", "Assets", "Next Steps"],
+                           "Script", "Campaign Strategy", "Storyboard", "Budget", "Locations", 
+                           "Strategic Recommendations", "Assets", "Campaign Roadmap"],
             }
 
         except Exception as e:

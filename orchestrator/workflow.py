@@ -31,30 +31,22 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from local_intel.agent import LocalIntelAgent
 from review_intel.agent import ReviewIntelAgent
 from yelp_intel.agent import YelpIntelAgent
-from trends_intel.agent import TrendsIntelAgent
+from ad_intel_no.google_trends_agent import GoogleTrendsAgent
 from related_questions_intel.agent import RelatedQuestionsIntelAgent
 
 
 class MarkyWorkflow:
     """
-    Sequential workflow that orchestrates all intelligence agents.
-    
-    Pipeline (raw data collection, no filtering):
-    1. Local Intel - Find competitors, scrape websites
-    2. Review Intel - Google Reviews from competitors (needs place_ids from Local)
-    3. Yelp Intel - Extract customer voice from Yelp reviews
-    4. Trends Intel - Get seasonal timing data
-    5. Related Questions Intel - People also ask (content/intent)
-    6. Output - All collected data combined, unfiltered
+    Main workflow orchestrator for Marky's multi-agent ad research system.
     """
 
     def __init__(self):
-        """Initialize the workflow with agent instances."""
+        """Initialize all intelligence agents."""
         self.local_intel = LocalIntelAgent()
         self.review_intel = ReviewIntelAgent()
         self.yelp_intel = YelpIntelAgent()
-        self.trends_intel = TrendsIntelAgent()
-        self.related_questions_intel = RelatedQuestionsIntelAgent()
+        self.trends_intel = GoogleTrendsAgent()  # Now using Google Trends (free!)
+        self.related_questions = RelatedQuestionsIntelAgent()
         
     def run(
         self,
@@ -244,23 +236,16 @@ class MarkyWorkflow:
                 log(f"  ⚠ Yelp Intel error: {e}")
             
             # ================================================================
-            # Stage 4: Trends Intelligence
+            # Stage 4: Trends Intelligence (Google Trends)
             # ================================================================
             if request.include_trends:
-                log("📈 Stage 4/6: Running Trends Intelligence...")
+                log("📈 Stage 4/6: Running Trends Intelligence (Google Trends)...")
                 
                 try:
-                    # Build keywords from business type
-                    keywords = [
-                        request.business_type,
-                        f"{request.business_type} near me",
-                        f"best {request.business_type}",
-                    ]
-                    
-                    trends_analysis = self.trends_intel.analyze(
-                        keywords=keywords,
-                        location="United States",
-                        include_related=True,
+                    # Google Trends uses different interface
+                    trends_analysis = self.trends_intel.analyze_keywords(
+                        business_type=request.business_type,
+                        location=request.location,
                     )
                     
                     result.agents_used.append("trends_intel")
@@ -272,29 +257,24 @@ class MarkyWorkflow:
                         9: "Sep", 10: "Oct", 11: "Nov", 12: "Dec",
                     }
                     
-                    # Extract timing recommendations
-                    for kw_data in trends_analysis.keyword_data[:3]:
-                        seasonal = None
-                        for s in trends_analysis.seasonal_insights:
-                            if s.keyword == kw_data.keyword:
-                                seasonal = s
-                                break
-                        
-                        # Convert month ints to strings
-                        peak_strs = [month_names.get(m, str(m)) for m in (seasonal.peak_months if seasonal else [])]
-                        low_strs = [month_names.get(m, str(m)) for m in (seasonal.low_months if seasonal else [])]
-                        
+                    # Extract timing recommendations from Google Trends
+                    # GoogleTrendsAgent returns simplified data - build timing objects
+                    for kw_data in trends_analysis.keywords[:3]:
                         timing = SeasonalTiming(
                             keyword=kw_data.keyword,
-                            peak_months=peak_strs,
-                            low_months=low_strs,
-                            avg_cpc=kw_data.cpc or 0.0,
-                            monthly_volume=kw_data.search_volume or 0,
-                            recommendation=seasonal.recommendation if seasonal else "",
+                            peak_months=[],  # Google Trends doesn't provide month-level detail
+                            low_months=[],
+                            avg_cpc=0.0,  # No CPC from Google Trends (free service)
+                            monthly_volume=kw_data.search_volume,
+                            recommendation=f"{kw_data.trend} trend - {kw_data.interest}/100 interest",
                         )
                         result.timing.append(timing)
                     
-                    log(f"  ✓ Analyzed {len(keywords)} keywords")
+                    # Add seasonal insights from GoogleTrendsAgent
+                    if trends_analysis.seasonal_insights:
+                        log(f"  ✓ Seasonal insights: {', '.join(trends_analysis.seasonal_insights)}")
+                    
+                    log(f"  ✓ Analyzed {len(trends_analysis.keywords)} keywords from Google Trends")
                     
                 except Exception as e:
                     result.errors.append(f"trends_intel: {str(e)}")
@@ -307,7 +287,7 @@ class MarkyWorkflow:
             # ================================================================
             log("❓ Stage 5/6: Running Related Questions Intelligence...")
             try:
-                rq_analysis = self.related_questions_intel.analyze(
+                rq_analysis = self.related_questions.analyze(
                     business_type=request.business_type,
                     location=request.location,
                     seed_queries=None,
