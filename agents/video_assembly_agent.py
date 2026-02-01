@@ -1,8 +1,7 @@
 """
 Video Assembly Agent
 
-Combines video, voiceover, and music into final MP4 using FFmpeg.
-This is SAFE to implement and test (no API costs, uses local files).
+Combines video or images with audio (voiceover + optional music) into final MP4 using FFmpeg.
 """
 
 import os

@@ -1,14 +1,13 @@
 """
 Music Agent
 
-Suggests royalty-free background music based on ad tone and industry.
-Does NOT generate music - provides recommendations from free libraries.
+Provides music recommendations for ads. Background music is optional -
+the audio mixer will work with voiceover only if no music is provided.
 """
 
 import os
 import sys
 
-# Add project root to path for imports
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
@@ -17,21 +16,10 @@ from core.groq_client import chat_completion
 
 
 class MusicAgent:
-    """Suggests appropriate background music for the ad."""
-
-    # Royalty-free music libraries
-    FREE_MUSIC_SOURCES = [
-        {"name": "Pixabay Music", "url": "https://pixabay.com/music/"},
-        {"name": "Free Music Archive", "url": "https://freemusicarchive.org/"},
-        {"name": "Mixkit", "url": "https://mixkit.co/free-stock-music/"},
-        {
-            "name": "YouTube Audio Library",
-            "url": "https://studio.youtube.com/channel/audio",
-        },
-    ]
+    """Provides music recommendations for ads. Music is optional."""
 
     def __init__(self):
-        pass
+        self.output_dir = Path("output/music") if False else None  # No download needed
 
     async def run(
         self,
@@ -43,7 +31,7 @@ class MusicAgent:
         previous_results: dict,
     ) -> dict:
         """
-        Suggest music for the ad.
+        Provide music recommendations for the ad.
 
         Args:
             product: The product/business
@@ -54,11 +42,10 @@ class MusicAgent:
             previous_results: Results from previous agents
 
         Returns:
-            dict with music suggestions
+            dict with music recommendations (no actual download)
         """
 
         try:
-            # Get script context for better suggestions
             script_data = previous_results.get("script_writer", {})
             scenes = script_data.get("scenes", [])
 
@@ -99,14 +86,13 @@ Provide music recommendations in this format:
 - Outro ({int(duration * 0.75)}-{duration}s): [description]
 
 4. SPECIFIC TRACK SUGGESTIONS:
-Search these terms on Pixabay Music or Mixkit:
+Search these terms on Pixabay Music, Mixkit, or Epidemic Sound:
 - "[search term 1]"
 - "[search term 2]"
 - "[search term 3]"
 
 Keep suggestions appropriate for commercial use (royalty-free)."""
 
-            # Use the Groq client with automatic model fallback
             response = chat_completion(
                 messages=[{"role": "user", "content": prompt}],
                 max_tokens=800,
@@ -119,14 +105,15 @@ Keep suggestions appropriate for commercial use (royalty-free)."""
                 "suggestions": suggestions,
                 "tone": tone,
                 "duration": duration,
-                "free_music_sources": self.FREE_MUSIC_SOURCES,
                 "quick_recommendation": self._get_quick_recommendation(tone, industry),
+                "note": "Music is optional - audio mixer works with voiceover only",
             }
 
         except Exception as e:
             return {
                 "error": str(e),
                 "fallback_suggestion": self._get_quick_recommendation(tone, industry),
+                "note": "Music is optional - audio mixer works with voiceover only",
             }
 
     def _get_quick_recommendation(self, tone: str, industry: str) -> dict:
@@ -176,7 +163,6 @@ Keep suggestions appropriate for commercial use (royalty-free)."""
         if key in recommendations:
             return recommendations[key]
 
-        # Default
         return {
             "genre": "Upbeat Corporate",
             "search_terms": [
@@ -185,5 +171,8 @@ Keep suggestions appropriate for commercial use (royalty-free)."""
                 "positive energy",
             ],
             "bpm": "100-120",
-            "bpm": "100-120",
         }
+
+
+# Required for Path import
+from pathlib import Path

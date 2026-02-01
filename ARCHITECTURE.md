@@ -113,7 +113,7 @@ AdBoard AI is a multi-agent advertising platform that generates complete ad prod
 │  └─────────────────────────────────────────────────────────────────────┘  │
 │                                    │                                      │
 │                                    ▼                                      │
-│  Final Outputs: Script, Images, Voiceover, Music, Video, PDF, Budget     │
+│  Final Outputs: Script, Images, Voiceover, Video, PDF, Budget     │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -684,7 +684,7 @@ await agent.run(
 
 **Class:** `MusicAgent`
 
-**Purpose:** Selects or generates background music
+**Purpose:** Provides music recommendations for ads (optional - no downloading)
 
 **Inputs:**
 ```python
@@ -694,22 +694,29 @@ await agent.run(
     duration=30,
     tone="professional",
     city="Boston",
-    previous_results={},
+    previous_results={
+        "script_writer": {"scenes": [...]},
+    },
 )
 ```
 
 **Process:**
-1. Analyzes tone and duration
-2. Selects appropriate music (Incompetech, Lyria, or Groq generation)
-3. Downloads to `output/music/`
+- Uses Groq LLM to generate music recommendations based on ad content
+- Provides search terms for royalty-free music libraries (Pixabay, Mixkit, Epidemic Sound)
+- Falls back to quick recommendations based on tone/industry
 
 **Outputs:**
 ```python
 {
-    "music_path": "output/music/background_professional.mp3",
-    "source": "incompetech",
-    "bpm": 120,
-    "mood": "upbeat professional",
+    "suggestions": "1. PRIMARY RECOMMENDATION:\n- Genre: Acoustic / Light Jazz...",
+    "tone": "professional",
+    "duration": 30,
+    "quick_recommendation": {
+        "genre": "Acoustic / Light Jazz",
+        "search_terms": ["upbeat acoustic", "happy ukulele", "cafe jazz"],
+        "bpm": "100-120",
+    },
+    "note": "Music is optional - audio mixer works with voiceover only",
 }
 ```
 
@@ -721,7 +728,7 @@ await agent.run(
 
 **Class:** `AudioMixerAgent`
 
-**Purpose:** Combines voiceover and music into single audio track using FFmpeg
+**Purpose:** Creates final audio track from voiceover with optional background music
 
 **Inputs:**
 ```python
@@ -733,24 +740,26 @@ await agent.run(
     city="Boston",
     previous_results={
         "voiceover": {"audio_path": "output/voiceovers/voiceover.mp3"},
-        "music": {"music_path": "output/music/music.mp3"},
+        "music": {"music_path": "output/music/music.mp3"},  # Optional
     },
 )
 ```
 
 **Process:**
-1. Loads voiceover and music files
-2. Adjusts music volume (ducking during voiceover)
-3. Mixes into single track
-4. Saves to `output/audio/`
+1. Loads voiceover audio
+2. If music is provided and exists, mixes it with voiceover (ducking, fading)
+3. If no music, processes voiceover with fade in/out
+4. Saves to `output/mixed_audio/`
 
 **Outputs:**
 ```python
 {
-    "mixed_audio_path": "output/audio/mixed_pizza_30s.mp3",
+    "mixed_audio_path": "output/mixed_audio/final_audio_pizza_30s.mp3",
+    "voiceover_path": "output/voiceovers/voiceover_pizza_30s.mp3",
+    "music_path": "output/music/music.mp3",  # or null
     "duration": 30,
-    "voiceover_level": -3.0,
-    "music_level": -12.0,
+    "music_genre": "Upbeat",  # or "None"
+    "note": "Voiceover only - no background music",
 }
 ```
 
@@ -1078,7 +1087,7 @@ output/
 - `agents/script_writer.py` - Script generation
 - `agents/image_generator.py` - Image generation (Imagen)
 - `agents/voiceover_agent.py` - Voiceover (ElevenLabs)
-- `agents/music_agent.py` - Music selection
+- `agents/music_agent.py` - Music recommendations (optional)
 - `agents/audio_mixer.py` - Audio mixing (FFmpeg)
 - `agents/video_assembly_agent.py` - Video creation (FFmpeg)
 - `agents/cost_estimator.py` - Budget calculation

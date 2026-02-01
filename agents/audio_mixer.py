@@ -1,19 +1,19 @@
 """
 Audio Mixer Agent
 
-Downloads royalty-free music and combines it with voiceover to create final audio track.
+Creates final audio track from voiceover. Background music is optional -
+if no music is provided, voiceover is used as-is with fade effects.
 """
 
 import os
 import re
 from pathlib import Path
 
-import requests
 from pydub import AudioSegment
 
 
 class AudioMixerAgent:
-    """Downloads music and mixes it with voiceover."""
+    """Creates final audio track from voiceover with optional background music."""
 
     def __init__(self):
         self.output_dir = Path("output/mixed_audio")
@@ -29,7 +29,7 @@ class AudioMixerAgent:
         previous_results: dict,
     ) -> dict:
         """
-        Download music and mix with voiceover.
+        Create final audio track from voiceover.
 
         Args:
             product: Product name
@@ -44,7 +44,7 @@ class AudioMixerAgent:
         """
 
         try:
-            # Get voiceover and music data
+            # Get voiceover data
             voiceover_data = previous_results.get("voiceover", {})
             music_data = previous_results.get("music", {})
 
@@ -55,39 +55,34 @@ class AudioMixerAgent:
                     "skipped": True,
                 }
 
-            print(f"\n  🎵 Downloading background music...")
-            
-            # Get music URL and attribution
-            music_url, attribution = self._get_music_url(music_data)
-            
-            # Download music
-            music_path = self._download_music(music_url, product)
-            
-            if not music_path:
-                return {
-                    "error": "Failed to download music",
-                    "voiceover_path": voiceover_path,
-                }
-            
-            print(f"  🎛️  Mixing audio (voiceover + background music)...")
-            
-            # Mix voiceover and music
-            mixed_audio_path = self._mix_audio(
-                voiceover_path, music_path, product, duration
-            )
-            
+            # Check for music
+            music_path = music_data.get("music_path")
+            has_music = music_path and os.path.exists(music_path)
+
+            if has_music:
+                print(f"\n  🎵 Mixing voiceover with background music...")
+                mixed_audio_path = self._mix_with_music(
+                    voiceover_path, music_path, product, duration
+                )
+                music_note = "Voiceover mixed with background music"
+            else:
+                print(f"\n  🎵 Creating voiceover track (no background music)...")
+                mixed_audio_path = self._voiceover_only(
+                    voiceover_path, product, duration
+                )
+                music_note = "Voiceover only - no background music"
+
             # Get music recommendations for context
             music_rec = music_data.get("quick_recommendation", {})
-            
+
             return {
                 "mixed_audio_path": str(mixed_audio_path),
                 "voiceover_path": voiceover_path,
-                "music_path": music_path,
+                "music_path": music_path if has_music else None,
                 "duration": duration,
-                "music_genre": music_rec.get("genre", "Upbeat"),
-                "music_bpm": music_rec.get("bpm", "100-120"),
-                "music_attribution": attribution,
-                "note": "Full audio track ready with voiceover and royalty-free music (CC-BY Kevin MacLeod)",
+                "music_genre": music_rec.get("genre", "None") if has_music else "None",
+                "music_bpm": music_rec.get("bpm", "N/A") if has_music else "N/A",
+                "note": music_note,
             }
 
         except Exception as e:
@@ -98,119 +93,69 @@ class AudioMixerAgent:
                 ),
             }
 
-    def _get_music_url(self, music_data: dict) -> tuple[str, str]:
-        """
-        Get royalty-free music URL from Incompetech (Kevin MacLeod).
-        
-        Returns: (url, attribution_text)
-        """
+    def _voiceover_only(self, voiceover_path: str, product: str, target_duration: int) -> Path:
+        """Process voiceover with fade effects, no music."""
 
-        # Curated royalty-free music tracks from Incompetech
-        # All tracks are CC-BY 4.0 licensed by Kevin MacLeod
-        music_library = {
-            "upbeat": [
-                ("https://incompetech.com/music/royalty-free/mp3-royaltyfree/Carefree.mp3", 
-                 "Carefree by Kevin MacLeod"),
-                ("https://incompetech.com/music/royalty-free/mp3-royaltyfree/Wallpaper.mp3",
-                 "Wallpaper by Kevin MacLeod"),
-                ("https://incompetech.com/music/royalty-free/mp3-royaltyfree/Inspiring.mp3",
-                 "Inspiring by Kevin MacLeod"),
-            ],
-            "calm": [
-                ("https://incompetech.com/music/royalty-free/mp3-royaltyfree/Bliss.mp3",
-                 "Bliss by Kevin MacLeod"),
-                ("https://incompetech.com/music/royalty-free/mp3-royaltyfree/Calming%20Fires.mp3",
-                 "Calming Fires by Kevin MacLeod"),
-                ("https://incompetech.com/music/royalty-free/mp3-royaltyfree/Peaceful.mp3",
-                 "Peaceful by Kevin MacLeod"),
-            ],
-            "energetic": [
-                ("https://incompetech.com/music/royalty-free/mp3-royaltyfree/Upbeat%20Forever.mp3",
-                 "Upbeat Forever by Kevin MacLeod"),
-                ("https://incompetech.com/music/royalty-free/mp3-royaltyfree/Breaktime.mp3",
-                 "Breaktime by Kevin MacLeod"),
-                ("https://incompetech.com/music/royalty-free/mp3-royaltyfree/Happy%20Alley.mp3",
-                 "Happy Alley by Kevin MacLeod"),
-            ],
-        }
+        voiceover = AudioSegment.from_mp3(voiceover_path)
+        voiceover_duration = len(voiceover)
+        target_duration_ms = target_duration * 1000
 
-        # Get music style from recommendation  
-        rec = music_data.get("quick_recommendation", {})
-        genre = rec.get("genre", "").lower()
+        # Add fade in/out
+        voiceover = voiceover.fade_in(500).fade_out(1000)
 
-        # Select music based on genre keywords
-        if any(word in genre for word in ["upbeat", "energetic", "commercial", "corporate"]):
-            url, attribution = music_library["upbeat"][0]
-        elif any(word in genre for word in ["calm", "peaceful", "acoustic"]):
-            url, attribution = music_library["calm"][0]
+        # Trim or pad to match target duration
+        if len(voiceover) < target_duration_ms:
+            # Add silence padding at end
+            silence = AudioSegment.silent(duration=target_duration_ms - len(voiceover))
+            voiceover = voiceover + silence
         else:
-            url, attribution = music_library["upbeat"][0]  # Default
-        
-        return url, attribution
+            # Trim to target duration
+            voiceover = voiceover[:target_duration_ms]
 
-    def _download_music(self, url: str, product: str) -> str:
-        """Download music file from URL."""
+        # Export
+        safe_product = re.sub(r"[^\w\s-]", "", product).strip().replace(" ", "_")
+        output_filename = f"final_audio_{safe_product}_{target_duration}s.mp3"
+        output_path = self.output_dir / output_filename
 
-        try:
-            # Sanitize product name for filename
-            safe_product = re.sub(r"[^\w\s-]", "", product).strip().replace(" ", "_")
-            music_filename = f"music_{safe_product}.mp3"
-            music_path = self.output_dir / music_filename
+        voiceover.export(str(output_path), format="mp3", bitrate="192k")
 
-            # Download
-            print(f"  📥 Downloading from Incompetech...")
-            response = requests.get(url, timeout=30, allow_redirects=True)
-            response.raise_for_status()
+        print(f"  ✅ Voiceover track created: {output_path}")
+        print(f"     - Duration: {len(voiceover) / 1000:.1f}s")
 
-            # Save
-            with open(music_path, "wb") as f:
-                f.write(response.content)
+        return output_path
 
-            file_size = len(response.content) / (1024 * 1024)  # MB
-            print(f"  ✅ Downloaded music: {music_path} ({file_size:.1f}MB)")
-            return str(music_path)
-
-        except Exception as e:
-            print(f"  ⚠️  Failed to download music: {e}")
-            return None
-
-    def _mix_audio(
+    def _mix_with_music(
         self, voiceover_path: str, music_path: str, product: str, target_duration: int
     ) -> Path:
-        """Mix voiceover and background music."""
+        """Mix voiceover with background music."""
 
-        # Load audio files
         voiceover = AudioSegment.from_mp3(voiceover_path)
         music = AudioSegment.from_mp3(music_path)
 
-        # Calculate durations
-        voiceover_duration = len(voiceover)  # milliseconds
+        voiceover_duration = len(voiceover)
         target_duration_ms = target_duration * 1000
 
-        # Trim or loop music to match target duration
+        # Loop or trim music to match target duration
         if len(music) < target_duration_ms:
-            # Loop music if too short
             loops_needed = (target_duration_ms // len(music)) + 1
             music = music * loops_needed
 
-        # Trim music to target duration
         music = music[:target_duration_ms]
 
-        # Reduce music volume to -20dB for background
-        music = music - 20  # dB reduction
+        # Reduce music volume for background (-20dB)
+        music = music - 20
 
         # Add fade in/out to music
-        music = music.fade_in(2000).fade_out(2000)  # 2 second fades
+        music = music.fade_in(2000).fade_out(2000)
 
-        # Overlay voiceover on top of music
-        # Position voiceover slightly after start (500ms delay)
+        # Overlay voiceover on music (500ms delay)
         mixed = music.overlay(voiceover, position=500)
 
-        # Ensure mixed audio matches target duration
+        # Ensure final length matches target
         if len(mixed) > target_duration_ms:
             mixed = mixed[:target_duration_ms]
 
-        # Export mixed audio
+        # Export
         safe_product = re.sub(r"[^\w\s-]", "", product).strip().replace(" ", "_")
         output_filename = f"final_audio_{safe_product}_{target_duration}s.mp3"
         output_path = self.output_dir / output_filename
@@ -220,6 +165,5 @@ class AudioMixerAgent:
         print(f"  ✅ Mixed audio created: {output_path}")
         print(f"     - Voiceover: {voiceover_duration / 1000:.1f}s")
         print(f"     - Music (background): {target_duration}s")
-        print(f"     - Final: {len(mixed) / 1000:.1f}s")
 
         return output_path

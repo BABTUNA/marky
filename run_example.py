@@ -178,10 +178,15 @@ async def main():
             vo_path = voiceover_result.get('audio_path', 'N/A')
             print(f"  Voiceover: {vo_path.split('/')[-1] if '/' in vo_path else vo_path}")
 
-        music_result = result["results"].get("music", {})
-        if music_result and not music_result.get("error"):
-            music_path = music_result.get('music_path', 'N/A')
-            print(f"  Music: {music_path.split('/')[-1] if '/' in music_path else music_path}")
+        # Audio mixer (shows if music was included)
+        audio_mixer_result = result["results"].get("audio_mixer", {})
+        if audio_mixer_result and not audio_mixer_result.get("error"):
+            note = audio_mixer_result.get("note", "")
+            if "voiceover only" in note.lower():
+                print(f"  Music: None (voiceover only)")
+            else:
+                mixed_path = audio_mixer_result.get('mixed_audio_path', 'N/A')
+                print(f"  Audio: {mixed_path.split('/')[-1]}")
 
         # Video
         video_result = result["results"].get("video_assembly", {})
