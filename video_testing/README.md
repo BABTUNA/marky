@@ -5,13 +5,14 @@ Sample uAgent that **only** tests uploading a video preview to ASI:One / Agentve
 ## What it does
 
 1. Runs a uAgent with Chat Protocol and mailbox (Agentverse discovery).
-2. On any chat message: acknowledges, then reads the sample video from this folder, uploads it to **Agentverse External Storage**, and replies with a `ChatMessage` containing `ResourceContent` (video/mp4) so the chat UI can show a preview.
+2. On any chat message: acknowledges, then reads the sample video, uploads it to **Agentverse External Storage**, and replies using the **same pattern as the image agent**: sends a **thumbnail image** (first frame) as `ResourceContent` (image/png) so it **displays inline** in ASI:One, plus a clickable link to watch the full video. Requires **opencv-python** for thumbnail extraction; without it, only the video link is sent.
 
 ## Requirements
 
 - Python 3.10+
 - `uagents`, `uagents-core` (from project root: `pip install -r requirements.txt` or `pip install uagents uagents-core`)
 - **AGENTVERSE_API_KEY** in `.env` (project root or here) so the agent can upload the video to storage
+- **opencv-python** (optional but recommended): `pip install opencv-python` — used to extract a video thumbnail so the preview image displays inline in ASI:One like the image agent. Without it, only the video link is sent.
 
 ## Setup
 
@@ -47,7 +48,7 @@ python preview_agent.py
 - Default port: **8010** (override with `VIDEO_PREVIEW_AGENT_PORT`).
 - Use the Agent Inspector link in the logs to connect via **Mailbox** to Agentverse.
 - In Agentverse, open the agent and click **Chat with Agent** (or find it via ASI:One).
-- Send any message; the agent replies with the video resource and a **clickable "Watch video" link** (HTTPS). If ASI:One doesn't show an inline player, use that link to open the video. The link text for the resource is set to "Watch video" so it appears as a clear clickable item on the platform.
+- Send any message; the agent replies with a **thumbnail image** (displays inline like the image agent) and a **clickable link to watch the full video**. Install **opencv-python** for thumbnail extraction; without it, only the video link is sent.
 
 ## Optional env vars
 

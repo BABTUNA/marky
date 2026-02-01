@@ -63,6 +63,24 @@ else:
     external_storage = None
 
 
+def extract_video_thumbnail(video_path: Path) -> bytes | None:
+    """Extract first frame as PNG bytes. Returns None if opencv not available or extraction fails."""
+    try:
+        import cv2
+        cap = cv2.VideoCapture(str(video_path))
+        if not cap.isOpened():
+            return None
+        ret, frame = cap.read()
+        cap.release()
+        if not ret or frame is None:
+            return None
+        # cv2 uses BGR; encode as PNG
+        _, png = cv2.imencode(".png", frame)
+        return png.tobytes()
+    except Exception:
+        return None
+
+
 # -----------------------------------------------------------------------------
 # Agent
 # -----------------------------------------------------------------------------
@@ -92,26 +110,46 @@ def create_text_chat(text: str, end_session: bool = False) -> ChatMessage:
     )
 
 
+def create_video_message_with_thumbnail(
+    thumb_uri: str, video_watch_url: str
+) -> ChatMessage:
+    """Same pattern as image agent: send image (thumbnail) first so it displays inline, then link to full video."""
+    return ChatMessage(
+        timestamp=datetime.now(timezone.utc),
+        msg_id=uuid4(),
+        content=[
+            ResourceContent(
+                type="resource",
+                resource_id=uuid4(),
+                resource=Resource(
+                    uri=thumb_uri,
+                    metadata={"mime_type": "image/png", "role": "Video preview"},
+                ),
+            ),
+            TextContent(
+                type="text",
+                text=f"Sample video (from video_testing folder). Click to watch full video: {video_watch_url}",
+            ),
+            EndSessionContent(type="end-session"),
+        ],
+    )
+
+
 def create_video_resource_chat(asset_id: str, asset_uri: str) -> ChatMessage:
-    # Direct HTTPS link so ASI:One can show a clickable link (platform may not resolve agent-storage://)
+    """Fallback when no thumbnail: video resource + link (video may not display inline on ASI:One)."""
     watch_url = f"{AGENTVERSE_URL.rstrip('/')}/v1/storage/assets/{asset_id}"
     return ChatMessage(
         timestamp=datetime.now(timezone.utc),
         msg_id=uuid4(),
         content=[
-            # Resource first so clients that support it can show inline preview
             ResourceContent(
                 type="resource",
                 resource_id=uuid4(),
                 resource=Resource(
                     uri=asset_uri,
-                    metadata={
-                        "mime_type": "video/mp4",
-                        "role": "Watch video",  # Friendlier link text on ASI:One
-                    },
+                    metadata={"mime_type": "video/mp4", "role": "Watch video"},
                 ),
             ),
-            # Explicit HTTPS link so there's always a clickable "Watch video" on the platform
             TextContent(
                 type="text",
                 text=f"Sample video (from video_testing folder). Click to watch: {watch_url}",
@@ -170,16 +208,31 @@ async def handle_message(ctx: Context, sender: str, msg: ChatMessage):
         return
 
     try:
-        asset_id = external_storage.create_asset(
-            name=f"preview-{uuid4().hex[:8]}",
+        # Upload video so we have a watch URL
+        video_asset_id = external_storage.create_asset(
+            name=f"video-{uuid4().hex[:8]}",
             content=video_bytes,
             mime_type="video/mp4",
         )
-        external_storage.set_permissions(asset_id=asset_id, agent_address=sender)
-        asset_uri = f"agent-storage://{external_storage.storage_url}/{asset_id}"
+        external_storage.set_permissions(asset_id=video_asset_id, agent_address=sender)
+        video_watch_url = f"{AGENTVERSE_URL}/v1/storage/assets/{video_asset_id}"
 
-        await ctx.send(sender, create_video_resource_chat(asset_id, asset_uri))
-        ctx.logger.info(f"Sent video resource to {sender} (asset_id={asset_id})")
+        # Extract thumbnail (first frame) and send as image so it displays inline like the image agent
+        thumb_bytes = extract_video_thumbnail(VIDEO_PATH)
+        if thumb_bytes:
+            thumb_asset_id = external_storage.create_asset(
+                name=f"thumb-{uuid4().hex[:8]}",
+                content=thumb_bytes,
+                mime_type="image/png",
+            )
+            external_storage.set_permissions(asset_id=thumb_asset_id, agent_address=sender)
+            thumb_uri = f"agent-storage://{external_storage.storage_url}/{thumb_asset_id}"
+            await ctx.send(sender, create_video_message_with_thumbnail(thumb_uri, video_watch_url))
+            ctx.logger.info(f"Sent video thumbnail + link to {sender}")
+        else:
+            video_uri = f"agent-storage://{external_storage.storage_url}/{video_asset_id}"
+            await ctx.send(sender, create_video_resource_chat(video_asset_id, video_uri))
+            ctx.logger.info(f"Sent video resource to {sender} (asset_id={video_asset_id})")
     except Exception as e:
         ctx.logger.exception("Upload failed")
         await ctx.send(
