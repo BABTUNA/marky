@@ -1,0 +1,40 @@
+flowchart TB
+    subgraph Entry
+        A[User / ASI:One Chat]
+        B[Orchestrator]
+        C[Intent Extractor]
+    end
+
+    subgraph Pipeline["AdBoard Pipeline - storyboard_video (Sequential)"]
+        R[1. Research - Marky workflow]
+        L[2. Location Scout]
+        T[3. Trend Analyzer]
+        S[4. Script Writer]
+        I[5. Image Generator]
+        V[6. Video Assembly]
+        C2[7. Cost Estimator]
+        SM[8. Social Media]
+        P[9. PDF Builder]
+    end
+
+    subgraph Output
+        U[Upload to Drive / tmpfiles]
+        F[Format Results]
+        RES[Response: Thumbnail + Links]
+    end
+
+    A --> B
+    B --> C
+    C --> R
+    R --> L
+    L --> T
+    T --> S
+    S --> I
+    I --> V
+    V --> C2
+    C2 --> SM
+    SM --> P
+    P --> U
+    U --> F
+    F --> RES
+    RES --> A

@@ -41,6 +41,8 @@ def extract_intent(user_input: str) -> dict:
 
 Message: "{user_input}"
 
+We create two things: (1) a storyboard package for development (script, costs, locations, hiring guide) and (2) a ready-to-post viral video. The default is to create both.
+
 Return a JSON object with these exact fields:
 {{
     "is_ad_request": true/false,
@@ -55,9 +57,9 @@ Return a JSON object with these exact fields:
 }}
 
 Rules:
-1. is_ad_request = true if they want any kind of ad, commercial, storyboard, marketing video, or script
+1. is_ad_request = true if they want any kind of ad, commercial, storyboard, viral video, marketing, or script
 2. product is REQUIRED - if not provided, add "product" to missing
-3. output_type defaults to "storyboard_video" if not specified (this creates a video with sketch frames)
+3. output_type defaults to "storyboard_video" (storyboard + PDF package + optionally viral video)
 4. "full" or "full package" or "everything" means output_type = "full"
 5. "pdf" or "production package" or "budget" means output_type = "pdf"
 6. "video" or "storyboard video" or "animated" means output_type = "storyboard_video"

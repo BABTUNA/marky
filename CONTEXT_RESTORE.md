@@ -1,478 +1,304 @@
 # AdBoard AI - Master Context Restore
 
-> **Snapshot Date:** February 1, 2026 (Evening Update)
-> **System Status:** STABLE - Viral Video Pipeline TESTED
-> **Latest Change:** Google TTS Integration + Viral Pipeline Testing
+> **Snapshot Date:** February 2026 (Current)
+> **System Status:** STABLE - Agentverse Deployed, Google Drive Upload Working
+> **Latest:** Dual-package messaging, natural language UX, ASI:One preview, competitor map, rate-limited image gen
 
 ---
 
-## 0. Quick Reference - Critical Files
+## 0. Quick Reference
 
+### Critical Files
 | Category | File | Purpose |
 |----------|------|---------|
-| **Entry Point** | `agents/orchestrator.py` | ASI:One/Agentverse integration, Chat Protocol |
-| **Pipeline Runner** | `core/pipeline.py` | Defines agent sequences for each output type |
-| **LLM Client** | `core/gemini_client.py` | Google Gemini API wrapper |
-| **Intent Parser** | `core/intent_extractor.py` | Parses user messages to structured intent |
-| **Models** | `agents/models.py` | Shared message models (uAgents protocol) |
+| **Entry Point** | `agents/orchestrator.py` | ASI:One/Agentverse, Chat Protocol, pipeline runner |
+| **Pipeline Runner** | `core/pipeline.py` | Agent sequences, progress callbacks |
+| **LLM Client** | `core/gemini_client.py` | Google Gemini API (Vertex AI) |
+| **Intent Parser** | `core/intent_extractor.py` | Parses user messages → structured intent |
+| **Drive Upload** | `utils/gdrive_upload.py` | Uploads videos/PDFs to Google Drive |
 | **Marky Workflow** | `orchestrator/workflow.py` | Research sub-agent orchestration |
+| **Map Generator** | `utils/map_generator.py` | Competitor map with legend/border |
+| **Flowchart** | `docs/AGENT_FLOWCHART.md` | Agent orchestration diagram (Mermaid) |
+
+### Run Commands
+| Command | Purpose |
+|---------|---------|
+| `python agents/orchestrator.py` | Start agent for Agentverse (keep running) |
+| `python run_example.py "Create ad for my coffee shop"` | Full pipeline from CLI |
+| `python run_e2e_test.py` | Test Drive upload only (uses existing files in output/) |
 
 ---
 
-## 1. Project Overview & Mission
+## 1. Project Overview
 
-**AdBoard AI** is a multi-agent system that generates complete advertising campaigns for local businesses.
+**AdBoard AI** is a multi-agent system for the Fetch.AI track at Hack@Brown 2026. It generates full ad campaigns for local businesses.
 
-- **Input:** Business Name, Industry, City
-- **Output:**
-    1. **PDF Campaign Package:** Strategy, scripts, budget, distribution plan
-    2. **Storyboard Video:** Black & white hand-drawn sketches (concept validation) - **SILENT, NO AUDIO**
-    3. **Viral Video (Future):** Photorealistic VEO 3 video + Lyria music + Google TTS voiceover
+### Value Proposition
+We create **two packages**:
 
----
+1. **Storyboard package** — Concept video + full production brief (script, costs, locations, hiring guide) so clients can develop and film the real ad.
+2. **Viral video** — Ready-to-post short clip for TikTok and Reels while they develop the full production.
 
-## 2. IMPORTANT: Current vs Final System
+### Input / Output
+- **Input:** Natural language (e.g. "Create an ad campaign for my taco truck in Providence")
+- **Output:** Storyboard video + PDF (storyboard_video pipeline) + optionally viral video (viral_video pipeline)
 
-### What We Just Built (Testing Only)
-The viral video pipeline was tested to verify:
-- Video + Audio assembly works (moviepy)
-- Google TTS voiceover generation works
-- Music overlay works
-
-**This is NOT the final product flow.** The testing used:
-- Placeholder video (existing storyboard video)
-- Mock music (existing audio file)
-- Google TTS voiceover
-
-### Final Production System Will Be:
-1. **Storyboard Pipeline (Current Default):** Hand-drawn sketches → Ken Burns video → **NO AUDIO**
-2. **Viral Video Pipeline (Future):** VEO 3 photorealistic video → Lyria music → Google TTS → Combined viral video
-
-The storyboard videos are meant for concept validation and should remain silent.
+### Problem Solved
+Small businesses can't afford $5K–50K for agency storyboarding and campaign planning. AdBoard delivers both a development package and a ready-to-post viral clip.
 
 ---
 
-## 3. Recent Changes (This Session)
+## 2. How Everything Works
 
-### Google TTS Integration
-- **Status:** WORKING
-- **File:** `agents/viral_video_assembler.py`
-- **Voices:** Neural2 voices (most natural sounding)
-  - `professional` → en-US-Neural2-J (male)
-  - `friendly` → en-US-Neural2-F (female)
-  - `energetic` → en-US-Neural2-D (male)
-  - `calm` → en-US-Neural2-C (female)
-  - `funny` → en-US-Neural2-A (male)
-
-### Viral Video Pipeline Testing
-- **Test Script:** `test_viral_pipeline.py`
-- **Components Tested:**
-  - VEO 3 Agent (placeholder mode) ✅
-  - Lyria Agent (mock mode) ✅
-  - Video Assembler (full assembly) ✅
-  - Google TTS (working) ✅
-
-### Environment Variables for Testing
-```bash
-VEO_USE_PLACEHOLDER=true    # Use existing video instead of VEO 3
-LYRIA_USE_MOCK=true         # Use mock/silent audio instead of Lyria
-ASSEMBLER_USE_ELEVENLABS=false  # Use Google TTS (default now)
+### High-Level Flow
+```
+User (ASI:One / Agentverse chat)
+    → orchestrator.py (Chat Protocol)
+    → intent_extractor.py (Gemini: product, industry, output_type, duration, tone, city)
+    → pipeline.py (runs agent sequence with progress callbacks)
+    → format_results() uploads video + PDF to Drive (or tmpfiles fallback)
+    → extract_video_thumbnail() for ASI:One preview
+    → create_preview_response() or create_response()
+    → Response sent back: thumbnail + "View Full Video Here" + "View Full Analysis PDF"
 ```
 
----
+### Messaging (Natural Language, No Emojis)
+- **Kick-off:** "Got it. I'm putting together your ad campaign for {product}—a storyboard package with everything you need to hire and produce the real ad, plus a viral video you can post. This takes a few minutes. I'll check in as I go."
+- **Progress:** Sent after each pipeline step (e.g. "Research done. Writing your script.", "Storyboard frames are done. Assembling the concept video.")
+- **Final:** Minimal — thumbnail image + "View Full Video Here: {url}" + "View Full Analysis PDF: {url}" (+ "View Viral Video Here" when present)
 
-## 4. Known Issue: Google TTS Voice Sounds Robotic
-
-The current Google TTS Neural2 voices sound robotic. Options to improve:
-
-### Option 1: Use Studio Voices (Higher Quality)
-Google offers "Studio" voices that are more natural but cost more:
-```python
-voice = texttospeech.VoiceSelectionParams(
-    language_code="en-US",
-    name="en-US-Studio-O",  # Studio voice
-)
-```
-
-### Option 2: Use Journey Voices (Most Natural)
-Google's newest "Journey" voices are the most natural:
-```python
-voice = texttospeech.VoiceSelectionParams(
-    language_code="en-US",
-    name="en-US-Journey-D",  # Journey voice (if available)
-)
-```
-
-### Option 3: Adjust Speech Parameters
-Add SSML for more natural pacing:
-```python
-synthesis_input = texttospeech.SynthesisInput(
-    ssml='<speak><prosody rate="95%" pitch="-2st">Your text here</prosody></speak>'
-)
-```
-
-### Option 4: Switch to WaveNet Voices
-WaveNet voices are between Neural2 and Studio in quality:
-```python
-name="en-US-Wavenet-D"  # Instead of Neural2
-```
-
----
-
-## 5. File Manifest (Complete)
-
-### Core Files
-| File | Purpose | Status |
-|------|---------|--------|
-| `agents/orchestrator.py` | Main entry point, ASI:One/Agentverse Chat Protocol | ✅ Active |
-| `core/pipeline.py` | Pipeline definitions & runner (11 pipelines) | ✅ Active |
-| `core/gemini_client.py` | LLM Backend (Vertex AI Gemini) | ✅ Active |
-| `core/intent_extractor.py` | Parses user messages → structured intent | ✅ Active |
-| `agents/models.py` | Shared uAgents message models | ✅ Active |
-
-### Research Agents
-| File | Purpose | Status |
-|------|---------|--------|
-| `agents/enhanced_research.py` | Main research agent (calls Marky workflow) | ✅ Active |
-| `orchestrator/workflow.py` | Marky multi-agent research orchestration | ✅ Active |
-| `local_intel/agent.py` | SerpAPI competitor discovery | ✅ Active |
-| `review_intel/agent.py` | Google Reviews fetcher | ✅ Active |
-| `yelp_intel/agent.py` | Yelp reviews & insights | ✅ Active |
-| `ad_intel_no/google_trends_agent.py` | Google Trends keyword analysis | ✅ Active |
-| `related_questions_intel/agent.py` | "People also ask" scraper | ✅ Active |
-
-### Creative Agents
-| File | Purpose | Status |
-|------|---------|--------|
-| `agents/script_writer.py` | Gemini-powered script generation | ✅ Active |
-| `agents/trend_analyzer.py` | Viral trend analysis | ✅ Active |
-| `agents/image_generator.py` | Imagen 3 storyboard frames | ✅ Active |
-| `agents/video_assembly_agent.py` | Ken Burns animation (silent) | ✅ Active |
-
-### Audio/Video Agents
-| File | Purpose | Status |
-|------|---------|--------|
-| `agents/voiceover_agent.py` | ElevenLabs voiceover | ✅ Active |
-| `agents/music_agent.py` | Background music selection | ✅ Active |
-| `agents/audio_mixer.py` | Mixes voiceover + music (pydub) | ✅ Active |
-| `agents/veo3_agent.py` | VEO 3 video generation | ✅ Placeholder mode |
-| `agents/lyria_agent.py` | Lyria AI music generation | ✅ Mock mode |
-| `agents/viral_video_assembler.py` | Video + Music + Google TTS | ✅ **WORKING** |
-
-### Production Agents
-| File | Purpose | Status |
-|------|---------|--------|
-| `agents/cost_estimator.py` | Production budget estimation | ✅ Active |
-| `agents/location_scout.py` | Google Places filming locations | ✅ Active |
-| `agents/social_media_agent.py` | Hashtags & captions per platform | ✅ Active |
-| `agents/pdf_builder.py` | Complete PDF campaign package | ✅ Active |
-
-### Utilities
-| File | Purpose | Status |
-|------|---------|--------|
-| `utils/map_generator.py` | Google Static Maps competitor visualization | ✅ Integrated |
-| `utils/map_generator_simple.py` | Simplified map generator | ✅ Available |
-| `test_viral_pipeline.py` | CLI test script for viral pipeline | ✅ Active |
-
-### Legacy/Unused
-| File | Purpose | Status |
-|------|---------|--------|
-| `agents/veo_agent.py` | Original VEO agent (pre-VEO 3) | ⚠️ Deprecated |
-| `agents/research_agent.py` | Old research agent | ⚠️ Replaced by enhanced_research |
-| `core/groq_client.py` | Groq LLM client | ⚠️ Backup only |
-| `core/dummy_research.py` | Mock research data | ⚠️ Testing only |
-
----
-
-## 6. How to Run
-
-### Standard Storyboard (Production Default)
-```bash
-python agents/orchestrator.py
-```
-Result: Hand-drawn storyboard video (SILENT) + PDF Package
-
-### Test Viral Video Pipeline
-```bash
-python test_viral_pipeline.py
-python test_viral_pipeline.py --product "Pizza Shop" --tone "funny"
-python test_viral_pipeline.py --full  # Include research agents
-```
-Result: Assembled video with placeholder video + mock music + Google TTS voiceover
-
-### Enable Real VEO 3 + Lyria (Costs Money!)
-```bash
-export VEO_USE_PLACEHOLDER=false  # ~$2 per video
-export LYRIA_USE_MOCK=false       # Uses Lyria API
-python test_viral_pipeline.py
-```
-
----
-
-## 7. API Requirements & Environment Variables
-
-**Enabled APIs (Google Cloud Console):**
-- Vertex AI API ✅
-- Cloud Text-to-Speech API ✅
-- Imagen API ✅
-- Google Static Maps API ✅ (competitor map)
-- VEO 3 API (when ready)
-- Lyria API (when ready)
-
-**Required Environment Variables (.env):**
-```bash
-# Google Cloud (REQUIRED)
-GCP_PROJECT_ID=your-project-id
-GCP_LOCATION=us-central1
-GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json
-
-# Fetch.AI Agentverse (REQUIRED for ASI:One)
-AGENT_SEED_PHRASE=your-unique-seed-phrase
-AGENTVERSE_API_KEY=your-agentverse-key
-
-# Research APIs (REQUIRED for full research)
-SERPAPI_KEY=your-serpapi-key
-YOUTUBE_API_KEY=your-youtube-key
-GOOGLE_PLACES_API_KEY=your-places-key
-
-# Optional
-ELEVENLABS_API_KEY=your-elevenlabs-key  # Fallback TTS
-REPLICATE_API_TOKEN=your-replicate-key   # Backup image gen
-GROQ_API_KEY=your-groq-key               # Backup LLM
-```
-
-**Testing Mode Variables:**
-```bash
-VEO_USE_PLACEHOLDER=true     # Skip VEO 3 API (~$2/video)
-LYRIA_USE_MOCK=true          # Skip Lyria API  
-ASSEMBLER_USE_ELEVENLABS=false  # Use Google TTS (default)
-TEST_MODE=true               # Quick echo response (no pipeline)
-MOCK_MODE=true               # Return mock data instantly
-```
-
----
-
-## 8. Orchestrator Details
-
-### Entry Point Flow
-```
-User Message (ASI:One/Agentverse)
-       ↓
-orchestrator.py (Chat Protocol)
-       ↓
-intent_extractor.py (Gemini parses intent)
-       ↓
-pipeline.py (Runs agent sequence)
-       ↓
-Results formatted & returned
-       ↓
-Files uploaded to Google Drive (or tmpfiles.org fallback)
-```
+### File Upload
+- **Primary:** Google Drive when `GDRIVE_DEFAULT_FOLDER_ID` is set + OAuth complete
+- **Fallback:** tmpfiles.org (1hr expiry) if Drive not configured or fails
+- **Logic:** `upload_file()` in orchestrator tries Drive first, then `upload_file_to_tmpfiles()`
+- **Setup:** See `docs/MCP_AGENT.md` — credentials.json, oauth_tokens.json, folder ID in .env
 
 ### Orchestrator Modes
-| Mode | Env Variable | Behavior |
-|------|--------------|----------|
-| **Production** | (default) | Full pipeline, uploads to Google Drive (or tmpfiles.org if not configured) |
-| **Test Mode** | `TEST_MODE=true` | Quick echo response, no pipeline |
-| **Mock Mode** | `MOCK_MODE=true` | Returns realistic mock data instantly |
+| Mode | Env | Behavior |
+|------|-----|----------|
+| Production | (default) | Full pipeline, Drive upload, progress messages |
+| TEST_MODE | `true` | Echo response, no pipeline |
+| MOCK_MODE | `true` | Instant mock data, no pipeline |
 
-### Output Types (intent_extractor.py)
-| Keyword | Output Type | Description |
-|---------|-------------|-------------|
-| "storyboard video" | `storyboard_video` | Silent video with Ken Burns animation |
-| "video" | `storyboard_video` | Same as above (normalized) |
-| "full package" | `full` | Everything including PDF |
-| "pdf", "budget" | `pdf` | PDF package only |
-| "script only" | `script` | Just the script |
-| "storyboard" | `storyboard` | Images only, no video |
-
-### File Upload System
-The orchestrator uploads final files to **Google Drive** (when `GDRIVE_DEFAULT_FOLDER_ID` is set) or **tmpfiles.org** (fallback, 1hr expiry):
-- Videos (MP4) and PDFs
-- Uses `utils/gdrive_upload.py` for Drive (permanent links)
-- Falls back to tmpfiles.org via curl if Drive not configured
-- See `docs/MCP_AGENT.md` for Drive setup
+### Default Output Type
+User says "video" or "storyboard video" → `storyboard_video` pipeline.
 
 ---
 
-## 9. Stretch Goals (From Discord)
+## 3. Pipelines (core/pipeline.py)
 
-### Priority Tasks
-1. **Integrate MCP Google Drive Upload** - Upload final videos/PDFs to Google Drive ✅ DONE
-2. **Ensure Research → Script Context** - Research agent must know it's generating for storyboard + viral video + PDF ✅ DONE
-3. **Test with Actual VEO 3** - Full pipeline with real video generation, music, TTS overlay, then Drive upload
+| Pipeline | Use Case |
+|----------|----------|
+| **storyboard_video** | **DEFAULT** — research → script → images → video → cost → social → PDF |
+| script | Script only |
+| storyboard | Script + images, no video |
+| pdf | PDF package (no video) |
+| full | Everything (voiceover, music, PDF) |
+| viral_video | VEO 3 + Lyria + TTS (placeholder/mock) |
+| viral_video_test | Viral pipeline without research |
+| quick_test | Dummy research → script → images → video → PDF (no Marky, faster) |
+| audio_package | Voiceover + music, no video |
+| preproduction | Research + script + cost + social |
+| full_no_visual | Full minus images/video |
 
-### Stretch Goal
-4. **ASI:One Preview Integration** - Figure out how to preview results in ASI:One interface
+**quick_test** injects dummy research/trends/location — skips slow Marky workflow. Use for fast iteration.
 
-## 10. Completed Small Tasks
-
-- ✅ Fixed voiceover label (was showing "elevenlabs" instead of "google_tts")
-- ✅ Fixed mock music bug (was using old voiceover as music, causing voice overlap)
-- ✅ Updated script writer to know output is used for storyboard + viral video + PDF
-- ✅ Improved Google TTS with Studio/Casual voices + SSML for natural pacing
-- ✅ Integrated competitor map generator into research pipeline
-- ✅ Added competitor map image to PDF output
+### Progress Messages (PROGRESS_MESSAGES)
+Sent after each step: research, location_scout, trend_analyzer, script_writer, image_generator, video_assembly, cost_estimator, social_media, pdf_builder. Viral pipeline: veo3_generator, lyria_music, viral_video_assembler.
 
 ---
 
-## 11. Full Agent Orchestration Chain
+## 4. Agent Roster
 
-### Pipeline Definitions (from `core/pipeline.py`) - 11 Total
+| Agent | File | Purpose |
+|-------|------|---------|
+| Research | `enhanced_research.py` | Marky workflow: competitors, reviews, trends, competitor map |
+| Location Scout | `location_scout.py` | Google Places filming locations |
+| Trend Analyzer | `trend_analyzer.py` | Viral patterns, hooks (Gemini) |
+| Script Writer | `script_writer.py` | Ad script for storyboard + viral (Gemini) |
+| Image Generator | `image_generator.py` | Imagen 3 storyboard frames (30s delay between calls) |
+| Video Assembly | `video_assembly_agent.py` | Ken Burns from frames (FFmpeg) |
+| Voiceover | `voiceover_agent.py` | ElevenLabs |
+| Music | `music_agent.py` | Background music (Gemini) |
+| Audio Mixer | `audio_mixer.py` | Mix voiceover + music |
+| Cost Estimator | `cost_estimator.py` | Budget breakdown (Gemini) |
+| Social Media | `social_media_agent.py` | Hashtags, captions (Gemini) |
+| PDF Builder | `pdf_builder.py` | Campaign PDF with map, script, budget, hiring guide |
+| VEO 3 | `veo3_agent.py` | Photorealistic video (placeholder) |
+| Lyria | `lyria_agent.py` | AI music (mock) |
+| Viral Assembler | `viral_video_assembler.py` | Video + music + Google TTS |
 
-| Pipeline Name | Agents in Order | Use Case |
-|--------------|-----------------|----------|
-| `script` | research → location_scout → trend_analyzer → script_writer | Script only |
-| `storyboard` | research → location_scout → trend_analyzer → script_writer → image_generator | Storyboard frames |
-| `video` | research → location_scout → trend_analyzer → script_writer → image_generator → voiceover → music | Full video (legacy) |
-| `pdf` | research → trend_analyzer → script_writer → image_generator → cost_estimator → location_scout → pdf_builder | PDF package |
-| `full` | research → trend_analyzer → script_writer → image_generator → voiceover → music → cost_estimator → location_scout → pdf_builder | Everything |
-| `audio_package` | research → location_scout → trend_analyzer → script_writer → voiceover → music → audio_mixer → social_media | Audio only (no video) |
-| `preproduction` | research → location_scout → trend_analyzer → script_writer → cost_estimator → social_media | Planning only |
-| `full_no_visual` | research → location_scout → trend_analyzer → script_writer → voiceover → music → audio_mixer → cost_estimator → social_media | Full minus images |
-| `storyboard_video` | research → location_scout → trend_analyzer → script_writer → image_generator → video_assembly → cost_estimator → social_media | **DEFAULT** Ken Burns video (silent) |
-| `viral_video` | research → trend_analyzer → script_writer → veo3_generator → lyria_music → viral_video_assembler | TikTok/Reels with audio |
-| `viral_video_test` | script_writer → veo3_generator → lyria_music → viral_video_assembler | Quick test (no research) |
+**Marky sub-agents** (enhanced_research): LocalIntel (SerpAPI), ReviewIntel (Google), YelpIntel, GoogleTrendsAgent, RelatedQuestions
 
-### Detailed Agent Descriptions
+---
 
-| Agent | File | Purpose | Input | Output |
-|-------|------|---------|-------|--------|
-| **Research** | `agents/enhanced_research.py` | Runs Marky workflow for competitor/review/trend research | product, industry, city | competitor_details, customer_voice, keyword_trends, competitor_map_path |
-| **Location Scout** | `agents/location_scout.py` | Finds filming locations via Google Places | city | locations list with addresses |
-| **Trend Analyzer** | `agents/trend_analyzer.py` | Analyzes viral trends and hooks | research data | viral_patterns, recommended_hooks |
-| **Script Writer** | `agents/script_writer.py` | Writes ad script with scenes | research, trends | scenes[], voiceover_text |
-| **Image Generator** | `agents/image_generator.py` | Generates storyboard frames via Imagen | script scenes | frame images (hand-drawn style) |
-| **Voiceover** | `agents/voiceover_agent.py` | Generates voiceover via ElevenLabs | script | audio file |
-| **Music** | `agents/music_agent.py` | Selects/generates background music | tone | audio file |
-| **Video Assembly** | `agents/video_assembly_agent.py` | Ken Burns animation from frames | images, audio | silent video |
-| **Cost Estimator** | `agents/cost_estimator.py` | Estimates production costs | all previous | budget breakdown |
-| **Social Media** | `agents/social_media_agent.py` | Generates hashtags/captions | script, research | platform-specific content |
-| **PDF Builder** | `agents/pdf_builder.py` | Builds campaign PDF package | all previous | PDF file with map, diagram |
-| **VEO 3 Generator** | `agents/veo3_agent.py` | Generates photorealistic video | script | video file (or placeholder) |
-| **Lyria Music** | `agents/lyria_agent.py` | Generates AI music | tone, duration | audio file (or mock) |
-| **Viral Assembler** | `agents/viral_video_assembler.py` | Combines video + music + TTS | veo3, lyria, script | final viral video |
+## 5. Key Features & Implementation
 
-### Marky Research Sub-Agents (from `orchestrator/workflow.py`)
+### ASI:One Image Preview
+- **extract_video_thumbnail()** — Tries frames 0, 1, 2, 3, ~1s; skips black frames (brightness < 15); uses OpenCV
+- **upload_to_agentverse_storage()** — Uploads thumbnail to Agentverse External Storage
+- **create_preview_response()** — ChatMessage with ResourceContent (thumbnail) + TextContent (links)
 
-The Research agent internally runs these Marky sub-agents:
+### Competitor Map
+- **utils/map_generator.py** — Google Static Maps API; Pillow post-process adds title bar, legend, border
+- **competitor_map_path** in research → passed to pdf_builder
+- **CompetitorInsight.address** — Workflow passes address from local_intel for map markers
 
-1. **LocalIntelAgent** (`local_intel/agent.py`) - Discovers competitors via SerpAPI, scrapes websites
-2. **ReviewIntelAgent** (`review_intel/agent.py`) - Fetches Google Reviews for competitors
-3. **YelpIntelAgent** (`yelp_intel/agent.py`) - Fetches Yelp reviews, extracts pain/praise
-4. **TrendsIntelAgent** (`trends_intel/agent.py`) - Gets keyword trends from DataForSEO
-5. **RelatedQuestionsAgent** (`related_questions_intel/agent.py`) - "People also ask" queries
+### Image Generation Rate Limits
+- **IMAGE_DELAY_SECONDS** — 30s between each Imagen call (configurable via `IMAGEN_DELAY_SECONDS` in .env)
+- Prevents quota/rate-limit failures
 
-### Data Flow Diagram
+### format_results
+- Returns `{text, video_url, pdf_url, video_path}` (minimal text; details in PDF)
+- Links: "View Full Video Here", "View Full Analysis PDF", "View Viral Video Here" (when present)
+
+---
+
+## 6. File Structure
 
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                           USER INPUT                                     │
-│              (Business Name, Industry, City, Tone, Duration)             │
-└─────────────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-┌─────────────────────────────────────────────────────────────────────────┐
-│                         RESEARCH PHASE                                   │
-│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐       │
-│  │ LocalIntel  │ │ ReviewIntel │ │  YelpIntel  │ │ TrendsIntel │       │
-│  │ (SerpAPI)   │ │ (Google)    │ │   (Yelp)    │ │ (DataForSEO)│       │
-│  └──────┬──────┘ └──────┬──────┘ └──────┬──────┘ └──────┬──────┘       │
-│         └───────────────┴───────────────┴───────────────┘               │
-│                                 │                                        │
-│                    ┌────────────▼────────────┐                          │
-│                    │   Competitor Map Gen    │                          │
-│                    │  (Google Static Maps)   │                          │
-│                    └────────────┬────────────┘                          │
-└─────────────────────────────────┼───────────────────────────────────────┘
-                                  │
-          ┌───────────────────────┼───────────────────────┐
-          │                       │                       │
-          ▼                       ▼                       ▼
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│  SCRIPT WRITER  │    │ LOCATION SCOUT  │    │ TREND ANALYZER  │
-│    (Gemini)     │    │ (Google Places) │    │    (Gemini)     │
-└────────┬────────┘    └────────┬────────┘    └────────┬────────┘
-         │                      │                      │
-         └──────────────────────┼──────────────────────┘
-                                │
-         ┌──────────────────────┼──────────────────────┐
-         │                      │                      │
-         ▼                      ▼                      ▼
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│ IMAGE GENERATOR │    │  VEO 3 AGENT    │    │  COST ESTIMATOR │
-│    (Imagen 3)   │    │  (Placeholder)  │    │    (Gemini)     │
-└────────┬────────┘    └────────┬────────┘    └────────┬────────┘
-         │                      │                      │
-         ▼                      ▼                      │
-┌─────────────────┐    ┌─────────────────┐             │
-│ VIDEO ASSEMBLY  │    │  LYRIA MUSIC    │             │
-│  (Ken Burns)    │    │    (Mock)       │             │
-└────────┬────────┘    └────────┬────────┘             │
-         │                      │                      │
-         │              ┌───────▼───────┐              │
-         │              │ VIRAL VIDEO   │              │
-         │              │  ASSEMBLER    │              │
-         │              │ (Google TTS)  │              │
-         │              └───────┬───────┘              │
-         │                      │                      │
-         └──────────────────────┼──────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────────────┐
-│                          PDF BUILDER                                     │
-│  • Pipeline Diagram (agent flow visualization)                          │
-│  • Competitor Map (Google Static Maps image)                            │
-│  • Research Summary (competitors, reviews, keywords)                    │
-│  • Script & Storyboard Frames                                           │
-│  • Cost Breakdown & Timeline                                            │
-│  • Social Media Strategy                                                │
-└─────────────────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────────────┐
-│                           FINAL OUTPUT                                   │
-│  • PDF Campaign Package (with map + diagram)                            │
-│  • Storyboard Video (silent, Ken Burns)                                 │
-│  • Viral Video (with music + TTS) [when VEO 3 enabled]                  │
-└─────────────────────────────────────────────────────────────────────────┘
+Brown/
+├── agents/
+│   ├── orchestrator.py          # Main entry, Chat Protocol, preview
+│   ├── enhanced_research.py     # Research (Marky) + competitor map
+│   ├── script_writer.py
+│   ├── image_generator.py       # Imagen 3, 30s delay
+│   ├── video_assembly_agent.py
+│   ├── pdf_builder.py
+│   ├── cost_estimator.py
+│   ├── location_scout.py
+│   ├── social_media_agent.py
+│   ├── voiceover_agent.py
+│   ├── music_agent.py
+│   ├── audio_mixer.py
+│   ├── veo3_agent.py
+│   ├── lyria_agent.py
+│   ├── viral_video_assembler.py
+│   ├── campaign_strategy_content.py
+│   ├── mock_response.py
+│   └── models.py
+├── core/
+│   ├── pipeline.py              # Pipelines, progress callbacks
+│   ├── intent_extractor.py      # Dual-package framing
+│   ├── gemini_client.py
+│   ├── groq_client.py
+│   └── dummy_research.py
+├── orchestrator/
+│   ├── workflow.py              # Marky workflow
+│   ├── agent.py
+│   └── models.py                # CompetitorInsight has address
+├── utils/
+│   ├── gdrive_upload.py
+│   └── map_generator.py         # Title, legend, border
+├── docs/
+│   ├── AGENT_FLOWCHART.md
+│   ├── agent_flowchart.mmd
+│   ├── MCP_AGENT.md
+│   ├── ASI_ONE_VIDEO_PREVIEW.md
+│   └── ...
+├── mcp-agents/gdrive-pdf-upload-mcp-agent/
+├── run_example.py
+├── run_e2e_test.py
+└── output/
 ```
 
 ---
 
-## 12. Known Issues & Gotchas
+## 7. Environment Variables
 
-### Moviepy v1 vs v2 Compatibility
-The codebase uses moviepy v2 API. If you see errors like `subclip not found`, check:
-- `subclip()` → `subclipped()` in v2
-- `volumex()` → `with_volume_scaled()` in v2
-- `set_audio()` → `with_audio()` in v2
-- `write_videofile()` doesn't accept `verbose` or `logger` in v2
-
-### Google TTS Voice Quality
-- Neural2 voices sound robotic
-- Studio voices (en-US-Studio-O, en-US-Studio-Q) are more natural but cost more
-- Casual voices (en-US-Casual-K) good for energetic tones
-- Use SSML with `<break>` tags for natural pacing
-
-### Mock Music Bug (FIXED)
-Previously, mock music was copying voiceover files causing voice overlap. Fixed by filtering:
-```python
-existing_music = [f for f in files if "music" in f.name.lower() and "voiceover" not in f.name.lower()]
+### Required for Agentverse
+```bash
+AGENT_SEED_PHRASE=your-seed
+AGENTVERSE_API_KEY=your-key
 ```
 
-### Agent Signature Requirements
-All agents must accept these parameters (even if unused):
-```python
-async def run(self, product, industry, duration, tone, city, previous_results, **kwargs)
+### Required for Pipeline
+```bash
+GCP_PROJECT_ID=...
+GCP_LOCATION=us-central1
+GOOGLE_APPLICATION_CREDENTIALS=/path/to/key.json
 ```
 
-### File Upload (Google Drive / tmpfiles.org)
-- **Google Drive**: Set `GDRIVE_DEFAULT_FOLDER_ID` + OAuth (see docs/MCP_AGENT.md). Permanent links.
-- **tmpfiles.org fallback**: Files expire after ~1 hour. Use direct URL: `tmpfiles.org/dl/ID/file`
-- May fail silently - check return value
+### Google Drive
+```bash
+GDRIVE_DEFAULT_FOLDER_ID=your_folder_id
+# credentials.json + oauth_tokens.json in mcp-agents/gdrive-pdf-upload-mcp-agent/
+```
+
+### Image Generation
+```bash
+IMAGEN_DELAY_SECONDS=30   # Seconds between Imagen API calls (default 30)
+```
+
+### Research
+SERPAPI_KEY, YOUTUBE_API_KEY, GOOGLE_PLACES_API_KEY (or GOOGLE_MAPS_API_KEY)
+
+### Optional
+ELEVENLABS_API_KEY, GROQ_API_KEY, REPLICATE_API_TOKEN, TOGETHER_API_KEY
 
 ---
 
-*Last Updated: February 1, 2026 (Night)*
-*Hack@Brown 2026 - AdBoard AI Team*
+## 8. What's Been Done (Complete)
+
+### UX & Messaging
+- Natural language, no emojis in user-facing text
+- Kick-off: describes storyboard + viral packages
+- Progress check-ins during pipeline
+- Minimal final output: thumbnail + 2–3 links
+
+### ASI:One Preview
+- Video thumbnail extracted (non-black frame)
+- Uploaded to Agentverse External Storage
+- ResourceContent displays inline
+- create_preview_response() for thumbnail + links
+
+### Dual-Package Framing
+- README, intro, kick-off, progress, intent extractor
+- Script writer knows it feeds storyboard + viral
+- Campaign strategy PDF describes both packages
+- format_results labels: storyboard video, PDF, viral video
+
+### Competitor Map
+- Title bar, legend, border (Pillow post-process)
+- CompetitorInsight.address from workflow
+- Map included in PDF
+
+### Technical
+- Google Drive as primary upload; tmpfiles fallback
+- 30s delay between Imagen calls (IMAGEN_DELAY_SECONDS)
+- Pipeline progress_callback for check-in messages
+- Agent flowchart (docs/AGENT_FLOWCHART.md)
+
+---
+
+## 9. What's Next
+
+### Hackathon
+1. Demo video (3–5 min) — ASI:One discovery, full request, Drive links
+2. Deploy to cloud — 24/7 uptime
+3. README — Agent address, badges, demo link
+
+### Optional
+- Real VEO 3 + Lyria (placeholders now)
+- Payment Protocol
+- TTS quality (Studio/WaveNet)
+
+---
+
+## 10. Known Issues
+
+- **Moviepy v2** — Use `subclipped()`, `with_volume_scaled()`, `with_audio()`
+- **Agent must stay running** — Local orchestrator stops when terminal closes
+- **Drive OAuth** — Token refreshes on 401; first run may show "Refreshing credentials"
+- **Black thumbnails** — Fixed by trying multiple frames, skipping black (brightness < 15)
+
+---
+
+## 11. Agent Address
+
+Search "AdBoard AI" on [agentverse.ai](https://agentverse.ai). Run `python agents/orchestrator.py` to start. Address printed on startup.
+
+---
+
+*Last Updated: February 2026*
+*Hack@Brown 2026 - AdBoard AI - Fetch.AI Track*

@@ -29,6 +29,7 @@ class CompetitorInsight:
     rating: float
     review_count: int
     website: Optional[str] = None
+    address: str = ""  # For competitor map generation
     strengths: List[str] = field(default_factory=list)
     weaknesses: List[str] = field(default_factory=list)
     services: List[str] = field(default_factory=list)
@@ -118,6 +119,7 @@ class AdResearchResult:
                     "rating": c.rating,
                     "review_count": c.review_count,
                     "website": c.website,
+                    "address": getattr(c, "address", ""),
                     "strengths": c.strengths,
                     "weaknesses": c.weaknesses,
                     "services": c.services,

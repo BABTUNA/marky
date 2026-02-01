@@ -151,7 +151,7 @@ Then build in this order:
 ```
 utils/groq_client.py
 utils/youtube_client.py
-agents/research_agent.py
+agents/enhanced_research.py
 agents/creative_director.py
 utils/replicate_client.py
 ```

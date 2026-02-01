@@ -16,13 +16,12 @@ def get_campaign_strategy_section(product, industry, city, duration, research, s
     sections.append({
         "title": "📊 CAMPAIGN STRATEGY",
         "content": [
-            f"This is a complete multi-format advertising campaign for {product}, not just a single ad. "
-            f"The campaign includes multiple video assets optimized for different platforms and audience segments.",
+            f"This campaign delivers two things: (1) a storyboard package for development—everything you need to hire a crew, budget, and film the real ad—and (2) a ready-to-post viral video for TikTok and Reels.",
             "",
-            "<b>Campaign Assets:</b>",
-            f"• Long-form Concept Video ({duration}s) - Black & white storyboard for client approval and concept validation",
-            "• Short-form Viral Video (15s) - Photorealistic TikTok/Instagram Reels optimized content",
-            "• Complete PDF Package - Research, strategy, scripts, and production details",
+            "<b>What You Get:</b>",
+            f"• Storyboard Video ({duration}s) - Concept validation, hiring brief, and client approval. Black & white pencil sketch animation.",
+            "• Viral Video (15s) - Ready to post on TikTok and Instagram Reels while you develop the full production.",
+            "• This PDF - Complete strategy, costs, locations, script, and production details.",
             "• Social Media Assets - Platform-specific captions and hashtags",
         ]
     })

@@ -102,6 +102,7 @@ class MarkyWorkflow:
                         rating=comp.rating or 0.0,
                         review_count=comp.review_count or 0,
                         website=comp.website,
+                        address=getattr(comp, "address", "") or "",
                         strengths=comp.trust_signals or [],
                         weaknesses=[],  # Not available in source model
                         services=comp.services or [],

@@ -1,8 +1,9 @@
 """
 Comprehensive PDF Builder Agent
 
-Generates a complete production deliverable PDF with ALL research, analysis,
-script, storyboard, budget, and production details.
+Generates the full campaign PDF for the storyboard package. Includes research,
+script, storyboard frames, budget, filming locations, hiring guide, and production
+details—everything the client needs to produce the real ad and post the viral clip.
 """
 
 import os

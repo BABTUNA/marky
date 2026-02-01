@@ -25,6 +25,9 @@ aiohttp>=3.9.0
 reportlab>=4.0.0
 Pillow>=10.0.0
 
+# Video thumbnail extraction (ASI:One preview)
+opencv-python>=4.8.0
+
 # Environment & Config
 python-dotenv>=1.0.0
 

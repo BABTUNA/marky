@@ -8,6 +8,22 @@ Each agent runs after the previous one completes, passing results forward.
 import asyncio
 from typing import Any, Dict, List
 
+# Human-friendly progress messages (no emojis)
+PROGRESS_MESSAGES = {
+    "research": "Research done. Writing your script.",
+    "location_scout": "Found filming locations. Writing your script.",
+    "trend_analyzer": "Analyzed what works in ads like yours. Writing the script.",
+    "script_writer": "Script is ready. Generating storyboard frames for both packages.",
+    "image_generator": "Storyboard frames are done. Assembling the concept video.",
+    "video_assembly": "Concept video is ready. Building your full campaign package.",
+    "cost_estimator": "Budget estimated. Building your PDF with hiring and cost details.",
+    "social_media": "Social strategy ready. Building your campaign PDF.",
+    "pdf_builder": "Almost done. Finalizing your storyboard and viral packages.",
+    "veo3_generator": "Generating viral video. Adding music next.",
+    "lyria_music": "Music added. Assembling viral clip.",
+    "viral_video_assembler": "Viral video is ready. Finalizing your packages.",
+}
+
 # Pipeline definitions - which agents to run for each output type
 PIPELINES = {
     "script": ["research", "location_scout", "trend_analyzer", "script_writer"],
@@ -189,9 +205,12 @@ class AdBoardPipeline:
             "video_assembly": VideoAssemblyAgent(),
         }
 
-    async def run(self) -> Dict[str, Any]:
+    async def run(self, progress_callback=None) -> Dict[str, Any]:
         """
         Execute the pipeline based on output type.
+
+        Args:
+            progress_callback: Optional async callable(step_name, message) for check-in messages.
 
         Returns:
             dict with keys:
@@ -246,6 +265,13 @@ class AdBoardPipeline:
 
                     # Store result
                     self.results[step] = result
+
+                    # Progress check-in (human-friendly message)
+                    if progress_callback and step in PROGRESS_MESSAGES:
+                        try:
+                            await progress_callback(step, PROGRESS_MESSAGES[step])
+                        except Exception:
+                            pass
 
                     # Check for errors
                     if isinstance(result, dict) and result.get("error"):

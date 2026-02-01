@@ -7,9 +7,9 @@ Usage:
     python run_example.py "your prompt"      # Direct mode - pass prompt as argument
 
 Examples:
-    python run_example.py "Create a 30 second ad for my taco truck in Austin"
-    python run_example.py "I need a storyboard video for my new coffee shop in Providence"
-    python run_example.py "Make a funny commercial for my gym in Boston"
+    python run_example.py "Create an ad campaign for my taco truck in Austin"
+    python run_example.py "I need ads for my coffee shop in Providence"
+    python run_example.py "Make a viral video and storyboard for my gym in Boston"
 """
 
 import asyncio
@@ -22,18 +22,18 @@ from core.pipeline import run_pipeline
 def print_banner():
     """Print the AdBoard AI banner."""
     print("\n" + "=" * 60)
-    print("  🎬 AdBoard AI - Multi-Agent Storyboard Video Generator")
+    print("  AdBoard AI - Full Ad Campaign Generator")
     print("=" * 60)
-    print("\nDescribe the ad you want to create. Include:")
+    print("\nCreates: (1) storyboard package for development + (2) viral video ready to post.")
+    print("\nDescribe the ad you want. Include:")
     print("  • What business/product (required)")
     print("  • Location/city (for local research)")
     print("  • Duration (30s, 45s, or 60s)")
     print("  • Tone (professional, funny, emotional, energetic)")
-    print("  • Output type (script, storyboard, storyboard_video, pdf)")
     print("\nExamples:")
-    print('  "Create a 30 second ad for my taco truck in Austin"')
-    print('  "I need a funny storyboard video for my coffee shop in Providence"')
-    print('  "Make an emotional 60 second commercial for my gym in Boston"')
+    print('  "Create an ad campaign for my taco truck in Austin"')
+    print('  "I need ads for my coffee shop in Providence"')
+    print('  "Make a viral video and storyboard for my gym in Boston"')
     print("=" * 60 + "\n")
 
 

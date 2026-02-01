@@ -2,7 +2,7 @@
 Google Maps competitor location visualizer.
 
 Generates a static map image showing competitor locations in a city.
-Uses Google Maps Static API.
+Uses Google Maps Static API. Adds legend, title, and border overlay.
 """
 
 import os
@@ -13,6 +13,89 @@ from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
+
+
+def _add_legend_and_border(
+    image_path: str,
+    city: str,
+    competitors: List[Dict[str, str]],
+    border_px: int = 3,
+    legend_height: int = 80,
+) -> None:
+    """
+    Add title bar, legend, and border to the map image using Pillow.
+    Modifies the file in place.
+    """
+    try:
+        from PIL import Image, ImageDraw, ImageFont
+    except ImportError:
+        return  # Skip if Pillow not available
+
+    img = Image.open(image_path).convert("RGB")
+    w, h = img.size
+
+    # New image: map + title bar + legend + border padding
+    pad = border_px
+    title_h = 36
+    new_h = h + title_h + legend_height + 2 * pad
+    new_w = w + 2 * pad
+
+    out = Image.new("RGB", (new_w, new_h), color=(240, 240, 240))
+    # Layout: top margin | title bar | map | legend | bottom margin
+    out.paste(img, (pad, pad + title_h))
+
+    draw = ImageDraw.Draw(out)
+
+    # Try system font, fallback to default
+    font_paths = [
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+        "/System/Library/Fonts/Supplemental/Arial Bold.ttf",
+        "C:/Windows/Fonts/arial.ttf",
+    ]
+    font_lg = font_sm = ImageFont.load_default()
+    for p in font_paths:
+        if os.path.exists(p):
+            try:
+                font_lg = ImageFont.truetype(p, 16)
+                font_sm = ImageFont.truetype(p, 12)
+                break
+            except Exception:
+                continue
+
+    # Title bar (below top margin)
+    draw.rectangle(
+        [pad, pad, new_w - pad, pad + title_h],
+        fill=(50, 50, 55),
+        outline=(80, 80, 90),
+    )
+    draw.text(
+        (new_w // 2, pad + title_h // 2),
+        f"Competitor Locations — {city}",
+        fill="white",
+        font=font_lg,
+        anchor="mm",
+    )
+
+    # Legend box (below map)
+    leg_y = pad + title_h + h + 8
+    leg_box = [pad, leg_y, new_w - pad, new_h - pad]
+    draw.rectangle(leg_box, fill="white", outline=(180, 180, 185), width=1)
+
+    legend_text = f"Red markers (1–{min(len(competitors), 10)}) = competitor locations"
+    draw.text((pad + 12, leg_y + 12), legend_text, fill=(60, 60, 65), font=font_sm)
+
+    # Competitor list (truncated if many)
+    names = [c.get("name", "")[:30] for c in competitors[:5]]
+    if names:
+        list_text = " • ".join(f"{i+1}: {n}" for i, n in enumerate(names))
+        if len(competitors) > 5:
+            list_text += f" ... +{len(competitors) - 5} more"
+        draw.text((pad + 12, leg_y + 32), list_text, fill=(90, 90, 95), font=font_sm)
+
+    # Border around entire image
+    draw.rectangle([0, 0, new_w - 1, new_h - 1], outline=(160, 160, 165), width=border_px)
+
+    out.save(image_path, "PNG", optimize=True)
 
 
 def generate_competitor_map(
@@ -78,9 +161,11 @@ def generate_competitor_map(
             response = requests.get(base_url, params=params, timeout=30)
         
         if response.status_code == 200:
-            # Save image
-            with open(output_path, 'wb') as f:
+            # Save raw map
+            with open(output_path, "wb") as f:
                 f.write(response.content)
+            # Add legend, title, and border
+            _add_legend_and_border(output_path, city, competitors[:10])
             print(f"✅ Competitor map saved to: {output_path}")
             return output_path
         else:

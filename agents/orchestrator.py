@@ -9,9 +9,10 @@ Deploy this agent to Agentverse for the hackathon.
 
 import os
 import sys
-import requests
 from datetime import datetime
 from uuid import uuid4
+
+import requests
 
 # Add project root to Python path
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -24,6 +25,8 @@ from uagents_core.contrib.protocols.chat import (
     ChatAcknowledgement,
     ChatMessage,
     EndSessionContent,
+    Resource,
+    ResourceContent,
     TextContent,
     chat_protocol_spec,
 )
@@ -33,6 +36,20 @@ from uagents_core.utils.registration import (
 )
 
 load_dotenv()
+
+# Agentverse External Storage for image/video previews
+AGENTVERSE_URL = (os.getenv("AGENTVERSE_URL") or "https://agentverse.ai").rstrip("/")
+STORAGE_URL = f"{AGENTVERSE_URL}/v1/storage"
+
+ExternalStorage = None
+external_storage = None
+
+try:
+    from uagents_core.storage import ExternalStorage as _ES
+
+    ExternalStorage = _ES
+except ImportError:
+    pass
 
 # Configuration
 AGENT_NAME = "AdBoardAI"
@@ -67,43 +84,31 @@ else:
 protocol = Protocol(spec=chat_protocol_spec)
 
 # README for Agentverse listing
-README = """# AdBoard AI - AI Video Ad Generator for Small Businesses
+README = """# AdBoard AI - Full Ad Campaign Generator for Small Businesses
 
 ![tag:innovationlab](https://img.shields.io/badge/innovationlab-3D8BD3)
 ![tag:hackathon](https://img.shields.io/badge/hackathon-5F43F1)
 
-An AI-powered multi-agent system that creates professional ad storyboard VIDEOS for small businesses. Tell me about your business and I'll generate a complete 30-second video ad with:
-- Pencil-sketch storyboard frames (AI-generated)
-- Professional voiceover narration
-- Background music
-- Ken Burns animation effects
+I create two things for you:
 
-## What I Can Create
+1. **Storyboard package** — A concept video and full production brief so you can hire a crew and film the real ad. Includes pencil-sketch storyboard frames, script, cost estimates, filming locations, and everything you need to brief actors and producers.
 
-- **Storyboard Video** (default): Complete video with sketch frames, voiceover, and music
-- **Script**: Just the ad script with scene breakdowns
-- **Storyboard**: Script + visual storyboard frames (no video)
-- **PDF Package**: Complete production package with budget estimates and locations
+2. **Ready-to-post viral video** — A short clip optimized for TikTok and Reels that you can post immediately while you develop the full production.
+
+Tell me about your business and I'll research your competitors, write the script, generate the visuals, and deliver both packages.
 
 ## How to Use
 
-Just tell me about your business! Examples:
+- "Create an ad campaign for my taco truck"
+- "I need ads for my coffee shop in Boston"
+- "Make a viral video and storyboard for my fitness studio"
 
-- "Create an ad for my taco truck"
-- "Make a 30-second funny video for my coffee shop"
-- "I need a professional ad for my fitness studio in Boston"
-- "Generate a storyboard video for my tech startup"
+## What You Get
 
-## Features
-
-- 🔍 Researches viral ads in your industry
-- ✍️ Writes compelling scripts based on what works
-- 🎨 Generates pencil-sketch storyboard frames (Google Imagen 3)
-- 🎤 Creates natural voiceover narration (ElevenLabs)
-- 🎵 Adds royalty-free background music
-- 🎬 Assembles video with Ken Burns pan/zoom effects
-- 💰 Estimates production costs
-- 📍 Finds filming locations
+- Storyboard concept video (for development and client approval)
+- Full PDF package (strategy, budget, locations, hiring guide)
+- Viral-ready short-form video (TikTok/Reels)
+- Cost estimates and filming recommendations
 
 Built at Hack@Brown 2026 for the Fetch.AI track.
 """
@@ -185,42 +190,43 @@ async def handle_message(ctx: Context, sender: str, msg: ChatMessage):
     if TEST_MODE:
         ctx.logger.info("TEST MODE: Sending quick test response")
         response_text = f"✅ Echo: {user_text}\n\n🤖 AdBoard AI Test Mode\n📬 Sender: {sender[:20]}..."
-        
+
         response_msg = ChatMessage(
             timestamp=datetime.now(),
             msg_id=uuid4(),
             content=[TextContent(type="text", text=response_text)],
         )
-        
+
         ctx.logger.info(f"📤 Sending response to: {sender}")
-        
+
         try:
             await ctx.send(sender, response_msg)
             ctx.logger.info("✅ Response sent successfully!")
         except Exception as e:
             ctx.logger.error(f"❌ Failed to send response: {e}")
             import traceback
+
             ctx.logger.error(traceback.format_exc())
         return
-    
+
     # MOCK MODE: Return realistic mock data without running pipeline
     if MOCK_MODE:
         ctx.logger.info("MOCK MODE: Returning realistic mock response")
         from agents.mock_response import MOCK_PIPELINE_RESULT
-        
-        # Send initial "working on it" message
+
+        # Send initial message
         await ctx.send(
             sender,
             create_response(
-               "🎬 Generating your ad package (MOCK MODE - instant results)...\n\n"
-                "In production, this would take 3-5 minutes. Mock mode returns instantly!"
+                "Running in mock mode so this will be quick. Here are your results."
             ),
         )
-        
+
         # Format and send mock results
-        response_text = format_results(MOCK_PIPELINE_RESULT, "storyboard_video")
+        formatted = format_results(MOCK_PIPELINE_RESULT, "storyboard_video")
+        response_text = formatted["text"]
         ctx.logger.info(f"Sending mock response ({len(response_text)} chars)")
-        
+
         try:
             await ctx.send(sender, create_response(response_text, end_session=True))
             ctx.logger.info("✅ Mock response sent successfully!")
@@ -242,14 +248,11 @@ async def handle_message(ctx: Context, sender: str, msg: ChatMessage):
             await ctx.send(
                 sender,
                 create_response(
-                    "Hi! I'm AdBoard AI - I create VIDEO ADS for small businesses!\n\n"
-                    "Just tell me about your business and I'll generate:\n"
-                    "- A compelling script\n"
-                    "- Pencil-sketch storyboard frames\n"
-                    "- Professional voiceover\n"
-                    "- Background music\n"
-                    "- A complete 30-second video!\n\n"
-                    "Example: 'Create an ad for my taco truck' or 'Make a funny video for my coffee shop in Providence'"
+                    "I create full ad campaigns for small businesses. I'll give you two things: "
+                    "a storyboard package with everything you need to hire a crew and produce the real ad "
+                    "(script, costs, locations), plus a ready-to-post viral video for TikTok and Reels. "
+                    "Just tell me about your business—like 'Create an ad for my taco truck' or "
+                    "'I need ads for my coffee shop in Boston.'"
                 ),
             )
             return
@@ -277,28 +280,23 @@ async def handle_message(ctx: Context, sender: str, msg: ChatMessage):
         duration = intent.get("duration", 30)
         tone = intent.get("tone", "professional")
 
-        # Friendly output type names
-        output_type_names = {
-            "storyboard_video": "storyboard video",
-            "storyboard": "storyboard images",
-            "script": "script",
-            "pdf": "PDF package",
-            "full": "full package",
-        }
-        friendly_output = output_type_names.get(output_type, output_type)
-
+        # Natural-language kick-off (no emojis)
+        city_part = f" in {intent.get('city')}" if intent.get("city") else ""
         await ctx.send(
             sender,
             create_response(
-                f"🎬 Creating your {friendly_output}!\n\n"
-                f"📦 Product: {product}\n"
-                f"⏱️ Duration: {duration}s\n"
-                f"🎭 Tone: {tone}\n"
-                f"📍 Location: {intent.get('city', 'General')}\n\n"
-                "⏳ This takes 3-5 minutes (generating images, voiceover, video)...\n"
-                "I'll send you the results when ready!"
+                f"Got it. I'm putting together your ad campaign for {product}{city_part}—a storyboard package "
+                "with everything you need to hire and produce the real ad, plus a viral video you can post. "
+                "This takes a few minutes. I'll check in as I go."
             ),
         )
+
+        # Progress callback for check-in messages
+        async def on_progress(step_name: str, message: str):
+            try:
+                await ctx.send(sender, create_response(message))
+            except Exception as e:
+                ctx.logger.warning(f"Could not send progress: {e}")
 
         # Run the pipeline
         pipeline = AdBoardPipeline(
@@ -310,29 +308,49 @@ async def handle_message(ctx: Context, sender: str, msg: ChatMessage):
             city=intent.get("city", ""),
         )
 
-        result = await pipeline.run()
+        result = await pipeline.run(progress_callback=on_progress)
 
         # Format and send results
         ctx.logger.info("Pipeline completed, sending results back to Agentverse...")
 
         if result.get("success"):
-            response_text = format_results(result, output_type)
+            formatted = format_results(result, output_type)
+            response_text = formatted["text"]
+            video_url = formatted.get("video_url")
+            pdf_url = formatted.get("pdf_url")
+            video_path = formatted.get("video_path")
+
+            # Build ASI:One preview: thumbnail + "Watch Full Video Here" + "View Full Analysis PDF"
+            thumbnail_uri = None
+            if video_path:
+                thumb_bytes = extract_video_thumbnail(video_path)
+                if thumb_bytes:
+                    thumbnail_uri, _ = upload_to_agentverse_storage(
+                        thumb_bytes, "video_preview.png", "image/png", sender
+                    )
+
             ctx.logger.info(f"Sending success response ({len(response_text)} chars)")
             try:
-                await ctx.send(sender, create_response(response_text, end_session=True))
+                if thumbnail_uri or (video_url and "View Full Video" in response_text):
+                    msg = create_preview_response(
+                        thumbnail_uri=thumbnail_uri,
+                        video_url=video_url,
+                        pdf_url=pdf_url,
+                        text_summary=response_text,
+                        end_session=True,
+                    )
+                    await ctx.send(sender, msg)
+                else:
+                    await ctx.send(sender, create_response(response_text, end_session=True))
                 ctx.logger.info("Response sent successfully!")
             except Exception as send_err:
                 ctx.logger.error(f"Failed to send response: {send_err}")
-                # Try sending a shorter response
                 try:
-                    short_response = (
-                        "Your ad is ready! Check the output folder for your video."
-                    )
                     await ctx.send(
-                        sender, create_response(short_response, end_session=True)
+                        sender, create_response(response_text, end_session=True)
                     )
                 except Exception as e2:
-                    ctx.logger.error(f"Failed to send short response: {e2}")
+                    ctx.logger.error(f"Failed to send fallback: {e2}")
         else:
             ctx.logger.info(f"Pipeline failed: {result.get('error')}")
             await ctx.send(
@@ -367,15 +385,178 @@ async def handle_ack(ctx: Context, sender: str, msg: ChatAcknowledgement):
     ctx.logger.debug(f"Received ack from {sender} for {msg.acknowledged_msg_id}")
 
 
+def extract_video_thumbnail(video_path: str) -> bytes | None:
+    """Extract a non-black frame from video as PNG bytes for preview.
+
+    Tries multiple frames since the first frame is often black (fade-in).
+    Skips frames that are mostly black (mean brightness < 15).
+
+    Args:
+        video_path: Path to video file
+
+    Returns:
+        PNG image bytes, or None if extraction fails
+    """
+    try:
+        import cv2
+        import numpy as np
+
+        cap = cv2.VideoCapture(video_path)
+        if not cap.isOpened():
+            print(f"⚠️ Could not open video for thumbnail: {video_path}")
+            return None
+
+        fps = cap.get(cv2.CAP_PROP_FPS) or 24
+        total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT) or 1)
+        frame_indices = [0, 1, 2, 3, max(1, int(fps))]  # Try frame 0, 1, 2, 3, ~1 sec in
+
+        best_frame = None
+        best_brightness = 0
+
+        for idx in frame_indices:
+            if idx >= total_frames:
+                continue
+            cap.set(cv2.CAP_PROP_POS_FRAMES, idx)
+            ret, frame = cap.read()
+            if not ret or frame is None:
+                continue
+            # Mean brightness (skip black frames)
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            brightness = float(np.mean(gray))
+            if brightness > best_brightness and brightness > 15:
+                best_frame = frame
+                best_brightness = brightness
+            elif best_frame is None:
+                best_frame = frame  # Fallback to first readable frame
+
+        cap.release()
+        if best_frame is None:
+            print("⚠️ Could not read any frame from video")
+            return None
+
+        _, png = cv2.imencode(".png", best_frame)
+        print("Extracted thumbnail from video")
+        return png.tobytes()
+    except ImportError:
+        print("⚠️ opencv-python not installed, skipping thumbnail extraction")
+        return None
+    except Exception as e:
+        print(f"⚠️ Thumbnail extraction failed: {e}")
+        return None
+
+
+def init_external_storage():
+    """Initialize Agentverse External Storage if API key is available."""
+    global external_storage
+    if external_storage is not None:
+        return external_storage
+    if AGENTVERSE_KEY and ExternalStorage is not None:
+        try:
+            external_storage = ExternalStorage(
+                api_token=AGENTVERSE_KEY, storage_url=STORAGE_URL
+            )
+            print(f"✅ Agentverse External Storage initialized")
+            return external_storage
+        except Exception as e:
+            print(f"⚠️ Failed to init external storage: {e}")
+    return None
+
+
+def upload_to_agentverse_storage(
+    content: bytes, name: str, mime_type: str, sender: str
+) -> tuple[str | None, str | None]:
+    """Upload content to Agentverse External Storage.
+
+    Args:
+        content: File bytes
+        name: Asset name
+        mime_type: MIME type (e.g., "image/png", "video/mp4")
+        sender: Agent address to grant permissions
+
+    Returns:
+        Tuple of (asset_uri, watch_url) or (None, None) if failed
+    """
+    storage = init_external_storage()
+    if storage is None:
+        return None, None
+
+    try:
+        asset_id = storage.create_asset(
+            name=name,
+            content=content,
+            mime_type=mime_type,
+        )
+        storage.set_permissions(asset_id=asset_id, agent_address=sender)
+        asset_uri = f"agent-storage://{STORAGE_URL}/{asset_id}"
+        watch_url = f"{AGENTVERSE_URL}/v1/storage/assets/{asset_id}"
+        print(f"✅ Uploaded to Agentverse storage: {asset_id}")
+        return asset_uri, watch_url
+    except Exception as e:
+        print(f"⚠️ Agentverse storage upload failed: {e}")
+        return None, None
+
+
+def create_preview_response(
+    thumbnail_uri: str | None,
+    video_url: str | None,
+    pdf_url: str | None,
+    text_summary: str,
+    end_session: bool = True,
+) -> ChatMessage:
+    """Create a ChatMessage with image preview and links.
+
+    Args:
+        thumbnail_uri: Agentverse storage URI for thumbnail image
+        video_url: Public URL to watch full video
+        pdf_url: Public URL to download PDF
+        text_summary: Text content for the message
+        end_session: Whether to end the session
+
+    Returns:
+        ChatMessage with ResourceContent for preview
+    """
+    from datetime import timezone
+
+    content = []
+
+    # Add thumbnail image as ResourceContent (displays inline in ASI:One)
+    if thumbnail_uri:
+        content.append(
+            ResourceContent(
+                type="resource",
+                resource_id=uuid4(),
+                resource=Resource(
+                    uri=thumbnail_uri,
+                    metadata={
+                        "mime_type": "image/png",
+                        "role": "Video Preview",
+                    },
+                ),
+            )
+        )
+
+    # Add text with links
+    content.append(TextContent(type="text", text=text_summary))
+
+    if end_session:
+        content.append(EndSessionContent(type="end-session"))
+
+    return ChatMessage(
+        timestamp=datetime.now(timezone.utc),
+        msg_id=uuid4(),
+        content=content,
+    )
+
+
 def upload_file(file_path: str) -> str | None:
     """Upload file to Google Drive (preferred) or tmpfiles.org fallback.
-    
+
     Uses Google Drive when GDRIVE_DEFAULT_FOLDER_ID is set and OAuth is complete.
     Otherwise falls back to tmpfiles.org (1hr expiry).
-    
+
     Args:
         file_path: Local path to file (video, PDF, etc.)
-        
+
     Returns:
         Public URL to file, or None if upload failed
     """
@@ -383,352 +564,120 @@ def upload_file(file_path: str) -> str | None:
     if os.getenv("GDRIVE_DEFAULT_FOLDER_ID"):
         try:
             from utils.gdrive_upload import upload_file_to_drive
+
             url = upload_file_to_drive(file_path)
             if url:
                 return url
         except Exception as e:
             print(f"⚠️ Drive upload failed, falling back to tmpfiles: {e}")
-    
+
     # Fallback to tmpfiles.org
     return upload_file_to_tmpfiles(file_path)
 
 
 def upload_file_to_tmpfiles(file_path: str) -> str | None:
     """Upload any file to tmpfiles.org and return public URL.
-    
+
     tmpfiles.org is a free temporary file hosting service.
     Files are kept for ~1 hour (sufficient for demos).
-    
+
     Args:
         file_path: Local path to file (video, PDF, image, etc.)
-        
+
     Returns:
         Public URL to file, or None if upload failed
     """
     try:
-        import subprocess
         import json
-        
+        import subprocess
+
         if not os.path.exists(file_path):
             print(f"⚠️ File not found: {file_path}")
             return None
-        
+
         filename = os.path.basename(file_path)
         print(f"📤 Uploading {filename} to tmpfiles.org...")
-        
+
         # Use curl command - more reliable than requests for file uploads
         result = subprocess.run(
-            ['curl', '-F', f'file=@{file_path}', 'https://tmpfiles.org/api/v1/upload'],
+            ["curl", "-F", f"file=@{file_path}", "https://tmpfiles.org/api/v1/upload"],
             capture_output=True,
             text=True,
-            timeout=60
+            timeout=60,
         )
-        
+
         if result.returncode == 0:
             # tmpfiles.org returns JSON like: {"status":"success","data":{"url":"https://tmpfiles.org/xyz/file.mp4"}}
             data = json.loads(result.stdout)
-            if data.get('status') == 'success':
-                url = data['data']['url']
+            if data.get("status") == "success":
+                url = data["data"]["url"]
                 # Convert to direct download URL: tmpfiles.org/ID/file → tmpfiles.org/dl/ID/file
-                direct_url = url.replace('tmpfiles.org/', 'tmpfiles.org/dl/')
+                direct_url = url.replace("tmpfiles.org/", "tmpfiles.org/dl/")
                 print(f"✅ File uploaded successfully: {direct_url}")
                 return direct_url
-        
+
         print(f"⚠️ Upload failed: {result.stderr}")
         return None
-        
+
     except Exception as e:
         print(f"⚠️ Upload error: {e}")
         return None
 
 
-def format_results(result: dict, output_type: str) -> str:
-    """Format pipeline results with COMPLETE details (like terminal logs)."""
-    
+def format_results(result: dict, output_type: str) -> dict:
+    """Format pipeline results. Minimal output: video + PDF links only (details in PDF)."""
+
     results = result.get("results", {})
     output_lines = []
-    viral_video_url = None
-
-    # === EXECUTIVE SUMMARY (Top of response for quick scanning) ===
-    output_lines.append("=" * 50)
-    output_lines.append("🎯 CAMPAIGN PACKAGE READY")
-    output_lines.append("=" * 50)
-    
-    # Quick stats
-    research_data = results.get("research", {})
-    script_data = results.get("script_writer", {})
-    scenes = script_data.get("scenes", [])
-    
-    if research_data:
-        summary = research_data.get("research_summary", {})
-        output_lines.append(f"✅ Analyzed {summary.get('competitors_found', 0)} competitors")
-        output_lines.append(f"✅ Generated {len(scenes)} scene storyboard")
-        output_lines.append(f"✅ Researched {summary.get('keywords_analyzed', 0)} keywords")
-    
-    output_lines.append("")
-    output_lines.append("📦 Package Includes:")
-    output_lines.append("   • Black & White Storyboard Video (concept validation)")
-    output_lines.append("   • Complete PDF Package (strategy + research + budget)")
-    output_lines.append("   • Multi-Platform Distribution Plan")
-    output_lines.append("   • A/B Testing Recommendations")
-    output_lines.append("")
-    output_lines.append("⬇️ SCROLL DOWN FOR DETAILS & DOWNLOAD LINKS")
-    output_lines.append("=" * 50)
-    output_lines.append("")
-    
-    output_lines.append("=" * 50)
-    output_lines.append("🎉 YOUR AD PRODUCTION PACKAGE IS READY!")
-    output_lines.append("=" * 50)
-    output_lines.append("")
-    
-    # === VIDEO & FILES ===
     video_url = None
+    video_path = None
+    pdf_url = None
+
+    # === VIDEO ===
     if "video_assembly" in results:
         video_data = results["video_assembly"]
-        
-        # Check if mock URL already provided (for MOCK_MODE)
         if video_data.get("video_url"):
             video_url = video_data["video_url"]
-            output_lines.append("🎬 FINAL VIDEO")
-            output_lines.append("-" * 50)
-            output_lines.append(f"🔗 WATCH NOW: {video_url}")
-            output_lines.append(f"   (Mock link - in production, this uploads to Google Drive)")
-            output_lines.append(f"   • Duration: {video_data.get('duration', 30)}s")
-            output_lines.append(f"   • Resolution: {video_data.get('resolution', '1920x1080')}")
-            output_lines.append(f"   • Frames: {video_data.get('frames_used', 5)} with Ken Burns effects")
-            output_lines.append("")
         else:
-            # Real mode: check if file exists and upload it
             video_path = video_data.get("final_video_path")
             if video_path and os.path.exists(video_path):
-                output_lines.append("🎬 FINAL VIDEO")
-                output_lines.append("-" * 50)
-                # Upload video
-                print(f"\n📤 Uploading video...")
+                print("\nUploading video...")
                 video_url = upload_file(video_path)
-                if video_url:
-                    output_lines.append(f"🔗 WATCH NOW: {video_url}")
-                    output_lines.append(f"   (Click link above to view)")
-                output_lines.append(f"   • Duration: {video_data.get('duration', 30)}s")
-                output_lines.append(f"   • Resolution: {video_data.get('resolution', '1920x1080')}")
-                output_lines.append(f"   • Frames: {video_data.get('frames_used', 5)} with Ken Burns effects")
-                output_lines.append("")
-    
 
-    # === VIRAL VIDEO (VEO 3 + LYRIA + TTS) ===
+    # === PDF ===
+    pdf_data = results.get("pdf_export") or results.get("pdf_builder")
+    if pdf_data:
+        if pdf_data.get("pdf_url"):
+            pdf_url = pdf_data["pdf_url"]
+        else:
+            pdf_path = pdf_data.get("pdf_path")
+            if pdf_path and os.path.exists(pdf_path):
+                print("\nUploading PDF...")
+                pdf_url = upload_file(pdf_path)
+
+    # Minimal text: storyboard, PDF, viral (when present)
+    if video_url:
+        output_lines.append(f"View Full Video Here: {video_url}")
+    if pdf_url:
+        output_lines.append(f"View Full Analysis PDF: {pdf_url}")
+
+    # Viral video (ready to post)
     if "viral_video_assembler" in results:
         viral_data = results["viral_video_assembler"]
         viral_path = viral_data.get("final_video_path")
-        
-        output_lines.append("📱 VIRAL VIDEO (TikTok/Reels)")
-        output_lines.append("-" * 50)
-        
         if viral_path and os.path.exists(viral_path):
-            print(f"\n📤 Uploading viral video...")
-            viral_video_url = upload_file(viral_path)
-            
-            if viral_video_url:
-                output_lines.append(f"🔗 WATCH NOW: {viral_video_url}")
-            
-            output_lines.append(f"   • Format: 9:16 Vertical (15s)")
-            output_lines.append(f"   • Music: Generated by Lyria")
-            output_lines.append(f"   • Voice: Google TTS Neural2")
-            output_lines.append("")
-        elif viral_path: # Mock mode or error
-             output_lines.append(f"🔗 WATCH NOW: {viral_path} (Mock)")
+            viral_url = upload_file(viral_path)
+            if viral_url:
+                output_lines.append(f"View Viral Video Here: {viral_url}")
 
-    # === PDF PACKAGE ===
-    pdf_url = None
-    pdf_data = results.get("pdf_export") or results.get("pdf_builder")
-    if pdf_data:
-        
-        # Check if mock URL already provided (for MOCK_MODE)
-        if pdf_data.get("pdf_url"):
-            pdf_url = pdf_data["pdf_url"]
-            output_lines.append("📄 COMPLETE AD PACKAGE (PDF)")
-            output_lines.append("-" * 50)
-            output_lines.append(f"🔗 DOWNLOAD PDF: {pdf_url}")
-            output_lines.append(f"   (Mock link - in production, this uploads to Google Drive)")
-            output_lines.append(f"   • Pages: {pdf_data.get('pages', 8)}")
-            includes = pdf_data.get('includes', [])
-            if includes:
-                output_lines.append(f"   • Includes: {', '.join(includes)}")
-            output_lines.append("")
-        else:
-            # Real mode: check if file exists and upload it
-            pdf_path = pdf_data.get("pdf_path")
-            if pdf_path and os.path.exists(pdf_path):
-                output_lines.append("📄 COMPLETE AD PACKAGE (PDF)")
-                output_lines.append("-" * 50)
-                print(f"\n📤 Uploading PDF...")
-                pdf_url = upload_file(pdf_path)
-                if pdf_url:
-                    output_lines.append(f"🔗 DOWNLOAD PDF: {pdf_url}")
-                    output_lines.append(f"   (Click link above to view)")
-                output_lines.append(f"   • Pages: {pdf_data.get('pages', 8)}")
-                includes = pdf_data.get('includes', [])
-                if includes:
-                    output_lines.append(f"   • Includes: {', '.join(includes)}")
-                output_lines.append("")
-    
-    # === FULL SCRIPT ===
-    if "script_writer" in results:
-        script_data = results["script_writer"]
-        scenes = script_data.get("scenes", [])
-        output_lines.append("📝 COMPLETE SCRIPT")
-        output_lines.append("-" * 50)
-        
-        if scenes:
-            for scene in scenes:
-                output_lines.append(f"\n🎬 SCENE {scene.get('scene_number')} ({scene.get('timing')}) - {scene.get('title', '').upper()}")
-                output_lines.append(f"Visual: {scene.get('visual', '')}")
-                if scene.get('voiceover'):
-                    output_lines.append(f"Voiceover: \"{scene.get('voiceover')}\"")
-                if scene.get('audio'):
-                    output_lines.append(f"Audio: {scene.get('audio')}")
-        
-        voiceover = script_data.get("voiceover_text", "")
-        if voiceover:
-            output_lines.append(f"\n📢 FULL VOICEOVER TEXT:")
-            output_lines.append(f'"{voiceover}"')
-        output_lines.append("")
-    
-    # === RESEARCH INSIGHTS ===
-    if "research" in results:
-        research_data = results["research"]
-        output_lines.append("🔍 MARKET RESEARCH SUMMARY")
-        output_lines.append("-" * 50)
-        
-        # Stats
-        output_lines.append(f"✓ Competitors analyzed: {research_data.get('competitors_found', 0)}")
-        output_lines.append(f"✓ Google Reviews: {research_data.get('google_reviews', 0)}")
-        output_lines.append(f"✓ Yelp Reviews: {research_data.get('yelp_reviews', 0)}")
-        output_lines.append(f"✓ Keywords analyzed: {research_data.get('keywords_analyzed', 0)}")
-        
-        # Top Competitors
-        local_intel = research_data.get("local_intel", {})
-        if local_intel.get("top_competitors"):
-            output_lines.append(f"\n🏆 Top Competitors:")
-            for comp in local_intel["top_competitors"][:3]:
-                output_lines.append(f"   • {comp}")
-        
-        # Ad Hooks
-        hooks = research_data.get("ad_hooks", [])
-        if hooks:
-            output_lines.append(f"\n💡 Recommended Ad Hooks:")
-            for hook in hooks[:3]:
-                output_lines.append(f"   • {hook}")
-        
-        # Key Insights
-        insights = research_data.get("insights", [])
-        if insights:
-            output_lines.append(f"\n📊 Key Insights:")
-            for insight in insights[:5]:
-                output_lines.append(f"   • {insight}")
-        
-        output_lines.append("")
-    
-    # === STORYBOARD FRAMES ===
-    if "image_generator" in results:
-        img_data = results["image_generator"]
-        frames = img_data.get("frames", [])
-        if frames:
-            output_lines.append("🎨 STORYBOARD FRAMES")
-            output_lines.append("-" * 50)
-            script_scenes = results.get("script_writer", {}).get("scenes", [])
-            for i, frame in enumerate(frames, 1):
-                timing = frame.get("timing", "")
-                if i <= len(script_scenes):
-                    desc = script_scenes[i-1].get("visual", "")[:80]
-                else:
-                    desc = frame.get("description", "Generated scene")
-                output_lines.append(f"Frame {i} ({timing}): {desc}")
-            output_lines.append(f"\nTotal: {len(frames)} frames generated via {img_data.get('model_used', 'Imagen')}")
-            output_lines.append("")
-    
-    # === COST BREAKDOWN ===
-    if "cost_estimator" in results:
-        cost_data = results["cost_estimator"]
-        total = cost_data.get("total", 0)
-        output_lines.append("💰 PRODUCTION COST ESTIMATE")
-        output_lines.append("-" * 50)
-        output_lines.append(f"TOTAL BUDGET: ${total:,.2f}")
-        output_lines.append("")
-        
-        # Line items
-        line_items = cost_data.get("line_items", [])
-        if line_items:
-            current_category = None
-            for item in line_items:
-                category = item.get("category", "")
-                if category != current_category:
-                    output_lines.append(f"\n{category}:")
-                    current_category = category
-                name = item.get("item", "")
-                cost = item.get("cost", 0)
-                output_lines.append(f"   • {name}: ${cost:,.2f}")
-        else:
-            # Fallback to breakdown
-            breakdown = cost_data.get("breakdown", {})
-            if breakdown:
-                output_lines.append("Breakdown:")
-                for key, value in breakdown.items():
-                    output_lines.append(f"   • {key.replace('_', ' ').title()}: ${value:,.2f}")
-        output_lines.append("")
-    
-    # === SOCIAL MEDIA ===
-    if "social_media" in results:
-        social_data = results["social_media"]
-        hashtags = social_data.get("hashtags", {})
-        captions = social_data.get("captions", {})
-        
-        if hashtags or captions:
-            output_lines.append("📱 SOCIAL MEDIA STRATEGY")
-            output_lines.append("-" * 50)
-            
-            primary = hashtags.get("primary", [])
-            if primary:
-                output_lines.append(f"Hashtags: {' '.join(primary[:5])}")
-            
-            if captions:
-                for platform, caption in list(captions.items())[:2]:
-                    output_lines.append(f"\n{platform.title()}: \"{caption[:100]}...\"")
-            output_lines.append("")
-    
-    # === FILMING LOCATIONS ===
-    if "location_scout" in results:
-        loc_data = results["location_scout"]
-        locations = loc_data.get("locations", [])
-        if locations:
-            output_lines.append("📍 RECOMMENDED FILMING LOCATIONS")
-            output_lines.append("-" * 50)
-            for loc in locations[:3]:
-                name = loc.get("name", "")
-                address = loc.get("address", "")
-                notes = loc.get("notes", "")
-                output_lines.append(f"   • {name}")
-                if address:
-                    output_lines.append(f"     {address}")
-                if notes:
-                    output_lines.append(f"     Note: {notes}")
-            output_lines.append("")
-    
-    # === FOOTER ===
-    output_lines.append("=" * 50)
-    if video_url or pdf_url or viral_video_url:
-        output_lines.append("🎯 YOUR CAMPAIGN PACKAGE:")
-        if video_url:
-            output_lines.append(f"   🎬 Video: {video_url}")
-        if viral_video_url:
-            output_lines.append(f"   📱 Viral Video: {viral_video_url}")
-        if pdf_url:
-            output_lines.append(f"   📄 PDF Package: {pdf_url}")
-        output_lines.append("")
-    output_lines.append("Your complete campaign package is ready! 🚀")
-    output_lines.append("Built at Hack@Brown 2026 | 12-Agent Orchestration System")
-    output_lines.append("=" * 50)
-    
-    return "\n".join(output_lines)
+    output_text = "\n\n".join(output_lines) if output_lines else "Your campaign package is ready. Check the output folder for files."
+
+    return {
+        "text": output_text,
+        "video_url": video_url,
+        "pdf_url": pdf_url,
+        "video_path": str(video_path) if video_path else None,
+    }
 
 
 # Include the chat protocol
@@ -772,7 +721,7 @@ async def startup_handler(ctx: Context):
                     agent_seed_phrase=SEED_PHRASE,
                 ),
                 readme=README,
-                description="AI-powered multi-agent system that creates professional ad storyboards for small businesses. Researches viral ads, writes scripts, generates visuals, and delivers production-ready packages.",
+                description="Creates full ad campaigns for small businesses: a storyboard package for development (script, costs, locations, hiring guide) plus a ready-to-post viral video for TikTok and Reels.",
             )
             ctx.logger.info("Successfully registered with Agentverse!")
 

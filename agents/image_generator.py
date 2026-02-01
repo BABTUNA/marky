@@ -1,10 +1,9 @@
 """
 Image Generator Agent
 
-Generates storyboard frames using Google Cloud Vertex AI Imagen.
-Uses Imagen 4 Fast model at $0.02/image - very cost effective!
-
-With $410 in credits = ~20,000 images possible.
+Generates storyboard frames for the concept video (part of the development package).
+Uses Google Cloud Vertex AI Imagen. Frames are used for both the storyboard concept
+video and inform the viral video production.
 """
 
 import asyncio
@@ -25,6 +24,9 @@ GCP_LOCATION = os.getenv("GCP_LOCATION", "us-central1")
 # - imagen-4.0-fast-generate-preview-05-20: $0.02/image (fast, good quality)
 # - imagegeneration@006: Imagen 3 (older but stable)
 IMAGEN_MODEL = "imagen-3.0-generate-001"  # Stable model
+
+# Seconds to wait between each Imagen API call (rate limit)
+IMAGE_DELAY_SECONDS = int(os.getenv("IMAGEN_DELAY_SECONDS", "30"))
 
 
 class ImageGeneratorAgent:
@@ -99,19 +101,19 @@ class ImageGeneratorAgent:
             print("  ⚠️ Imagen model not available - using placeholders")
             return await self._generate_placeholders(scenes, product, industry, tone)
 
+        delay_sec = IMAGE_DELAY_SECONDS
         print(f"  🎨 Using Google Vertex AI Imagen (~$0.02-0.04/image)")
-        print(f"  ⏱️  Note: Adding 30s delay between requests to respect quota limits")
+        print(f"  ⏱️  {delay_sec}s between each image (rate limit)")
 
         frames = []
-        # Generate frame for each scene (no cap)
-
         for i, scene in enumerate(scenes):
-            # Add delay between requests to avoid quota limits (except for first request)
+            # Delay before each call after the first (30s between all Imagen requests)
             if i > 0:
-                print(f"  ⏳ Waiting 30s before next request (quota limit)...")
-                await asyncio.sleep(30)
+                print(f"  ⏳ Waiting {delay_sec}s before next request...")
+                await asyncio.sleep(delay_sec)
 
             print(f"  Generating frame {i + 1}/{len(scenes)} via Imagen...")
+
 
             # Build image prompt from scene
             prompt = self._build_image_prompt(
@@ -255,7 +257,7 @@ class ImageGeneratorAgent:
 
 Black and white pencil drawing. Traditional hand-drawn animation storyboard style.
 
-IMPORTANT:
+IMPORTANT. EACH IMAGE GENERATED MUST FOLLOW THESE RULES:
 - Single complete scene only (NOT a collage)
 - Fill entire image edge to edge
 - Rough pencil sketch with visible strokes

@@ -243,11 +243,11 @@ RESEARCH INSIGHTS (USE THESE - they're based on real competitor analysis and cus
 STRUCTURE GUIDANCE:
 {structure_text if structure_text else "Standard: Hook -> Problem -> Solution -> Social Proof -> CTA"}
 
-OUTPUT USAGE - Your script will be used for:
-1. STORYBOARD VIDEO: Hand-drawn sketch frames with Ken Burns animation (concept validation)
-2. VIRAL VIDEO: Photorealistic VEO 3 video for TikTok/Instagram Reels (future production)
-3. PDF CAMPAIGN PACKAGE: Complete strategy document for the client
-So make sure visuals are descriptive enough to sketch AND to generate as video.
+OUTPUT USAGE - Your script feeds TWO deliverables:
+1. STORYBOARD PACKAGE: Concept video + full production brief for hiring crew, budgeting, and filming. Hand-drawn sketch frames with Ken Burns animation. The client uses this to approve the concept and brief their team.
+2. VIRAL VIDEO: Ready-to-post short clip for TikTok and Reels. Photorealistic, optimized for immediate social posting while they develop the full production.
+3. PDF: Complete strategy, costs, locations, and hiring guide.
+Make visuals descriptive enough for both storyboard sketching and video generation.
 
 IMPORTANT: The script MUST:
 1. Address at least ONE customer pain point identified in the research

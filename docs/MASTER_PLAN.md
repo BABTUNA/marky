@@ -139,7 +139,7 @@ class ResearchResponse(Model):
    ```
 
 **Key Files**:
-- `agents/research_agent.py`
+- `agents/enhanced_research.py`
 - `utils/youtube_client.py`
 
 ---
@@ -473,7 +473,7 @@ Brown/
 │   ├── __init__.py
 │   ├── models.py               # Shared message models
 │   ├── orchestrator.py         # Main agent (Chat Protocol)
-│   ├── research_agent.py       # YouTube research
+│   ├── enhanced_research.py    # Marky workflow (YouTube, competitors, etc.)
 │   ├── creative_director.py    # Coordinates creative tasks
 │   └── production_agent.py     # Costs, locations, PDF
 ├── utils/
