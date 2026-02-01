@@ -256,7 +256,9 @@ class ImageGeneratorAgent:
 
 Scene for {product} commercial. Black and white pencil drawing style, professional animation concept art, clean lines, detailed shading.
 
-The illustration fills the entire canvas edge to edge with no empty space around it."""
+The illustration fills the entire canvas edge to edge with no empty space around it.
+
+IMPORTANT: No text, no labels, no words, no letters in the image."""
 
         return prompt
 
